@@ -55,3 +55,6 @@ CMakeUserPresets.json
 !.vscode/launch.json
 !.vscode/extensions.json
 *.code-workspace
+
+# ImGui rules
+imgui.ini
