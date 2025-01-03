@@ -50,8 +50,8 @@ public:
     virtual void displayInfo() {
         ImGui::SeparatorText("Simulation Object");
         ImGui::Text("Position:");
-        ImGui::InputFloat("x", &pos.x, 1.0f, 1.0f, "%.2f");
-        ImGui::InputFloat("y", &pos.y, 1.0f, 1.0f, "%.2f");
+        ImGui::InputFloat("x", &pos.x, 1.0f, 1.0f, "%.1f");
+        ImGui::InputFloat("y", &pos.y, 1.0f, 1.0f, "%.1f");
     }
 };
 
