@@ -6,20 +6,27 @@
 #include "imgui.h"
 #include "utilities/utilities.h"
 
+class Simulation;
+
 class SimulationObject
 {
 private:
 protected:
+    std::weak_ptr<Simulation> simulation;
+
     int radius;
     ImU32 color;
 
-    // std::shared_ptr<Simulation> simulation;
-
 public:
     Vec2<float> pos;
-
-    SimulationObject(Vec2<float> position, int radius_, ImVec4 color_)
-        : pos(position), radius(radius_), color(ImColor(color_))
+    
+    /// @brief Constructs a SimulationObject with the given parameters.
+    /// @param simulation_ A shared pointer to the parent simulation. Used to interact with the simulation context.
+    /// @param position The initial position of the object as a Vec2<float>.
+    /// @param radius_ The radius of the object, defining its size.
+    /// @param color_ The color of the object represented as an ImVec4 (RGBA format).
+    SimulationObject(std::shared_ptr<Simulation> simulation_, Vec2<float> position, int radius_, ImVec4 color_)
+        : simulation(simulation_), radius(radius_), color(ImColor(color_)), pos(position)
     {
     }
 
@@ -41,7 +48,7 @@ public:
 class Simulation
 {
 private:
-    std::vector<SimulationObject *> objects;
+    std::vector<std::unique_ptr<SimulationObject>> objects;
 
 public:
     const int unit;
@@ -54,7 +61,7 @@ public:
     /// @brief Update all objects in simulation
     void update()
     {
-        for (auto obj : objects)
+        for (auto& obj : objects)
         {
             obj->update();
         }
@@ -65,16 +72,24 @@ public:
     /// @param window_delta Position of window to draw on. Must add it to objects position 
     void render(ImDrawList *draw_list, ImVec2 window_delta)
     {
-        for (auto obj : objects)
+        for (auto& obj : objects)
         {
             obj->draw(draw_list, window_delta);
         }
     }
 
-    /// @brief Add object to simulation
-    /// @param obj Pointer to object to add to simulation.
-    void addObject(SimulationObject *obj)
+    /// @brief Adds a new object to the simulation.
+    /// @tparam T The type of object to add. Must derive from SimulationObject.
+    /// @tparam Args Variadic template for the arguments required to construct the object.
+    /// @param args Arguments to forward to the constructor of the object.
+    /// @return A raw pointer to the newly created object.
+    template <typename T, typename... Args>
+    T* addObject(Args&&... args)
     {
-        objects.push_back(obj);
+        auto obj = std::make_unique<T>(std::forward<Args>(args)...);
+        T* objPtr = obj.get();
+        objects.push_back(std::move(obj));
+
+        return objPtr; // if you need to use raw pointer after adding.
     }
 };

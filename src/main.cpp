@@ -135,53 +135,32 @@ int main(int, char**)
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     // Init of simulation here
-    Simulation simulation;
-    std::vector<SimulationObject> sobjects = {
-        SimulationObject(Vec2(0, 0), 3, colorInt(255, 0, 0)),
-        SimulationObject(Vec2(100, 100), 5, colorInt(255, 255, 0)),
-        SimulationObject(Vec2(100, 150), 5, colorInt(255, 255, 0)),
-        SimulationObject(Vec2(150, 100), 5, colorInt(255, 255, 0)),
-        SimulationObject(Vec2(50, 110), 10, colorInt(0, 0, 255, 120)),
-        SimulationObject(Vec2(60, 70), 30, colorInt(0, 125, 0))
-    };
-    
-    for (auto& obj : sobjects) {
-        simulation.addObject(&obj);
-    };
-    
-    std::vector<FoodObject> food = {
-        FoodObject(Vec2(200, 200), simulation.unit * 10, colorInt(255, 0, 0)),
-        FoodObject(Vec2(250, 200), simulation.unit * 20, colorInt(255, 0, 0)),
-        FoodObject(Vec2(300, 200), simulation.unit * 30, colorInt(255, 0, 0)),
-        FoodObject(Vec2(350, 200), simulation.unit * 40, colorInt(255, 0, 0)),
-        FoodObject(Vec2(400, 200), simulation.unit * 50, colorInt(255, 0, 0)),
-        FoodObject(Vec2(450, 200), simulation.unit * 60, colorInt(255, 0, 0)),
-        FoodObject(Vec2(500, 200), simulation.unit * 70, colorInt(255, 0, 0)),
-        FoodObject(Vec2(600, 200), simulation.unit * 100, colorInt(255, 0, 0)),
-    };
+    // Create a shared pointer to the simulation
+    std::shared_ptr<Simulation> simulation = std::make_shared<Simulation>();
 
-    for (auto& obj : food) {
-        simulation.addObject(&obj);
-    };
+    // Add SimulationObjects
+    simulation->addObject<SimulationObject>(simulation, Vec2(0, 0), 3, colorInt(255, 0, 0));
+    simulation->addObject<SimulationObject>(simulation, Vec2(100, 100), 5, colorInt(255, 255, 0));
+    simulation->addObject<SimulationObject>(simulation, Vec2(100, 150), 5, colorInt(255, 255, 0));
+    simulation->addObject<SimulationObject>(simulation, Vec2(150, 100), 5, colorInt(255, 255, 0));
+    simulation->addObject<SimulationObject>(simulation, Vec2(50, 110), 10, colorInt(0, 0, 255, 120));
+    simulation->addObject<SimulationObject>(simulation, Vec2(60, 70), 30, colorInt(0, 125, 0));
 
-    std::vector<TreeObject> tree = {
-        TreeObject(Vec2(200, 150), 3),
-        TreeObject(Vec2(250, 150), 5),
-        TreeObject(Vec2(350, 150), 10),
-    };
+    // Add FoodObjects
+    simulation->addObject<FoodObject>(simulation, Vec2(200, 200), simulation->unit * 10, colorInt(255, 0, 0));
+    simulation->addObject<FoodObject>(simulation, Vec2(250, 200), simulation->unit * 20, colorInt(255, 0, 0));
+    simulation->addObject<FoodObject>(simulation, Vec2(300, 200), simulation->unit * 30, colorInt(255, 0, 0));
+    simulation->addObject<FoodObject>(simulation, Vec2(350, 200), simulation->unit * 40, colorInt(255, 0, 0));
 
-    for (auto& obj : tree) {
-        simulation.addObject(&obj);
-    };
+    // Add TreeObjects
+    simulation->addObject<TreeObject>(simulation, Vec2(200, 150), 3);
+    simulation->addObject<TreeObject>(simulation, Vec2(250, 150), 5);
+    simulation->addObject<TreeObject>(simulation, Vec2(350, 150), 10);
 
-    std::vector<BotObject> bots = {
-        BotObject(Vec2(300, 300), 100, 80, 30, 5.0f, 8),
-        BotObject(Vec2(400, 300), 200, 40, 20, 2.0f, 20),
-    };
+    // Add BotObjects
+    simulation->addObject<BotObject>(simulation, Vec2(300, 300), 100, 80, 30, 5.0f, 8);
+    simulation->addObject<BotObject>(simulation, Vec2(400, 300), 200, 40, 20, 2.0f, 20);
 
-    for (auto& obj : bots) {
-        simulation.addObject(&obj);
-    };
 
     // Main loop
 #ifdef __EMSCRIPTEN__
@@ -366,8 +345,8 @@ int main(int, char**)
             ImDrawList* draw_list = ImGui::GetWindowDrawList();
             ImVec2 window_delta = ImGui::GetCursorScreenPos();
 
-            simulation.update();
-            simulation.render(draw_list, window_delta);
+            simulation->update();
+            simulation->render(draw_list, window_delta);
 
             ImGui::End();
         }
