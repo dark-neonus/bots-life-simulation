@@ -4,10 +4,10 @@ class FoodObject : public SimulationObject
 {
 private:
 protected:
-    int calories;
+    float calories;
 
 public:
-    FoodObject(std::shared_ptr<Simulation> simulation, Vec2<float> position, int calories_, ImVec4 color)
+    FoodObject(std::shared_ptr<Simulation> simulation, Vec2<float> position, float calories_, ImVec4 color)
         : SimulationObject(simulation, position, getRadius(), color),
           calories(calories_)
     {
@@ -34,7 +34,7 @@ public:
         // Add custom behavior for this class
         ImGui::SeparatorText("Food Object");
         // TODO: Here in future we need to specify min and max value for calories
-        ImGui::SliderInt("Calories", &calories, 0, 500);
+        ImGui::SliderFloat("Calories", &calories, 0.0f, 500.0f, "%.1f");
     }
 };
 
