@@ -30,12 +30,14 @@ public:
     {
     }
 
+    virtual int getRadius() { return radius; }
+
     /// @brief Draw object to ImGui window
     /// @param draw_list Object to draw on provided by ImGui
-    /// @param window_delta Position of window to draw on. Must add it to objects position 
+    /// @param window_delta Position of window to draw on. Must add it to objects position
     virtual void draw(ImDrawList *draw_list, ImVec2 window_delta)
     {
-        draw_list->AddCircle(ImVec2(window_delta.x + pos.x, window_delta.y + pos.y), radius, color, 24);
+        draw_list->AddCircle(ImVec2(window_delta.x + pos.x, window_delta.y + pos.y), getRadius(), color, 24);
     }
     
 
@@ -46,20 +48,17 @@ public:
     }
 
     virtual void displayInfo() {
-        ImGui::Text("Simulation Object");
+        ImGui::SeparatorText("Simulation Object");
         ImGui::Text("Position:");
         ImGui::InputFloat("x", &pos.x, 1.0f, 1.0f, "%.2f");
         ImGui::InputFloat("y", &pos.y, 1.0f, 1.0f, "%.2f");
     }
-
-    // This one function must be defined in .cpp file
-    void setAsInfoViewObject();
 };
 
 class Simulation
 {
 private:
-    std::vector<std::unique_ptr<SimulationObject>> objects;
+    std::vector<std::shared_ptr<SimulationObject>> objects;
 
     std::weak_ptr<SimulationObject> viewInfoObject;
 
@@ -86,9 +85,22 @@ public:
     /// @param window_delta Position of window to draw on. Must add it to objects position 
     void render(ImDrawList *draw_list, ImVec2 window_delta)
     {
+        ImVec2 object_center;
+        ImVec2 mouse_pos = ImGui::GetMousePos();
+        float dist_sq = 0.0f;
         for (auto& obj : objects)
         {
             obj->draw(draw_list, window_delta);
+            // Check for click
+            if (ImGui::IsMouseClicked(0)) {
+                ImVec2 circle_center(window_delta.x + obj->pos.x, window_delta.y + obj->pos.y);
+                float dist_sq = (mouse_pos.x - circle_center.x) * (mouse_pos.x - circle_center.x) + 
+                        (mouse_pos.y - circle_center.y) * (mouse_pos.y - circle_center.y);
+                if (dist_sq <= obj->getRadius() * obj->getRadius())
+                {
+                    setViewInfoObject(obj);
+                }
+            }
         }
     }
 
@@ -100,7 +112,7 @@ public:
     template <typename T, typename... Args>
     T* addObject(Args&&... args)
     {
-        auto obj = std::make_unique<T>(std::forward<Args>(args)...);
+        auto obj = std::make_shared<T>(std::forward<Args>(args)...);
         T* objPtr = obj.get();
         objects.push_back(std::move(obj));
 

@@ -8,8 +8,8 @@ protected:
 
 public:
     FoodObject(std::shared_ptr<Simulation> simulation, Vec2<float> position, int calories_, ImVec4 color)
-        : SimulationObject(simulation, position, convertCaloriesToRadius(calories_), color),
-        calories(calories_)
+        : SimulationObject(simulation, position, getRadius(), color),
+          calories(calories_)
     {
     }
 
@@ -18,11 +18,23 @@ public:
         // do nothing
     }
 
-    void draw(ImDrawList* draw_list, ImVec2 window_delta) override
+    void draw(ImDrawList *draw_list, ImVec2 window_delta) override
     {
-        draw_list->AddRectFilled(ImVec2(window_delta.x + pos.x - radius, window_delta.y + pos.y - radius),
-            ImVec2(window_delta.x + pos.x + radius, window_delta.y + pos.y + radius),
-            color);
+        draw_list->AddRectFilled(ImVec2(window_delta.x + pos.x - getRadius(), window_delta.y + pos.y - getRadius()),
+                                 ImVec2(window_delta.x + pos.x + getRadius(), window_delta.y + pos.y + getRadius()),
+                                 color);
+    }
+
+    int getRadius() override { return convertCaloriesToRadius(calories); }
+
+    void displayInfo() override {
+        // Call parent class displayInfo to show basic information
+        SimulationObject::displayInfo();
+
+        // Add custom behavior for this class
+        ImGui::SeparatorText("Food Object");
+        // TODO: Here in future we need to specify min and max value for calories
+        ImGui::SliderInt("Calories", &calories, 0, 500);
     }
 };
 
@@ -34,8 +46,8 @@ protected:
 
 public:
     TreeObject(std::shared_ptr<Simulation> simulation, Vec2<float> position, int numberOfFruits_)
-        : SimulationObject(simulation, position, 10 + numberOfFruits_ * 2, colorInt(80, 40, 0)),
-        numberOfFruits(numberOfFruits_)
+        : SimulationObject(simulation, position, getRadius(), colorInt(80, 40, 0)),
+          numberOfFruits(numberOfFruits_)
     {
     }
 
@@ -44,8 +56,20 @@ public:
         // Do nothing for the moment
     }
 
-    void draw(ImDrawList* draw_list, ImVec2 window_delta) override
+    void draw(ImDrawList *draw_list, ImVec2 window_delta) override
     {
-        draw_list->AddNgonFilled(ImVec2(pos.x + window_delta.x, pos.y + window_delta.y), radius, color, numberOfFruits);
+        draw_list->AddNgonFilled(ImVec2(pos.x + window_delta.x, pos.y + window_delta.y), getRadius(), color, numberOfFruits);
+    }
+
+    int getRadius() override { return 10 + numberOfFruits * 2; }
+
+    void displayInfo() override {
+        // Call parent class displayInfo to show basic information
+        SimulationObject::displayInfo();
+
+        // Add custom behavior for this class
+        ImGui::SeparatorText("Tree Object");
+        // TODO: Here in future we need to specify min and max value for number of fruits
+        ImGui::SliderInt("Number of Fruits", &numberOfFruits, 3, 12);
     }
 };
