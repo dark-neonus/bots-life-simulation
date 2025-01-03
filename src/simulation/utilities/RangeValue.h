@@ -23,6 +23,10 @@ public:
     RangeValue(T value_, T minValue_, T maxValue_)
         : value(value_), minValue(minValue_), maxValue(maxValue_) {}
 
+    /// @brief Use only for ImGui sliders!
+    /// @return Pointer to value
+    T* valuePointer() { return &value; }
+
     /// @brief Set newValue to RangeValue.value. Beign cut to [minValue, maxValue]
     /// @param newValue New value of RangeValue
     void set(T newValue) { value = std::max(std::min(newValue, maxValue), minValue); }
@@ -73,4 +77,5 @@ public:
         }
         return (value - minValue) / (maxValue - minValue);
     }
+    
 };
