@@ -2,6 +2,8 @@
 
 #include "imgui.h"
 #include "Vec2.h"
+#define _USE_MATH_DEFINES
+#include "math.h"
 
 // Always use inline for functions defined in headers
 
