@@ -10,7 +10,7 @@ constexpr float caloriesToSizeKoef = 1.0f;
 /// @param calories Amount of calories
 /// @param koef Koef to multiply radius by
 /// @return Radius of circle containing given amount of calories
-inline int converCaloriesToRadius(int calories, float koef = caloriesToSizeKoef)
+inline int convertCaloriesToRadius(int calories, float koef = caloriesToSizeKoef)
 {
     return int(ceil(sqrt(calories / M_PI) * koef));
 }
