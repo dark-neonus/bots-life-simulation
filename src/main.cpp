@@ -201,7 +201,7 @@ int main(int, char**)
             ImGui::DockBuilderAddNode(dockspace_id);
             ImGui::DockBuilderSetNodeSize(dockspace_id, ImGui::GetMainViewport()->Size);
 
-            ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Left, 0.5f, &dock_id_left, &dock_id_right);
+            ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Left, 0.7f, &dock_id_left, &dock_id_right);
             ImGui::DockBuilderDockWindow("Simulation window", dock_id_left);
             ImGui::DockBuilderDockWindow("Simulation object info", dock_id_right);
 
