@@ -109,7 +109,7 @@ public:
 
     Simulation(int numberOfChunksX_, int numberOfChunksY_, int unit_ = 10)
         : unit(unit_),
-        chunkManager(numberOfChunksX_, numberOfChunksY_, float(unit * 5)),
+        chunkManager(numberOfChunksX_, numberOfChunksY_, float(unit * 10)),
         maxSeeDistance(chunkManager.chunkSize * 2)
     {
         // chunkManager.simulation = shared_from_this();

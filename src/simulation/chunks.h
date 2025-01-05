@@ -32,9 +32,9 @@ class Chunk : public std::enable_shared_from_this<Chunk>
 {
 private:
 public:
+    const float chunkSize;
     const Vec2<float> startPos;
     const Vec2<float> endPos;
-    const float chunkSize;
 
     std::unordered_set<std::weak_ptr<SimulationObject>,
         std::hash<std::weak_ptr<SimulationObject>>, std::equal_to<std::weak_ptr<SimulationObject>>> objects;
@@ -95,6 +95,7 @@ public:
         {
             for (int x = 0; x < numberOfChunksX; x++)
             {
+                std::cout << "y: " << y << " | x: " << x << "\n";
                 chunks[y].emplace_back(x * chunkSize, y * chunkSize, chunkSize);
             }
         }
@@ -127,8 +128,8 @@ public:
         {
             for (int x = 0; x < numberOfChunksX; x++)
             {
-                // draw_list->AddRect(toImVec2(Vec2<float>(window_delta) + chunks[y][x].startPos),
-                //                     toImVec2(Vec2<float>(window_delta) + chunks[y][x].endPos), ImColor(colorInt(255, 255, 0, 10)), 0, 0, 2);
+                draw_list->AddRect(toImVec2(Vec2<float>(window_delta) + chunks[y][x].startPos),
+                                    toImVec2(Vec2<float>(window_delta) + chunks[y][x].endPos), ImColor(colorInt(255, 255, 0, 10)), 0, 0, 2);
             }
         }
         // Draw map limits

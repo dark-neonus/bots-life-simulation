@@ -17,7 +17,8 @@ class Vec2
                   "Type not allowed!");
 
 public:
-    T x, y;
+    T x = static_cast<T>(0);
+    T y = static_cast<T>(0);
 
     // Constructors
     Vec2() : x(0), y(0) {}
