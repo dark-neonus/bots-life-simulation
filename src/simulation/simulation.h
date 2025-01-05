@@ -20,6 +20,7 @@ protected:
     int radius;
     ImU32 color;
 
+    bool highlighted = false;
 public:
     Vec2<float> pos;
     
@@ -37,6 +38,9 @@ public:
 
     std::weak_ptr<Chunk> getChunk() { return chunk; }
     void setChunk(std::weak_ptr<Chunk> chunkToSet) { chunk = chunkToSet; }
+
+    bool isHighlighted() { return highlighted; }
+    void setHighlightion(bool value) { highlighted = value; }
 
     /// @brief Draw object to ImGui window
     /// @param draw_list Object to draw on provided by ImGui
@@ -59,6 +63,24 @@ public:
         ImGui::InputFloat("x", &pos.x, 1.0f, 1.0f, "%.1f");
         ImGui::InputFloat("y", &pos.y, 1.0f, 1.0f, "%.1f");
     }
+
+    const ImVec4 selectionColor = colorInt(255, 255, 255, 45);
+    virtual void drawHighlightion(ImDrawList *draw_list, ImVec2 window_delta) {
+        static constexpr int selectionRubHeigt = 3;
+        static constexpr int selectionRubWidth = 2;
+        Vec2<float> realPos = Vec2<float>(window_delta) + pos;
+        int selectionRadius = getRadius() + 8;
+        draw_list->AddRect(toImVec2(realPos - selectionRadius), toImVec2(realPos + selectionRadius), ImColor(selectionColor), 0, 0, 3.0f);
+        // lines |
+        // draw_list->AddRectFilled(toImVec2(realPos + Vec2<float>(-selectionRubWidth, selectionRadius - selectionRubHeigt)),
+        //                             toImVec2(realPos + Vec2<float>(selectionRubWidth, selectionRadius + selectionRubHeigt)), ImColor(selectionColor));
+        // draw_list->AddRectFilled(toImVec2(realPos + Vec2<float>(-selectionRubWidth, -selectionRadius - selectionRubHeigt)),
+        //                             toImVec2(realPos + Vec2<float>(selectionRubWidth, -selectionRadius + selectionRubHeigt)), ImColor(selectionColor));
+        // draw_list->AddRectFilled(toImVec2(realPos + Vec2<float>(selectionRadius - selectionRubHeigt, -selectionRubWidth)),
+        //                             toImVec2(realPos + Vec2<float>(selectionRadius + selectionRubHeigt, selectionRubWidth)), ImColor(selectionColor));
+        // draw_list->AddRectFilled(toImVec2(realPos + Vec2<float>(-selectionRadius - selectionRubHeigt, -selectionRubWidth)),
+        //                             toImVec2(realPos + Vec2<float>(-selectionRadius + selectionRubHeigt, selectionRubWidth)), ImColor(selectionColor));
+    }
 };
 
 class Simulation : public std::enable_shared_from_this<Simulation>
@@ -74,8 +96,8 @@ public:
 
     ChunkManager chunkManager;
 
-    
     const int maxSeeDistance;
+
 
     Simulation(int numberOfChunksX_, int numberOfChunksY_, int unit_ = 10)
         : unit(unit_),
@@ -97,14 +119,21 @@ public:
     /// @brief Render all objects in simulation
     /// @param draw_list Object to draw on provided by ImGui
     /// @param window_delta Position of window to draw on. Must add it to objects position 
-    void render(ImDrawList *draw_list, ImVec2 window_delta)
+    void render(ImDrawList *draw_list, ImVec2 window_delta, bool drawDebugLayer=true)
     {
-        ImVec2 object_center;
+        chunkManager.drawChunksMesh(draw_list, window_delta);
+
         ImVec2 mouse_pos = ImGui::GetMousePos();
+        // Holder variable for distance between click position and object
         float dist_sq = 0.0f;
+        ImVec2 object_center;
+        // In future, when we will have camera will be able to move it,
+        // this should be optimized to call Chunk::draw() if chunk is in visible area
+        // And then Chunk::draw() will call drawing of all all chunks objects
         for (auto& obj : objects)
         {
             obj->draw(draw_list, window_delta);
+            obj->setHighlightion(false);
             // Check for click
             if (ImGui::IsMouseClicked(0)) {
                 ImVec2 circle_center(window_delta.x + obj->pos.x, window_delta.y + obj->pos.y);
@@ -113,6 +142,17 @@ public:
                 if (dist_sq <= obj->getRadius() * obj->getRadius())
                 {
                     setViewInfoObject(obj);
+                }
+            }
+        }
+        if (auto viewInfoObjectValid = viewInfoObject.lock()) {
+            viewInfoObjectValid->setHighlightion(true);
+        }
+        if (drawDebugLayer) {
+            for (auto& obj : objects)
+            {
+                if (obj->isHighlighted()) {
+                    obj->drawHighlightion(draw_list, window_delta);
                 }
             }
         }
@@ -161,5 +201,9 @@ public:
             return obj;  // Lock the weak pointer to get the shared pointer
         }
         return nullptr;
+    }
+
+    void drawHighlight(std::weak_ptr<SimulationObject> obj, ImDrawList *draw_list, ImVec2 window_delta) {
+
     }
 };

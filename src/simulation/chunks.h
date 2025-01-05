@@ -81,4 +81,17 @@ public:
     /// @param position Position to check
     /// @return Return chunk which contain given position. If there is no such chunk, return std::weak_ptr<Chunk>() meaning nullptr
     std::weak_ptr<Chunk> whatChunkHere(Vec2<float> position) { return std::weak_ptr<Chunk>(); } // Bad value. Just to compile
+
+    void drawChunksMesh(ImDrawList *draw_list, ImVec2 window_delta) {
+        for (int y = 0; y < numberOfChunksY; y++)
+        {
+            for (int x = 0; x < numberOfChunksX; x++)
+            {
+                // draw_list->AddRect(toImVec2(Vec2<float>(window_delta) + chunks[y][x].startPos),
+                //                     toImVec2(Vec2<float>(window_delta) + chunks[y][x].endPos), ImColor(colorInt(255, 255, 0, 10)), 0, 0, 2);
+            }
+        }
+        // Draw map limits
+        draw_list->AddRect(window_delta, ImVec2(window_delta.x + mapWidth, window_delta.y + mapHeight), ImColor(colorInt(255, 0, 255, 30)), 0, 0, 5);
+    }
 };
