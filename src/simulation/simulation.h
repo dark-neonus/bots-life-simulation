@@ -34,10 +34,17 @@ public:
     {
     }
 
-    virtual int getRadius() { return radius; }
+    virtual int getRadius() {
+        return radius;
+    }
 
-    std::weak_ptr<Chunk> getChunk() { return chunk; }
-    void setChunk(std::weak_ptr<Chunk> chunkToSet) { chunk = chunkToSet; }
+    std::shared_ptr<Chunk> getChunk() {
+        return chunk.lock();
+    }
+
+    void setChunk(std::shared_ptr<Chunk> chunkToSet) {
+        chunk = chunkToSet; 
+    }
 
     bool isHighlighted() { return highlighted; }
     void setHighlightion(bool value) { highlighted = value; }
@@ -96,6 +103,7 @@ public:
 
     ChunkManager chunkManager;
 
+    
     const int maxSeeDistance;
 
 
@@ -167,6 +175,7 @@ public:
     T* addObject(Args&&... args)
     {
         auto obj = std::make_shared<T>(std::forward<Args>(args)...);
+
         // Check if position is valid (inside map)
         if (obj->pos.x < 0 || obj->pos.y < 0 ||
             obj->pos.x > chunkManager.mapWidth || obj->pos.y > chunkManager.mapHeight) {
@@ -175,18 +184,17 @@ public:
         // !!!! This must be working code, just uncomment it !!!!
         
         // Assign chunk to object and object to chunk
-        // std::weak_ptr<Chunk> objectsChunk = chunkManager.whatChunkHere(obj->pos);
-        // if (auto sharedPointerChunk = objectsChunk.lock()) {
-        //     sharedPointerChunk->addObject(obj);
-        // } else {
-        //     throw std::invalid_argument("There is no chunk that will hold given object. Pos: " + obj->pos.text());
-        // }       
-        
+        std::shared_ptr<Chunk> objectsChunk = chunkManager.whatChunkHere(obj->pos);
+        if (objectsChunk) {
+            objectsChunk->addObject<T>(obj);
+            // obj->setChunk(objectsChunk)
+        }
+        else {
+            throw std::invalid_argument("No chunk found for the given position. Pos: " + obj->pos.text());
+        }
 
-        T* objPtr = obj.get();
-        objects.push_back(std::move(obj));
-
-        return objPtr; // if you need to use raw pointer after adding.
+        objects.push_back(obj);
+        return obj.get();
     }
 
     /// @brief Sets the object to be displayed as the info view object.
