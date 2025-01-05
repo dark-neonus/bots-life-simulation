@@ -20,7 +20,7 @@ protected:
     int radius;
     ImU32 color;
 
-    bool highlighted = false;
+    // bool highlighted = false;
 public:
     Vec2<float> pos;
     
@@ -46,15 +46,15 @@ public:
         chunk = chunkToSet; 
     }
 
-    bool isHighlighted() { return highlighted; }
-    void setHighlightion(bool value) { highlighted = value; }
+    // bool isHighlighted() { return highlighted; }
+    // void setHighlightion(bool value) { highlighted = value; }
 
     /// @brief Draw object to ImGui window
     /// @param draw_list Object to draw on provided by ImGui
-    /// @param window_delta Position of window to draw on. Must add it to objects position
-    virtual void draw(ImDrawList *draw_list, ImVec2 window_delta)
+    /// @param window_pos Position of window to draw on. Must add it to objects position
+    virtual void draw(ImDrawList *draw_list, ImVec2 window_pos)
     {
-        draw_list->AddCircle(ImVec2(window_delta.x + pos.x, window_delta.y + pos.y), getRadius(), color, 24);
+        draw_list->AddCircle(ImVec2(window_pos.x + pos.x, window_pos.y + pos.y), getRadius(), color, 24);
     }
     
 
@@ -72,22 +72,7 @@ public:
     }
 
     const ImVec4 selectionColor = colorInt(255, 255, 255, 45);
-    virtual void drawHighlightion(ImDrawList *draw_list, ImVec2 window_delta) {
-        static constexpr int selectionRubHeigt = 3;
-        static constexpr int selectionRubWidth = 2;
-        Vec2<float> realPos = Vec2<float>(window_delta) + pos;
-        int selectionRadius = getRadius() + 8;
-        draw_list->AddRect(toImVec2(realPos - selectionRadius), toImVec2(realPos + selectionRadius), ImColor(selectionColor), 0, 0, 3.0f);
-        // lines |
-        // draw_list->AddRectFilled(toImVec2(realPos + Vec2<float>(-selectionRubWidth, selectionRadius - selectionRubHeigt)),
-        //                             toImVec2(realPos + Vec2<float>(selectionRubWidth, selectionRadius + selectionRubHeigt)), ImColor(selectionColor));
-        // draw_list->AddRectFilled(toImVec2(realPos + Vec2<float>(-selectionRubWidth, -selectionRadius - selectionRubHeigt)),
-        //                             toImVec2(realPos + Vec2<float>(selectionRubWidth, -selectionRadius + selectionRubHeigt)), ImColor(selectionColor));
-        // draw_list->AddRectFilled(toImVec2(realPos + Vec2<float>(selectionRadius - selectionRubHeigt, -selectionRubWidth)),
-        //                             toImVec2(realPos + Vec2<float>(selectionRadius + selectionRubHeigt, selectionRubWidth)), ImColor(selectionColor));
-        // draw_list->AddRectFilled(toImVec2(realPos + Vec2<float>(-selectionRadius - selectionRubHeigt, -selectionRubWidth)),
-        //                             toImVec2(realPos + Vec2<float>(-selectionRadius + selectionRubHeigt, selectionRubWidth)), ImColor(selectionColor));
-    }
+    virtual void drawHighlightion(ImDrawList *draw_list, ImVec2 window_pos);
 };
 
 class Simulation : public std::enable_shared_from_this<Simulation>
@@ -95,7 +80,9 @@ class Simulation : public std::enable_shared_from_this<Simulation>
 private:
     std::vector<std::shared_ptr<SimulationObject>> objects;
 
-    std::weak_ptr<SimulationObject> viewInfoObject;
+    // std::weak_ptr<SimulationObject> viewInfoObject;
+    std::vector<std::weak_ptr<SimulationObject>> selectedObjects;
+    std::weak_ptr<Chunk> selectedChunk;
 
 public:
     // This property must be first
@@ -105,6 +92,7 @@ public:
 
     
     const int maxSeeDistance;
+    const int allowedClickError = 10;
 
 
     Simulation(int numberOfChunksX_, int numberOfChunksY_, int unit_ = 10)
@@ -126,41 +114,75 @@ public:
 
     /// @brief Render all objects in simulation
     /// @param draw_list Object to draw on provided by ImGui
-    /// @param window_delta Position of window to draw on. Must add it to objects position 
-    void render(ImDrawList *draw_list, ImVec2 window_delta, bool drawDebugLayer=true)
+    /// @param window_pos Position of window to draw on. Must add it to objects position 
+    void render(ImDrawList *draw_list, ImVec2 window_pos, ImVec2 window_size, bool drawDebugLayer=true)
     {
-        chunkManager.drawChunksMesh(draw_list, window_delta);
+        chunkManager.drawChunksMesh(draw_list, window_pos);
 
         ImVec2 mouse_pos = ImGui::GetMousePos();
         // Holder variable for distance between click position and object
         float dist_sq = 0.0f;
         ImVec2 object_center;
-        // In future, when we will have camera will be able to move it,
-        // this should be optimized to call Chunk::draw() if chunk is in visible area
-        // And then Chunk::draw() will call drawing of all all chunks objects
-        for (auto& obj : objects)
-        {
-            obj->draw(draw_list, window_delta);
-            obj->setHighlightion(false);
-            // Check for click
-            if (ImGui::IsMouseClicked(0)) {
-                ImVec2 circle_center(window_delta.x + obj->pos.x, window_delta.y + obj->pos.y);
-                float dist_sq = (mouse_pos.x - circle_center.x) * (mouse_pos.x - circle_center.x) + 
-                        (mouse_pos.y - circle_center.y) * (mouse_pos.y - circle_center.y);
-                if (dist_sq <= obj->getRadius() * obj->getRadius())
-                {
-                    setViewInfoObject(obj);
+        // In future, when we will have camera will be able to move it
+            
+        bool isMouseClicked = ImGui::IsMouseClicked(0);
+        // Check if click was inside simulation window. If not, then not count it as a click
+        if (mouse_pos.x < window_pos.x || mouse_pos.y < 0 ||
+            mouse_pos.x >= window_pos.x + window_size.x - 10 || mouse_pos.y >= window_pos.y + window_size.y - 10)
+            { isMouseClicked = false; }
+        // Click handling
+        bool wasSelectedObject = false;
+        if (isMouseClicked) {
+            // If mouse were clicked clear all previous selections
+            selectedObjects.clear();
+            selectedChunk.reset();
+            std::shared_ptr<Chunk> clickedChunk = chunkManager.whatChunkHere(Vec2<float>(mouse_pos) - Vec2<float>(window_pos));
+            if (clickedChunk) {
+                for (auto& obj : clickedChunk->objects) {
+                    if (auto validObj = obj.lock()) {
+                        object_center = ImVec2(window_pos.x + validObj->pos.x, window_pos.y + validObj->pos.y);
+                        dist_sq = (mouse_pos.x - object_center.x) * (mouse_pos.x - object_center.x) + 
+                                    (mouse_pos.y - object_center.y) * (mouse_pos.y - object_center.y);
+                        if (dist_sq <= (validObj->getRadius() + allowedClickError) * (validObj->getRadius() + allowedClickError)) {
+                            // setViewInfoObject(validObj);
+                            selectedObjects.push_back(validObj);
+                            wasSelectedObject = true;
+                        }
+                    }
+                }
+                // if chunk was clicked, but no specific object was selected
+                if (!wasSelectedObject) {
+                    selectedChunk = clickedChunk;
+                    for (auto& obj : clickedChunk->objects) {
+                        if (auto validObj = obj.lock()) {
+                            selectedObjects.push_back(validObj);
+                        }
+                    }
                 }
             }
         }
-        if (auto viewInfoObjectValid = viewInfoObject.lock()) {
-            viewInfoObjectValid->setHighlightion(true);
+        // If chunk is selected, draw it before anything else
+        if (auto validSelectedChunk = selectedChunk.lock()) {
+            draw_list->AddRect(toImVec2(Vec2<float>(window_pos) + validSelectedChunk->startPos),
+                                    toImVec2(Vec2<float>(window_pos) + validSelectedChunk->endPos), ImColor(colorInt(255, 255, 0, 50)), 0, 0, 2);
         }
+        
+        // Draw all objects by chunks
+        for (auto chunk : chunkManager) {
+            for (auto& obj : chunk->objects) {
+                if (auto validObj = obj.lock()) {
+                    validObj->draw(draw_list, window_pos);
+                    
+                }
+            }
+        }
+        
+        // Draw debug layer
         if (drawDebugLayer) {
-            for (auto& obj : objects)
+            for (auto& obj : selectedObjects)
             {
-                if (obj->isHighlighted()) {
-                    obj->drawHighlightion(draw_list, window_delta);
+                if (auto validSelectedObject = obj.lock()) {
+                    validSelectedObject->drawHighlightion(draw_list, window_pos);
                 }
             }
         }
@@ -187,7 +209,7 @@ public:
         std::shared_ptr<Chunk> objectsChunk = chunkManager.whatChunkHere(obj->pos);
         if (objectsChunk) {
             objectsChunk->addObject<T>(obj);
-            // obj->setChunk(objectsChunk)
+            // No need for "obj->setChunk(objectsChunk)" because Chunk::addObject() do it
         }
         else {
             throw std::invalid_argument("No chunk found for the given position. Pos: " + obj->pos.text());
@@ -197,21 +219,17 @@ public:
         return obj.get();
     }
 
-    /// @brief Sets the object to be displayed as the info view object.
-    /// @param obj Pointer to the SimulationObject that should be set as the info view object.
-    void setViewInfoObject(std::shared_ptr<SimulationObject> obj) {
-        viewInfoObject = obj;  // Store as weak pointer
-    }
-
     /// @brief Retrieves the current info view object.
     std::shared_ptr<SimulationObject> getInfoViewObject() {
-        if (auto obj = viewInfoObject.lock()) {
-            return obj;  // Lock the weak pointer to get the shared pointer
+        if (selectedObjects.size() == 1) {
+            if (auto validSelectedObject = selectedObjects[0].lock()) {
+                return validSelectedObject;  // Lock the weak pointer to get the shared pointer
+            }
         }
         return nullptr;
     }
 
-    void drawHighlight(std::weak_ptr<SimulationObject> obj, ImDrawList *draw_list, ImVec2 window_delta) {
+    void drawHighlight(std::weak_ptr<SimulationObject> obj, ImDrawList *draw_list, ImVec2 window_pos) {
 
     }
 };

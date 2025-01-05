@@ -213,9 +213,10 @@ int main(int, char**)
 
             ImDrawList* draw_list = ImGui::GetWindowDrawList();
             ImVec2 window_delta = ImGui::GetCursorScreenPos();
+            ImVec2 window_size = ImGui::GetWindowSize();
 
             simulation->update();
-            simulation->render(draw_list, window_delta);
+            simulation->render(draw_list, window_delta, window_size);
 
             ImGui::End();
         }

@@ -74,7 +74,7 @@ class ChunkManager
 {
 private:
 
-    std::vector<std::vector<Chunk>> chunks;
+    std::vector<std::vector<std::shared_ptr<Chunk>>> chunks;
 public:
     // std::weak_ptr<Simulation> simulation;
 
@@ -95,8 +95,7 @@ public:
         {
             for (int x = 0; x < numberOfChunksX; x++)
             {
-                std::cout << "y: " << y << " | x: " << x << "\n";
-                chunks[y].emplace_back(x * chunkSize, y * chunkSize, chunkSize);
+                chunks[y].emplace_back(std::make_shared<Chunk>(x * chunkSize, y * chunkSize, chunkSize));
             }
         }
     }
@@ -107,7 +106,7 @@ public:
     /// @return Return pointer to chunk at chunks[yIndex][xIndex]. If indexes are invalid, return std::weak_ptr<Chunk>() meaning nullptr
     std::shared_ptr<Chunk> getChunk(int xIndex, int yIndex) {
         if (xIndex >= 0 && xIndex < numberOfChunksX && yIndex >= 0 && yIndex < numberOfChunksY) {
-            return std::make_shared<Chunk>(chunks[yIndex][xIndex]);
+            return chunks[yIndex][xIndex];
         }
 
         return nullptr;
@@ -123,16 +122,57 @@ public:
         return getChunk(xIndex, yIndex);
     }
 
-    void drawChunksMesh(ImDrawList *draw_list, ImVec2 window_delta) {
+    void drawChunksMesh(ImDrawList *draw_list, ImVec2 window_pos) {
         for (int y = 0; y < numberOfChunksY; y++)
         {
             for (int x = 0; x < numberOfChunksX; x++)
             {
-                draw_list->AddRect(toImVec2(Vec2<float>(window_delta) + chunks[y][x].startPos),
-                                    toImVec2(Vec2<float>(window_delta) + chunks[y][x].endPos), ImColor(colorInt(255, 255, 0, 10)), 0, 0, 2);
+                draw_list->AddRect(toImVec2(Vec2<float>(window_pos) + chunks[y][x]->startPos),
+                                    toImVec2(Vec2<float>(window_pos) + chunks[y][x]->endPos), ImColor(colorInt(255, 255, 0, 10)), 0, 0, 2);
             }
         }
         // Draw map limits
-        draw_list->AddRect(window_delta, ImVec2(window_delta.x + mapWidth, window_delta.y + mapHeight), ImColor(colorInt(255, 0, 255, 30)), 0, 0, 5);
+        draw_list->AddRect(window_pos, ImVec2(window_pos.x + mapWidth, window_pos.y + mapHeight), ImColor(colorInt(255, 0, 255, 30)), 0, 0, 5);
     }
+
+    // Updated ChunkIterator
+    class ChunkIterator
+    {
+    private:
+        const std::vector<std::vector<std::shared_ptr<Chunk>>> &chunks;
+        size_t outerIndex, innerIndex;
+
+    public:
+        ChunkIterator(const std::vector<std::vector<std::shared_ptr<Chunk>>> &chunks_, size_t outerIdx, size_t innerIdx)
+            : chunks(chunks_), outerIndex(outerIdx), innerIndex(innerIdx) {}
+
+        // Dereference operator
+        std::shared_ptr<Chunk> operator*() { return chunks[outerIndex][innerIndex]; }
+
+        // Increment operator
+        ChunkIterator &operator++()
+        {
+            if (++innerIndex >= chunks[outerIndex].size())
+            {
+                innerIndex = 0;
+                ++outerIndex;
+            }
+            return *this;
+        }
+
+        // Equality operators
+        bool operator==(const ChunkIterator &other) const
+        {
+            return &chunks == &other.chunks && outerIndex == other.outerIndex && innerIndex == other.innerIndex;
+        }
+
+        bool operator!=(const ChunkIterator &other) const { return !(*this == other); }
+    };
+
+    // Begin iterator
+    ChunkIterator begin() const { return ChunkIterator(chunks, 0, 0); }
+
+    // End iterator
+    ChunkIterator end() const { return ChunkIterator(chunks, chunks.size(), 0); }
+
 };
