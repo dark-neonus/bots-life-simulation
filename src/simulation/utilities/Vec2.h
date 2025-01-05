@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include <array>
 #include <type_traits>
-#include <string>>
+#include <string>
 
 template <typename T>
 class Vec2
@@ -135,7 +135,7 @@ public:
         return os;
     }
 
-    std::string text() { return "Vec2<" + std::string(typeid(T).name()) + ">(" + std::string(x) + ", " + std::string(y) + ")"; }
+    std::string text() { return "Vec2<" + std::string(typeid(T).name()) + ">(" + std::to_string(x) + ", " + std::to_string(y) + ")"; }
 };
 
 // Static direction vectors (individual)
