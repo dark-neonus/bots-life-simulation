@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <cmath>
 #include <iostream>
 #include <stdexcept>
@@ -58,15 +57,51 @@ public:
     }
 
     /// @brief Return dot product of vector and other: x * other.x + y * other.y
-    /// @param Secong vector of dot production 
+    /// @param Secong vector of dot production
     /// @return Dot production of current vector and other vector
     T dot(const Vec2<T> &other) const
     {
         return x * other.x + y * other.y;
     }
 
-    // Arithmetic operations
+    // Arithmetic operations between vector and number
+    template <typename T1, typename = std::enable_if_t<std::is_same<T1, int>::value ||
+                                                       std::is_same<T1, float>::value ||
+                                                       std::is_same<T1, double>::value>>
+    Vec2<T> operator+(T1 number) const
+    {
+        return Vec2<T>(x + number, y + number);
+    }
 
+    template <typename T1, typename = std::enable_if_t<std::is_same<T1, int>::value ||
+                                                       std::is_same<T1, float>::value ||
+                                                       std::is_same<T1, double>::value>>
+    Vec2<T> operator-(T1 number) const
+    {
+        return Vec2<T>(x - number, y - number);
+    }
+
+    template <typename T1, typename = std::enable_if_t<std::is_same<T1, int>::value ||
+                                                       std::is_same<T1, float>::value ||
+                                                       std::is_same<T1, double>::value>>
+    Vec2<T> operator*(T1 number) const
+    {
+        return Vec2<T>(x * number, y * number);
+    }
+
+    template <typename T1, typename = std::enable_if_t<std::is_same<T1, int>::value ||
+                                                       std::is_same<T1, float>::value ||
+                                                       std::is_same<T1, double>::value>>
+    Vec2<T> operator/(T1 number) const
+    {
+        if (number == 0)
+        {
+            throw std::invalid_argument("Division by zero");
+        }
+        return Vec2<T>(x / number, y / number);
+    }
+
+    // Arithmetic operations between vectors
 
     Vec2<T> operator+(const Vec2<T> &other) const
     {
