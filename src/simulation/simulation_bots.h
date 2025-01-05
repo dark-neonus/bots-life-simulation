@@ -79,7 +79,9 @@ public:
         ImGui::SliderFloat("Health", health.valuePointer(), health.getMin(), health.getMax(), "%.1f");
         ImGui::SliderFloat("Food", food.valuePointer(), food.getMin(), food.getMax(), "%.1f calories");
         // TODO: Here in future we need to specify min and max value for see distance
-        ImGui::SliderInt("See distance", &see_distance, 1, 100);
+        if (auto simulationValid = simulation.lock()) {
+            ImGui::SliderInt("See distance", &see_distance, 1, simulationValid->maxSeeDistance);
+        }
         // TODO: Here in future we need to specify min and max value for speed
         ImGui::SliderFloat("Speed", &speed, 0.1f, 10.0f, "%.2f");
         // TODO: Here in future we need to specify min and max value for damage
