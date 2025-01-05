@@ -2,17 +2,20 @@
 
 #include <memory>
 #include <vector>
+#include <stdexcept>
 
 #include "imgui.h"
 #include "utilities/utilities.h"
+#include "chunks.h"
 
 class Simulation;
 
-class SimulationObject  : public std::enable_shared_from_this<SimulationObject>
+class SimulationObject : public std::enable_shared_from_this<SimulationObject>
 {
 private:
 protected:
     std::weak_ptr<Simulation> simulation;
+    std::weak_ptr<Chunk> chunk;
 
     int radius;
     ImU32 color;
@@ -31,6 +34,9 @@ public:
     }
 
     virtual int getRadius() { return radius; }
+
+    std::weak_ptr<Chunk> getChunk() { return chunk; }
+    void setChunk(std::weak_ptr<Chunk> chunkToSet) { chunk = chunkToSet; }
 
     /// @brief Draw object to ImGui window
     /// @param draw_list Object to draw on provided by ImGui
@@ -55,7 +61,7 @@ public:
     }
 };
 
-class Simulation
+class Simulation : public std::enable_shared_from_this<Simulation>
 {
 private:
     std::vector<std::shared_ptr<SimulationObject>> objects;
@@ -63,12 +69,20 @@ private:
     std::weak_ptr<SimulationObject> viewInfoObject;
 
 public:
+    // This property must be first
     const int unit;
 
+    ChunkManager chunkManager;
 
-    Simulation(int unit_ = 10)
-        : unit(unit_)
+    
+    const int maxSeeDistance;
+
+    Simulation(int numberOfChunksX_, int numberOfChunksY_, int unit_ = 10)
+        : unit(unit_),
+        chunkManager(numberOfChunksX_, numberOfChunksY_, float(unit * 5)),
+        maxSeeDistance(chunkManager.chunkSize * 2)
     {
+        // chunkManager.simulation = shared_from_this();
     }
 
     /// @brief Update all objects in simulation
@@ -113,6 +127,22 @@ public:
     T* addObject(Args&&... args)
     {
         auto obj = std::make_shared<T>(std::forward<Args>(args)...);
+        // Check if position is valid (inside map)
+        if (obj->pos.x < 0 || obj->pos.y < 0 ||
+            obj->pos.x > chunkManager.mapWidth || obj->pos.y > chunkManager.mapHeight) {
+            throw std::invalid_argument("Position of object is out of simualtion map. Pos: " + obj->pos.text());
+        }
+        // !!!! This must be working code, just uncomment it !!!!
+        
+        // Assign chunk to object and object to chunk
+        // std::weak_ptr<Chunk> objectsChunk = chunkManager.whatChunkHere(obj->pos);
+        // if (auto sharedPointerChunk = objectsChunk.lock()) {
+        //     sharedPointerChunk->addObject(obj);
+        // } else {
+        //     throw std::invalid_argument("There is no chunk that will hold given object. Pos: " + obj->pos.text());
+        // }       
+        
+
         T* objPtr = obj.get();
         objects.push_back(std::move(obj));
 
