@@ -1,5 +1,6 @@
 #pragma once
 
+#include "imgui.h"
 #include <cmath>
 #include <iostream>
 #include <stdexcept>
@@ -25,6 +26,7 @@ public:
     // Convert constructor
     template <typename U>
     Vec2(const Vec2<U> &other) : x(static_cast<T>(other.x)), y(static_cast<T>(other.y)) {}
+    Vec2(ImVec2 v) : x(static_cast<T>(v.x)), y(static_cast<T>(v.y)) {}
 
     static const Vec2<T> zero;
 
