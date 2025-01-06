@@ -38,8 +38,8 @@ private:
     RangeValue<float> lostLifeChance = RangeValue<float>(0.0f, 0.0f, 1.0f);
     RangeValue<float> findFoodChance = RangeValue<float>(0.0f, 0.0f, 1.0f);
 public:
-    // const int xIndex;
-    // const int yIndex;
+    const int xIndex;
+    const int yIndex;
     const float chunkSize;
     const Vec2<float> startPos;
     const Vec2<float> endPos;
@@ -47,8 +47,9 @@ public:
     std::unordered_set<std::weak_ptr<SimulationObject>,
         std::hash<std::weak_ptr<SimulationObject>>, std::equal_to<std::weak_ptr<SimulationObject>>> objects;
 
-    Chunk(float startX, float startY, float chunkSize_)
-        : chunkSize(chunkSize_), startPos(startX, startY), endPos(startX + chunkSize, startY + chunkSize)
+    Chunk(float startX, float startY, float chunkSize_, int xIndex_, int yIndex_)
+        : xIndex(xIndex_), yIndex(yIndex_),chunkSize(chunkSize_),
+        startPos(startX, startY), endPos(startX + chunkSize, startY + chunkSize)
     {
     }
 
@@ -116,7 +117,7 @@ public:
         {
             for (int x = 0; x < numberOfChunksX; x++)
             {
-                chunks[y].emplace_back(std::make_shared<Chunk>(x * chunkSize, y * chunkSize, chunkSize));
+                chunks[y].emplace_back(std::make_shared<Chunk>(x * chunkSize, y * chunkSize, chunkSize, x, y));
             }
         }
     }
