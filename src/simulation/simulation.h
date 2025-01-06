@@ -1,14 +1,25 @@
 #pragma once
 
-#include <memory>
 #include <vector>
 #include <stdexcept>
 
 #include "imgui.h"
 #include "utilities/utilities.h"
+#include "utilities/objectSet.h"
 #include "chunks.h"
 
+using objectSet = std::unordered_set<std::weak_ptr<SimulationObject>,
+    std::hash<std::weak_ptr<SimulationObject>>,
+    std::equal_to<std::weak_ptr<SimulationObject>>>;
+
 class Simulation;
+
+enum class SimulationObjectType {
+    BaseObject,
+    BotObject,
+    FoodObject,
+    TreeObject,
+};
 
 class SimulationObject : public std::enable_shared_from_this<SimulationObject>
 {
@@ -33,6 +44,10 @@ public:
     SimulationObject(std::shared_ptr<Simulation> simulation_, Vec2<float> position, int radius_, ImVec4 color_)
         : simulation(simulation_), radius(radius_), color(ImColor(color_)), pos(position)
     {
+    }
+
+    virtual SimulationObjectType type() const {
+        return SimulationObjectType::BaseObject;
     }
 
     virtual int getRadius() {

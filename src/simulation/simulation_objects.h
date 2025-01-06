@@ -13,6 +13,10 @@ public:
     {
     }
 
+    SimulationObjectType type() const override {
+        return SimulationObjectType::FoodObject;
+    }
+
     void update() override
     {
         // do nothing
@@ -49,6 +53,10 @@ public:
         : SimulationObject(simulation, position, getRadius(), colorInt(80, 40, 0)),
           numberOfFruits(numberOfFruits_)
     {
+    }
+
+    SimulationObjectType type() const override {
+        return SimulationObjectType::TreeObject;
     }
 
     void update() override

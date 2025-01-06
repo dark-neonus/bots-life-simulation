@@ -1,10 +1,13 @@
 #pragma once
 
+#include "chunks.h"
 #include "simulation.h"
 #include "simulation_objects.h"
 #include "utilities/utilities.h"
 
 #define DEFAULT_DEBUG_DRAWING true
+
+std::shared_ptr<Chunk> whatChunkHere(Vec2<float> position);
 
 class BotObject : public SimulationObject
 {
@@ -26,8 +29,12 @@ public:
     {
     }
 
+    SimulationObjectType type() const override {
+        return SimulationObjectType::BotObject;
+    }
+
     /// @brief Return see distance of bot including chunk multiplier
-    int getSeeDistance() {
+    int getSeeDistance() const {
         if (auto validChunk = chunk.lock()) {
             if (auto validSimulation = simulation.lock()) {
                 return std::min(static_cast<int>(see_distance * validChunk->getSeeDistanceMultiplier()),
@@ -36,6 +43,56 @@ public:
             throw std::runtime_error("Invalid simulation of BotObject!");
         }
         throw std::runtime_error("Invalid chunk of BotObject!");
+    }
+
+    /// @brief Get and return all chunks within a given radius of the position.
+    /// @param position The position to check around.
+    /// @param radius The radius within which to search for chunks.
+    /// @return A vector of shared pointers to the chunks within the specified radius.
+    std::vector<std::shared_ptr<Chunk>> getChunksInRadius(const Vec2<int>& position, int radius) {
+        std::vector<std::shared_ptr<Chunk>> chunks;
+        
+        Vec2<int> min = position - Vec2<int>(radius, radius);
+        Vec2<int> max = position + Vec2<int>(radius, radius);
+
+        for (int x = min.x; x <= max.x; ++x) {
+            for (int y = min.y; y <= max.y; ++y) {
+                auto chunk = whatChunkHere(Vec2<int>(x, y));
+                if (chunk) {
+                    chunks.push_back(chunk);
+                }
+            }
+        }
+
+        return chunks;
+    }
+
+    /// @brief Get all objects within the bot's vision range.
+    /// @return A set of weak pointers to the objects in the bot's vision.
+    objectSet getObjectsInVision() {
+        objectSet objectsInVision;
+
+        const int radius = getSeeDistance();
+        auto chunksInVision = getChunksInRadius(pos, radius);
+
+        for (const auto& chunk : chunksInVision) {
+            for (const auto& weakObject : chunk->getObjects()) {
+                if (auto object = weakObject.lock()) {
+                    if (isInVision(object)) {
+                        objectsInVision.insert(object);
+                    }
+                }
+            }
+        }
+
+        return objectsInVision;
+    }
+
+    /// @brief Check if the given object is within the bot's vision range.
+    /// @param object The object to check.
+    /// @return Returns `true` if the object is within the bot's vision range, otherwise `false`.
+    bool isInVision(const std::shared_ptr<SimulationObject>& object) const {
+        return pos.distanceTo(object->pos) <= getSeeDistance();
     }
 
     void update() override

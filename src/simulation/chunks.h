@@ -1,32 +1,18 @@
 #pragma once
 
-#include <memory>
 #include <vector>
-#include <unordered_set>
 #include <stdexcept>
 
 #include "utilities/utilities.h"
+#include "utilities/objectSet.h"
 #include "simulation.h"
-
-namespace std {
-    template <typename T>
-    struct hash<std::weak_ptr<T>> {
-        size_t operator()(const std::weak_ptr<T>& wp) const {
-            auto shared = wp.lock();
-            return shared ? reinterpret_cast<size_t>(shared.get()) : 0;
-        }
-    };
-
-    template <typename T>
-    struct equal_to<std::weak_ptr<T>> {
-        bool operator()(const std::weak_ptr<T>& wp1, const std::weak_ptr<T>& wp2) const {
-            return wp1.lock() == wp2.lock();
-        }
-    };
-}
 
 class SimulationObject;
 class Simulation;
+
+using objectSet = std::unordered_set<std::weak_ptr<SimulationObject>,
+    std::hash<std::weak_ptr<SimulationObject>>,
+    std::equal_to<std::weak_ptr<SimulationObject>>>;
 
 class Chunk : public std::enable_shared_from_this<Chunk>
 {
@@ -44,8 +30,7 @@ public:
     const Vec2<float> startPos;
     const Vec2<float> endPos;
 
-    std::unordered_set<std::weak_ptr<SimulationObject>,
-        std::hash<std::weak_ptr<SimulationObject>>, std::equal_to<std::weak_ptr<SimulationObject>>> objects;
+    objectSet objects;
 
     Chunk(float startX, float startY, float chunkSize_, int xIndex_, int yIndex_)
         : xIndex(xIndex_), yIndex(yIndex_), chunkSize(chunkSize_),
@@ -59,6 +44,10 @@ public:
     void addObject(std::shared_ptr<T> obj) {
         obj->setChunk(shared_from_this());
         objects.insert(obj);
+    }
+
+    objectSet getObjects() const {
+        return this->objects;
     }
 
     /// @brief Move object from current chunk to another
@@ -142,7 +131,7 @@ public:
     /// @brief Return pointer to chunk from chunk matrix by coordinates (x, y)
     /// @param xIndex Column index of chunk
     /// @param yIndex Row index of chunk
-    /// @return Return pointer to chunk at chunks[yIndex][xIndex]. If indexes are invalid, return std::weak_ptr<Chunk>() meaning nullptr
+    /// @return Return pointer to chunk at chunks[yIndex][xIndex]. If indexes are invalid, return nullptr
     std::shared_ptr<Chunk> getChunk(int xIndex, int yIndex) {
         if (xIndex >= 0 && xIndex < numberOfChunksX && yIndex >= 0 && yIndex < numberOfChunksY) {
             return chunks[yIndex][xIndex];
@@ -153,7 +142,7 @@ public:
 
     /// @brief Get and return chunk which own given position
     /// @param position Position to check
-    /// @return Return chunk which contain given position. If there is no such chunk, return std::weak_ptr<Chunk>() meaning nullptr
+    /// @return Return chunk which contain given position. If there is no such chunk, return nullptr
     std::shared_ptr<Chunk> whatChunkHere(Vec2<float> position) {
         int xIndex = static_cast<int>(position.x / chunkSize);
         int yIndex = static_cast<int>(position.y / chunkSize);

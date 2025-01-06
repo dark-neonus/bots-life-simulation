@@ -47,6 +47,15 @@ public:
         return std::sqrt(x * x + y * y);
     }
 
+    /// @brief Calculate the distance between this point and another point.
+    /// @param other The other point to calculate the distance to.
+    /// @return The distance between the two points.
+    T distanceTo(const Vec2<T>& other) const {
+        T dx = x - other.x;
+        T dy = y - other.y;
+        return std::sqrt(dx * dx + dy * dy);
+    }
+
     /// @brief Normalize vector
     /// @return Vector of the same type and direction with length of 1
     Vec2<T> normalize() const
