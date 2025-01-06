@@ -148,10 +148,10 @@ int main(int, char**)
     simulation->addObject<SimulationObject>(simulation, Vec2(60, 70), 30, colorInt(0, 125, 0));
 
     // Add FoodObjects
-    simulation->addObject<FoodObject>(simulation, Vec2(200, 200), simulation->unit * 10, colorInt(255, 0, 0));
-    simulation->addObject<FoodObject>(simulation, Vec2(250, 200), simulation->unit * 20, colorInt(255, 0, 0));
-    simulation->addObject<FoodObject>(simulation, Vec2(300, 200), simulation->unit * 30, colorInt(255, 0, 0));
-    simulation->addObject<FoodObject>(simulation, Vec2(350, 200), simulation->unit * 40, colorInt(255, 0, 0));
+    simulation->addObject<FoodObject>(simulation, Vec2(200, 200), simulation->unit * 10, colorInt(100, 0, 0));
+    simulation->addObject<FoodObject>(simulation, Vec2(250, 200), simulation->unit * 20, colorInt(100, 0, 0));
+    simulation->addObject<FoodObject>(simulation, Vec2(300, 200), simulation->unit * 30, colorInt(100, 0, 0));
+    simulation->addObject<FoodObject>(simulation, Vec2(350, 200), simulation->unit * 40, colorInt(100, 0, 0));
 
     // Add TreeObjects
     simulation->addObject<TreeObject>(simulation, Vec2(200, 150), 3);

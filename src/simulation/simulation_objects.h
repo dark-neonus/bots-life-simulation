@@ -50,7 +50,7 @@ protected:
 
 public:
     TreeObject(std::shared_ptr<Simulation> simulation, Vec2<float> position, int numberOfFruits_)
-        : SimulationObject(simulation, position, getRadius(), colorInt(80, 40, 0)),
+        : SimulationObject(simulation, position, getRadius(), colorInt(60, 30, 0)),
           numberOfFruits(numberOfFruits_)
     {
     }

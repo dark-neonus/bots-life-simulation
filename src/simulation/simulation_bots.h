@@ -7,7 +7,7 @@
 
 #define DEFAULT_DEBUG_DRAWING true
 
-std::shared_ptr<Chunk> whatChunkHere(Vec2<float> position);
+// std::shared_ptr<Chunk> whatChunkHere(Vec2<float> position);
 
 class BotObject : public SimulationObject
 {
@@ -25,7 +25,7 @@ public:
     BotObject(std::shared_ptr<Simulation> simulation, Vec2<int> position, float health_, float food_, int see_distance_, float speed_, float damage_)
         : health(health_, 0, health_), food(food_, 0, food_),
         see_distance(see_distance_), speed(speed_), damage(damage_),
-        SimulationObject(simulation, position, convertCaloriesToRadius(food_), colorInt(0, 125, 255))
+        SimulationObject(simulation, position, convertCaloriesToRadius(food_), colorInt(0, 75, 150))
     {
     }
 
@@ -40,9 +40,9 @@ public:
                 return std::min(static_cast<int>(see_distance * validChunk->getSeeDistanceMultiplier()),
                                 validSimulation->maxSeeDistance);
             }
-            throw std::runtime_error("Invalid simulation of BotObject!");
+            throw std::runtime_error("Invalid simulation pointer of BotObject!");
         }
-        throw std::runtime_error("Invalid chunk of BotObject!");
+        throw std::runtime_error("Invalid chunk pointer of BotObject!");
     }
 
     /// @brief Get and return all chunks within a given radius of the position.
@@ -51,18 +51,38 @@ public:
     /// @return A vector of shared pointers to the chunks within the specified radius.
     std::vector<std::shared_ptr<Chunk>> getChunksInRadius(const Vec2<int>& position, int radius) {
         std::vector<std::shared_ptr<Chunk>> chunks;
-        
-        Vec2<int> min = position - Vec2<int>(radius, radius);
-        Vec2<int> max = position + Vec2<int>(radius, radius);
 
-        for (int x = min.x; x <= max.x; ++x) {
-            for (int y = min.y; y <= max.y; ++y) {
-                auto chunk = whatChunkHere(Vec2<int>(x, y));
-                if (chunk) {
-                    chunks.push_back(chunk);
+        if (auto validSimulation = simulation.lock()) {
+            // Find top left chunk in radius
+            std::shared_ptr<Chunk> topLeftChunk = validSimulation->chunkManager.whatChunkHere(position - radius);
+            // Find bottom right chunk in radius
+            std::shared_ptr<Chunk> bottomRightChunk = validSimulation->chunkManager.whatChunkHere(position + radius);
+
+            // Get index of edge chunks(if radius out of map, return edge chunks)
+            int startX = 0;
+            int startY = 0;
+            if (topLeftChunk) {
+                startX = topLeftChunk->xIndex;
+                startY = topLeftChunk->yIndex;
+            }
+            int endX = validSimulation->chunkManager.numberOfChunksX - 1;
+            int endY = validSimulation->chunkManager.numberOfChunksY - 1;
+            if (bottomRightChunk) {
+                endX = bottomRightChunk->xIndex;
+                endY = bottomRightChunk->yIndex;
+            }
+            // chunks.resize((endY - startY + 1) * (endX - startX + 1));
+            for (int y = startY; y <= endY; y++) {
+                for (int x = startX; x <= endX; x++) {
+                    chunks.push_back(validSimulation->chunkManager.getChunk(x, y));
                 }
             }
+
         }
+        else {
+            throw std::runtime_error("Invalid simulation pointer of BotObject!");
+        }
+        
 
         return chunks;
     }
@@ -73,13 +93,14 @@ public:
         objectSet objectsInVision;
 
         const int radius = getSeeDistance();
+        const int sqrSeeDistance = radius * radius;
         auto chunksInVision = getChunksInRadius(pos, radius);
 
         for (const auto& chunk : chunksInVision) {
-            for (const auto& weakObject : chunk->getObjects()) {
-                if (auto object = weakObject.lock()) {
-                    if (isInVision(object)) {
-                        objectsInVision.insert(object);
+            for (const auto& chunkObject : chunk->getObjects()) {
+                if (auto validChunkObject = chunkObject.lock()) {
+                    if (isInVision(validChunkObject, sqrSeeDistance) && validChunkObject.get() != this) {
+                        objectsInVision.insert(validChunkObject);
                     }
                 }
             }
@@ -90,9 +111,11 @@ public:
 
     /// @brief Check if the given object is within the bot's vision range.
     /// @param object The object to check.
+    /// @param sqrSeeDistance getSeeDistance() * getSeeDistance() value
     /// @return Returns `true` if the object is within the bot's vision range, otherwise `false`.
-    bool isInVision(const std::shared_ptr<SimulationObject>& object) const {
-        return pos.distanceTo(object->pos) <= getSeeDistance();
+    bool isInVision(const std::shared_ptr<SimulationObject>& object, int sqrSeeDistance) const {
+        // Maybe we will need to change this function to take objects radius in account
+        return pos.sqrDistanceTo(object->pos) <= sqrSeeDistance;
     }
 
     void update() override
@@ -106,6 +129,8 @@ public:
                 health.decrease(0.5);
             }
         }
+        auto objectsInVision = getObjectsInVision();
+        std::cout << "radius: " << getSeeDistance() << " | objectsInVision: " << objectsInVision.size() << "\n";
     }
 
     void draw(ImDrawList* draw_list, ImVec2 window_pos) override
