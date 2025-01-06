@@ -59,5 +59,8 @@ CMakeUserPresets.json
 # ImGui rules
 imgui.ini
 
-# Add __* rule to ignore different files
+#  __* rule to ignore different files
 __*
+
+# perf.data rule
+perf.data*
