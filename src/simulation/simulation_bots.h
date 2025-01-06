@@ -130,7 +130,6 @@ public:
             }
         }
         auto objectsInVision = getObjectsInVision();
-        std::cout << "radius: " << getSeeDistance() << " | objectsInVision: " << objectsInVision.size() << "\n";
     }
 
     void draw(ImDrawList* draw_list, ImVec2 window_pos) override
