@@ -137,7 +137,7 @@ int main(int, char**)
 
     // Init of simulation here
     // Create a shared pointer to the simulation
-    std::shared_ptr<Simulation> simulation = std::make_shared<Simulation>(6, 6, 20);
+    std::shared_ptr<Simulation> simulation = std::make_shared<Simulation>(6, 6, 35);
 
     // Add SimulationObjects
     simulation->addObject<SimulationObject>(simulation, Vec2(0, 0), 3, colorInt(255, 0, 0));

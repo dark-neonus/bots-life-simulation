@@ -26,6 +26,18 @@ public:
     {
     }
 
+    /// @brief Return see distance of bot including chunk multiplier
+    int getSeeDistance() {
+        if (auto validChunk = chunk.lock()) {
+            if (auto validSimulation = simulation.lock()) {
+                return std::min(static_cast<int>(see_distance * validChunk->getSeeDistanceMultiplier()),
+                                validSimulation->maxSeeDistance);
+            }
+            throw std::runtime_error("Invalid simulation of BotObject!");
+        }
+        throw std::runtime_error("Invalid chunk of BotObject!");
+    }
+
     void update() override
     {
         // Change values just to display debug values drawing
@@ -50,7 +62,7 @@ public:
             constexpr int bar_height = 10;
             constexpr float bar_size_reduction = 0.3f;
             // Draw see distance circle
-            draw_list->AddCircle(ImVec2(center_x, center_y), float(see_distance),
+            draw_list->AddCircle(ImVec2(center_x, center_y), float(getSeeDistance()),
                 ImColor(colorInt(255, 255, 255, 100)), 24, 1.0f);
             // Draw food bar
             draw_list->AddRectFilled(ImVec2(center_x - radius_, center_y - radius_),
