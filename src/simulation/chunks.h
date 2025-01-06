@@ -48,7 +48,7 @@ public:
         std::hash<std::weak_ptr<SimulationObject>>, std::equal_to<std::weak_ptr<SimulationObject>>> objects;
 
     Chunk(float startX, float startY, float chunkSize_, int xIndex_, int yIndex_)
-        : xIndex(xIndex_), yIndex(yIndex_),chunkSize(chunkSize_),
+        : xIndex(xIndex_), yIndex(yIndex_), chunkSize(chunkSize_),
         startPos(startX, startY), endPos(startX + chunkSize, startY + chunkSize)
     {
     }
@@ -79,17 +79,34 @@ public:
     }
 
     float getSeeDistanceMultiplier() { return seeDistanceMultiplier.get(); }
-    float getSpeedMultiplier() { return seeDistanceMultiplier.get(); }
-    float getHungryMultiplier() { return seeDistanceMultiplier.get(); }
-    float getLostLifeChance() { return seeDistanceMultiplier.get(); }
-    float getFindFoodChance() { return seeDistanceMultiplier.get(); }
+    float getSpeedMultiplier() { return speedMultiplier.get(); }
+    float getHungryMultiplier() { return hungryMultiplier.get(); }
+    float getLostLifeChance() { return lostLifeChance.get(); }
+    float getFindFoodChance() { return findFoodChance.get(); }
 
-    // void displayInfo() {
-    //     ImGui::SeparatorText("Chunk");
-    //     ImGui::Text("Position:");
-    //     ImGui::InputFloat("x", &pos.x, 1.0f, 1.0f, "%.1f");
-    //     ImGui::InputFloat("y", &pos.y, 1.0f, 1.0f, "%.1f");
-    // }
+    void displayInfo() {
+        ImGui::SeparatorText("Chunk");
+        ImGui::Text("Indexes:");
+        ImGui::Text("xIndex: %i", xIndex);
+        ImGui::Text("yIndex: %i", yIndex);
+        ImGui::Separator();
+        ImGui::Text("Coordinates:");
+        ImGui::Text("StartPos: (%.1f, %.1f)", startPos.x, startPos.y);
+        ImGui::Text("EndPos: (%.1f, %.1f)", endPos.x, endPos.y);
+        ImGui::Separator();
+        ImGui::Text("Effects:");
+        ImGui::SliderFloat("SeeDistanceMultiplier", seeDistanceMultiplier.valuePointer(),
+                            seeDistanceMultiplier.getMin(), seeDistanceMultiplier.getMax(), "%.1f");
+        ImGui::SliderFloat("SpeedMultiplier", speedMultiplier.valuePointer(),
+                            speedMultiplier.getMin(), speedMultiplier.getMax(), "%.1f");
+        ImGui::SliderFloat("HungryMultiplier", hungryMultiplier.valuePointer(),
+                            hungryMultiplier.getMin(), hungryMultiplier.getMax(), "%.1f");
+        ImGui::SliderFloat("LostLifeChance", lostLifeChance.valuePointer(),
+                            lostLifeChance.getMin(), lostLifeChance.getMax(), "%.1f");
+        ImGui::SliderFloat("FindFoodChance", findFoodChance.valuePointer(),
+                            findFoodChance.getMin(), findFoodChance.getMax(), "%.1f");
+        
+    }
 };
 
 class ChunkManager

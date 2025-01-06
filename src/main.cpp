@@ -259,8 +259,12 @@ int main(int, char**)
             if (ImGui::CollapsingHeader("Object Info")) {
                 ImGui::Dummy(ImVec2(0.0f, 20.0f));
                 auto objectToDisplayInfo = simulation->getInfoViewObject();
-                if (objectToDisplayInfo != nullptr) {
+                auto selectedChunk = simulation->getSelectedChunk();
+                if (objectToDisplayInfo) {
                     objectToDisplayInfo->displayInfo();
+                }
+                else if (selectedChunk) {
+                    selectedChunk->displayInfo();
                 }
             }
             ImGui::End();

@@ -222,10 +222,17 @@ public:
 
     /// @brief Retrieves the current info view object.
     std::shared_ptr<SimulationObject> getInfoViewObject() {
-        if (selectedObjects.size() == 1) {
-            if (auto validSelectedObject = selectedObjects[0].lock()) {
+        if (!selectedObjects.empty() && selectedChunk.expired()) {
+            if (auto validSelectedObject = selectedObjects[selectedObjects.size() - 1].lock()) {
                 return validSelectedObject;  // Lock the weak pointer to get the shared pointer
             }
+        }
+        return nullptr;
+    }
+    /// @brief Retrieves the current selected chunk.
+    std::shared_ptr<Chunk> getSelectedChunk() {
+        if (auto validSelectedChunk = selectedChunk.lock()) {
+            return validSelectedChunk;  // Lock the weak pointer to get the shared pointer
         }
         return nullptr;
     }
