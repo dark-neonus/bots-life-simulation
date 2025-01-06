@@ -96,15 +96,15 @@ public:
         ImGui::Separator();
         ImGui::Text("Effects:");
         ImGui::SliderFloat("SeeDistanceMultiplier", seeDistanceMultiplier.valuePointer(),
-                            seeDistanceMultiplier.getMin(), seeDistanceMultiplier.getMax(), "%.1f");
+                            seeDistanceMultiplier.getMin(), seeDistanceMultiplier.getMax(), "%.2f");
         ImGui::SliderFloat("SpeedMultiplier", speedMultiplier.valuePointer(),
-                            speedMultiplier.getMin(), speedMultiplier.getMax(), "%.1f");
+                            speedMultiplier.getMin(), speedMultiplier.getMax(), "%.2f");
         ImGui::SliderFloat("HungryMultiplier", hungryMultiplier.valuePointer(),
-                            hungryMultiplier.getMin(), hungryMultiplier.getMax(), "%.1f");
+                            hungryMultiplier.getMin(), hungryMultiplier.getMax(), "%.2f");
         ImGui::SliderFloat("LostLifeChance", lostLifeChance.valuePointer(),
-                            lostLifeChance.getMin(), lostLifeChance.getMax(), "%.1f");
+                            lostLifeChance.getMin(), lostLifeChance.getMax(), "%.2f");
         ImGui::SliderFloat("FindFoodChance", findFoodChance.valuePointer(),
-                            findFoodChance.getMin(), findFoodChance.getMax(), "%.1f");
+                            findFoodChance.getMin(), findFoodChance.getMax(), "%.2f");
         
     }
 };
