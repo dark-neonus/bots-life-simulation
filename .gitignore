@@ -58,3 +58,6 @@ CMakeUserPresets.json
 
 # ImGui rules
 imgui.ini
+
+# Add __* rule to ignore different files
+__*
