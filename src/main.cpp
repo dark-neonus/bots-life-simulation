@@ -203,29 +203,65 @@ int main(int, char**)
 
             ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Left, 0.7f, &dock_id_left, &dock_id_right);
             ImGui::DockBuilderDockWindow("Simulation window", dock_id_left);
-            ImGui::DockBuilderDockWindow("Simulation object info", dock_id_right);
+            ImGui::DockBuilderDockWindow("Information", dock_id_right);
 
             ImGui::DockBuilderFinish(dockspace_id);
         }
+
+        ImVec2 sim_window_pos = ImGui::GetCursorScreenPos();
 
         {
             ImGui::Begin("Simulation window");
 
             ImDrawList* draw_list = ImGui::GetWindowDrawList();
-            ImVec2 window_delta = ImGui::GetCursorScreenPos();
+            sim_window_pos = ImGui::GetCursorScreenPos();
             ImVec2 window_size = ImGui::GetWindowSize();
 
             simulation->update();
-            simulation->render(draw_list, window_delta, window_size);
+            simulation->render(draw_list, sim_window_pos, window_size);
 
             ImGui::End();
         }
         
         {
-            ImGui::Begin("Simulation object info");
-            auto objectToDisplayInfo = simulation->getInfoViewObject();
-            if (objectToDisplayInfo != nullptr) {
-                objectToDisplayInfo->displayInfo();
+            // Information window
+            ImGui::Begin("Information");
+
+            // Simulation properties
+            if (ImGui::CollapsingHeader("Simulation properties")) {
+                ImGui::Text("MapSize (%.1f, %.1f)", simulation->chunkManager.mapWidth, simulation->chunkManager.mapHeight);
+                ImGui::Text("UnitSize: %i", simulation->unit);
+                ImGui::Separator();
+                ImGui::Text("NumberOfChunksX: %i", simulation->chunkManager.numberOfChunksX);
+                ImGui::Text("NumberOfChunksY: %i", simulation->chunkManager.numberOfChunksY);
+                ImGui::Text("ChunkSize: %.1f | (10 * UnitSize)", simulation->chunkManager.chunkSize);
+
+                ImGui::Dummy(ImVec2(0.0f, 10.0f));
+                ImVec2 mouse_pos = ImGui::GetMousePos();
+                ImGui::Text("RelativeMousePos: (%.1f, %.1f)", mouse_pos.x - sim_window_pos.x, mouse_pos.y - sim_window_pos.y);
+
+                ImGui::Dummy(ImVec2(0.0f, 20.0f));
+            }
+            // FPS tab
+            ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+            if (ImGui::CollapsingHeader("Efficiency")) {
+                
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4((1.0f - std::min(1.0f, io.Framerate / 120.0f)) * 0.9, std::min(1.0f, io.Framerate / 120.0f) * 0.9, 0.0f, 1.0f));
+                ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+                ImGui::PopStyleColor();
+                ImGui::Dummy(ImVec2(0.0f, 20.0f));
+                ImGui::Text("Number of objects: %i", simulation->getNumberOfObjects());
+                ImGui::Dummy(ImVec2(0.0f, 20.0f));
+            }
+            
+            // Object info tab
+            ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+            if (ImGui::CollapsingHeader("Object Info")) {
+                ImGui::Dummy(ImVec2(0.0f, 20.0f));
+                auto objectToDisplayInfo = simulation->getInfoViewObject();
+                if (objectToDisplayInfo != nullptr) {
+                    objectToDisplayInfo->displayInfo();
+                }
             }
             ImGui::End();
         }

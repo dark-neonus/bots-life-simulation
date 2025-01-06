@@ -229,7 +229,5 @@ public:
         return nullptr;
     }
 
-    void drawHighlight(std::weak_ptr<SimulationObject> obj, ImDrawList *draw_list, ImVec2 window_pos) {
-
-    }
+    int getNumberOfObjects() { return objects.size(); }
 };
