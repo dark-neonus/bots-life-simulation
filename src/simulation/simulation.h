@@ -15,6 +15,7 @@ class SimulationObject : public std::enable_shared_from_this<SimulationObject>
 private:
 protected:
     std::weak_ptr<Simulation> simulation;
+    // It would be better if SimulationObject::chunk stay protected
     std::weak_ptr<Chunk> chunk;
 
     int radius;

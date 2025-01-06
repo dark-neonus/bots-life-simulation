@@ -31,7 +31,15 @@ class Simulation;
 class Chunk : public std::enable_shared_from_this<Chunk>
 {
 private:
+    RangeValue<float> seeDistanceMultiplier = RangeValue<float>(1.0f, 0.0f, 2.0f);
+    RangeValue<float> speedMultiplier = RangeValue<float>(1.0f, 0.0f, 2.0f);
+    RangeValue<float> hungryMultiplier = RangeValue<float>(1.0f, 0.0f, 2.0f);
+
+    RangeValue<float> lostLifeChance = RangeValue<float>(0.0f, 0.0f, 1.0f);
+    RangeValue<float> findFoodChance = RangeValue<float>(0.0f, 0.0f, 1.0f);
 public:
+    // const int xIndex;
+    // const int yIndex;
     const float chunkSize;
     const Vec2<float> startPos;
     const Vec2<float> endPos;
@@ -40,7 +48,7 @@ public:
         std::hash<std::weak_ptr<SimulationObject>>, std::equal_to<std::weak_ptr<SimulationObject>>> objects;
 
     Chunk(float startX, float startY, float chunkSize_)
-        : startPos(startX, startY), chunkSize(chunkSize_), endPos(startX + chunkSize, startY + chunkSize)
+        : chunkSize(chunkSize_), startPos(startX, startY), endPos(startX + chunkSize, startY + chunkSize)
     {
     }
 
@@ -68,6 +76,19 @@ public:
     bool isObjectInChunk(std::shared_ptr<SimulationObject> obj) {
         return objects.find(obj) != objects.end();
     }
+
+    float getSeeDistanceMultiplier() { return seeDistanceMultiplier.get(); }
+    float getSpeedMultiplier() { return seeDistanceMultiplier.get(); }
+    float getHungryMultiplier() { return seeDistanceMultiplier.get(); }
+    float getLostLifeChance() { return seeDistanceMultiplier.get(); }
+    float getFindFoodChance() { return seeDistanceMultiplier.get(); }
+
+    // void displayInfo() {
+    //     ImGui::SeparatorText("Chunk");
+    //     ImGui::Text("Position:");
+    //     ImGui::InputFloat("x", &pos.x, 1.0f, 1.0f, "%.1f");
+    //     ImGui::InputFloat("y", &pos.y, 1.0f, 1.0f, "%.1f");
+    // }
 };
 
 class ChunkManager
