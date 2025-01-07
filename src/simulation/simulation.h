@@ -5,7 +5,6 @@
 
 #include "imgui.h"
 #include "utilities/utilities.h"
-#include "utilities/objectSet.h"
 #include "chunks.h"
 
 using objectSet = std::unordered_set<std::weak_ptr<SimulationObject>,
@@ -100,6 +99,7 @@ private:
     std::vector<std::weak_ptr<SimulationObject>> selectedObjects;
     std::weak_ptr<Chunk> selectedChunk;
 
+    Logger logger;
 public:
     // This property must be first
     const int unit;
@@ -109,6 +109,7 @@ public:
     
     const int maxSeeDistance;
     const int allowedClickError = 10;
+
 
 
     Simulation(int numberOfChunksX_, int numberOfChunksY_, int unit_ = 10)
@@ -253,4 +254,42 @@ public:
     }
 
     int getNumberOfObjects() { return objects.size(); }
+
+    /// @brief Draw logger display inside given window
+    /// @param parentWindowTitle Title of logger parent window
+    void drawLogger(const char* parentWindowTitle) {
+        logger.Draw(parentWindowTitle);
+    }
+
+    /// @brief  Output log to simulation logger window
+    /// @example log(Logger::LOG, "Radius: %i \n ObjectInVision: %i\n", getSeeDistance(), objectsInVision.size());
+    /// @param logType Type of log: LOG, WARNING, ERROR
+    /// @param fmt Formating string 
+    /// @param `...` Args for formating string
+    void log(Logger::LogType logType, const char* fmt, ...) {
+        const char* prefix = "";
+        switch (logType) {
+            case Logger::LOG:     prefix = "(LOG) "; break;
+            case Logger::WARNING: prefix = "[WARNING] "; break;
+            case Logger::ERROR:   prefix = "<ERROR> "; break;
+            default:              prefix = ".UNKNOWN. "; break;
+        }
+
+        // Create a buffer for the full message (prefix + formatted message)
+        char formattedMessage[512]; // Adjust size as needed
+
+        // Format the variadic arguments into a separate buffer
+        char messageBody[512];
+        va_list args;
+        va_start(args, fmt);
+        vsnprintf(messageBody, sizeof(messageBody), fmt, args);
+        va_end(args);
+
+        // Combine the prefix with the formatted message
+        snprintf(formattedMessage, sizeof(formattedMessage), "%s%s", prefix, messageBody);
+
+        // Call AddLog with the combined message
+        logger.AddLog("%s", formattedMessage);
+    }
+
 };

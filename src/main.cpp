@@ -200,19 +200,26 @@ int main(int, char**)
         ///////////////////////////////////////////////////
 
         ImGuiID dockspace_id = ImGui::DockSpaceOverViewport();
-        static bool init = true;
-        ImGuiID dock_id_left, dock_id_right;
-        if (init) {
-            init = false;
+        static bool dockspaceInit = true;
+        ImGuiID dock_id_simulation, dock_id_infotab, dock_id_logger;
+        if (dockspaceInit) {
+            dockspaceInit = false;
             ImGui::DockBuilderRemoveNode(dockspace_id);
             ImGui::DockBuilderAddNode(dockspace_id);
             ImGui::DockBuilderSetNodeSize(dockspace_id, ImGui::GetMainViewport()->Size);
 
-            ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Left, 0.7f, &dock_id_left, &dock_id_right);
-            ImGui::DockBuilderDockWindow("Simulation window", dock_id_left);
-            ImGui::DockBuilderDockWindow("Information", dock_id_right);
+            ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Left, 0.7f, &dock_id_simulation, &dock_id_infotab);
+            ImGui::DockBuilderDockWindow("Simulation window", dock_id_simulation);
+            ImGui::DockBuilderDockWindow("Information", dock_id_infotab);
 
             ImGui::DockBuilderFinish(dockspace_id);
+
+            ImGui::DockBuilderSplitNode(dock_id_simulation, ImGuiDir_Up, 0.8f, &dock_id_simulation, &dock_id_logger);
+            ImGui::DockBuilderDockWindow("Simulation window", dock_id_simulation);
+            ImGui::DockBuilderDockWindow("Logger", dock_id_logger);
+
+            ImGui::DockBuilderFinish(dock_id_simulation);
+
         }
 
         ImVec2 sim_window_pos = ImGui::GetCursorScreenPos();
@@ -274,6 +281,12 @@ int main(int, char**)
                     selectedChunk->displayInfo();
                 }
             }
+            ImGui::End();
+        }
+
+        {
+            ImGui::Begin("Logger");
+            simulation->drawLogger("Logger");
             ImGui::End();
         }
 
