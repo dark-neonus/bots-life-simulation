@@ -93,11 +93,7 @@ public:
     }
 
     /// @brief Tell simulation to delete object at the end of frame
-    virtual void markForDeletion() {
-        /*if (auto sim = simulation.lock()) {
-            sim->addToDeathNote(shared_from_this());
-        }*/
-    }
+    virtual void markForDeletion();
 
     virtual void displayInfo() {
         ImGui::SeparatorText("Simulation Object");

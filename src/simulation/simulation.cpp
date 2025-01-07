@@ -1,7 +1,6 @@
 #include "simulation.h"
 
-// here we define function that cant be define in simulation.h or those who are very long
-
+// here we define function that cant be define in simulation.h
 const char* getTypeString(SimulationObjectType type) {
     return SimulationObjectTypeNames[static_cast<int>(type)];
 }
@@ -17,6 +16,14 @@ void SimulationObject::drawHighlightion(ImDrawList *draw_list, ImVec2 window_pos
         draw_list->AddRect(toImVec2(realPos - 1), toImVec2(realPos + 1), ImColor(colorInt(255, 0, 255, 100)));
     }
 }
+
+void SimulationObject::markForDeletion() {
+    if (auto validSimulation = simulation.lock()) {
+        validSimulation->addToDeathNote(shared_from_this());
+    }
+}
+
+// Here we define just big functions ot those, which implementation in simulation.h isnt representative
 
 void Simulation::render(ImDrawList *draw_list, ImVec2 window_pos, ImVec2 window_size, bool drawDebugLayer) {
     chunkManager.drawChunksMesh(draw_list, window_pos);
