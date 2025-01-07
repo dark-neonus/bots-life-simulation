@@ -46,8 +46,22 @@ public:
         objects.insert(obj);
     }
 
+    /// @brief Returns the set of all objects in the chunk.
     objectSet getObjects() const {
         return this->objects;
+    }
+
+    /// @brief Removes a specific SimulationObject from the list of objects in the simulation.
+    void removeObject(std::shared_ptr<SimulationObject> obj) {
+        auto it = std::find_if(objects.begin(), objects.end(),
+            [&obj](const std::weak_ptr<SimulationObject>& wp) {
+                auto locked = wp.lock();
+                return locked == obj;     
+            });
+
+        if (it != objects.end()) {
+            objects.erase(it);
+        }
     }
 
     /// @brief Move object from current chunk to another

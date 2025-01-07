@@ -1,17 +1,18 @@
 #pragma once
 
 #include <vector>
+#include <queue>
 #include <stdexcept>
 
 #include "imgui.h"
 #include "utilities/utilities.h"
 #include "chunks.h"
 
+class Simulation;
+
 using objectSet = std::unordered_set<std::weak_ptr<SimulationObject>,
     std::hash<std::weak_ptr<SimulationObject>>,
     std::equal_to<std::weak_ptr<SimulationObject>>>;
-
-class Simulation;
 
 enum class SimulationObjectType {
     BaseObject,
@@ -91,8 +92,10 @@ public:
     }
 
     /// @brief Tell simulation to delete object at the end of frame
-    void markForDeletion() {
-        // Here code that will add current object to Simulation::deathNote
+    virtual void markForDeletion() {
+        /*if (auto sim = simulation.lock()) {
+            sim->addToDeathNote(shared_from_this());
+        }*/
     }
 
     virtual void displayInfo() {
@@ -105,6 +108,8 @@ public:
 
     const ImVec4 selectionColor = colorInt(255, 255, 255, 45);
     virtual void drawHighlightion(ImDrawList *draw_list, ImVec2 window_pos);
+
+    virtual ~SimulationObject() = default;
 };
 
 class Simulation : public std::enable_shared_from_this<Simulation>
@@ -119,8 +124,8 @@ private:
 
     Logger logger;
 
-    // Vector of all object that will be deleted in Simulation::afterUpdate() after Simulation::update()
-    std::vector<std::shared_ptr<SimulationObject>> deathNote;
+    // Queue of all object that will be deleted in Simulation::afterUpdate() after Simulation::update()
+    std::queue<std::shared_ptr<SimulationObject>> deathNote;
 public:
     // This property must be first
     const int unit;
@@ -150,11 +155,26 @@ public:
         }
     }
 
+    /// @brief Adds a SimulationObject to the death note queue for deletion after the update.
+    void addToDeathNote(std::shared_ptr<SimulationObject> obj) {
+        this->deathNote.push(obj);
+    }
+
     /// @brief Function to call after Simulation::update(). For now just delete objects in Simulation::deathNote
     void afterUpdate() {
-        // Here logic for deleting all object from Simulation::deathNote
-        // Here we also need to unlink all references to objects in Simulation::deathNote
-        // includeing reference in Simulation::deathNote
+        while (!deathNote.empty()) {
+            auto &obj = deathNote.front();
+            deathNote.pop();
+
+            if (auto chunk = obj->getChunk()) {
+                chunk->removeObject(obj);
+            }
+
+            auto it = std::find(objects.begin(), objects.end(), obj);
+            if (it != objects.end()) {
+                objects.erase(it);
+            }
+        }
     }
 
     /// @brief Render all objects in simulation
