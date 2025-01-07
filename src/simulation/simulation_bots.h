@@ -106,6 +106,21 @@ public:
             }
         }
 
+        // Just leaving it here. To run need make Simulation::objects public
+        // objectSet objectsInVision;
+
+        // const int radius = getSeeDistance();
+        // const int sqrSeeDistance = radius * radius;
+        // // auto chunksInVision = getChunksInRadius(pos, radius);
+
+        // if (auto validSimulation = simulation.lock()) {
+        //     for (auto chunkObject : validSimulation->objects) {
+        //         if (isInVision(chunkObject, sqrSeeDistance) && chunkObject.get() != this) {
+        //             objectsInVision.insert(chunkObject);
+        //         }
+        //     }
+        // }
+
         return objectsInVision;
     }
 
