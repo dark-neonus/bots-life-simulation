@@ -48,3 +48,14 @@ inline ImVec2 toImVec2(Vec2<T> v)
 {
     return ImVec2(v.x, v.y);
 }
+
+/// @brief Return sign of given value
+/// @tparam T Type value. Must be ether int, float or double
+/// @param value Source of sign
+/// @return 1 if value > 0, -1 if value < 0 and 0 if value == 0
+template <typename T, typename = std::enable_if_t<std::is_same<T, int>::value ||
+                                                       std::is_same<T, float>::value ||
+                                                       std::is_same<T, double>::value>>
+int signum(T value) {
+    return (value > T(0)) - (value < T(0));
+}
