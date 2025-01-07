@@ -16,7 +16,7 @@ set(SRC_DIR ${PROJECT_ROOT}/src)
 set(LIBS_DIR ${PROJECT_ROOT}/libs)
 set(IMGUI_DIR ${LIBS_DIR}/imgui)
 set(BACKENDS_DIR ${IMGUI_DIR}/backends)
-set(VEC2_DIR ${SRC_DIR}/vector2d)
+# set(VEC2_DIR ${SRC_DIR}/vector2d)
 set(SIMULATION_DIR ${SRC_DIR}/simulation)
 
 # Find all source files
@@ -29,7 +29,7 @@ file(GLOB_RECURSE SOURCES
 include_directories(
     ${IMGUI_DIR}
     ${BACKENDS_DIR}
-    ${VEC2_DIR}
+    # ${VEC2_DIR}
     ${SIMULATION_DIR}
 )
 
