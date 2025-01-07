@@ -232,6 +232,7 @@ int main(int, char**)
             ImVec2 window_size = ImGui::GetWindowSize();
 
             simulation->update();
+            simulation->afterUpdate();
             simulation->render(draw_list, sim_window_pos, window_size);
 
             ImGui::End();

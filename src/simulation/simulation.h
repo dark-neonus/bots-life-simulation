@@ -79,6 +79,11 @@ public:
         // pos = pos + Vec2<int>(rand() % 3 - 1, rand() % 3 - 1);
     }
 
+    /// @brief Tell simulation to delete object at the end of frame
+    void markForDeletion() {
+        // Here code that will add current object to Simulation::deathNote
+    }
+
     virtual void displayInfo() {
         ImGui::SeparatorText("Simulation Object");
         ImGui::Text("Position:");
@@ -100,6 +105,9 @@ private:
     std::weak_ptr<Chunk> selectedChunk;
 
     Logger logger;
+
+    // Vector of all object that will be deleted in Simulation::afterUpdate() after Simulation::update()
+    std::vector<std::shared_ptr<SimulationObject>> deathNote;
 public:
     // This property must be first
     const int unit;
@@ -129,82 +137,18 @@ public:
         }
     }
 
+    /// @brief Function to call after Simulation::update(). For now just delete objects in Simulation::deathNote
+    void afterUpdate() {
+        // Here logic for deleting all object from Simulation::deathNote
+        // Here we also need to unlink all references to objects in Simulation::deathNote
+        // includeing reference in Simulation::deathNote
+    }
+
     /// @brief Render all objects in simulation
     /// @param draw_list Object to draw on provided by ImGui
     /// @param window_pos Position of window to draw on. Must add it to objects position 
-    void render(ImDrawList *draw_list, ImVec2 window_pos, ImVec2 window_size, bool drawDebugLayer=true)
-    {
-        chunkManager.drawChunksMesh(draw_list, window_pos);
-
-        ImVec2 mouse_pos = ImGui::GetMousePos();
-        // Holder variable for distance between click position and object
-        float dist_sq = 0.0f;
-        ImVec2 object_center;
-        // In future, when we will have camera will be able to move it
-            
-        bool isMouseClicked = ImGui::IsMouseClicked(0);
-        // Check if click was inside simulation window. If not, then not count it as a click
-        if (mouse_pos.x < window_pos.x || mouse_pos.y < 0 ||
-            mouse_pos.x >= window_pos.x + window_size.x - 10 || mouse_pos.y >= window_pos.y + window_size.y - 10)
-            { isMouseClicked = false; }
-        // Click handling
-        bool wasSelectedObject = false;
-        if (isMouseClicked) {
-            // If mouse were clicked clear all previous selections
-            selectedObjects.clear();
-            selectedChunk.reset();
-            std::shared_ptr<Chunk> clickedChunk = chunkManager.whatChunkHere(Vec2<float>(mouse_pos) - Vec2<float>(window_pos));
-            if (clickedChunk) {
-                for (auto& obj : clickedChunk->objects) {
-                    if (auto validObj = obj.lock()) {
-                        object_center = ImVec2(window_pos.x + validObj->pos.x, window_pos.y + validObj->pos.y);
-                        dist_sq = (mouse_pos.x - object_center.x) * (mouse_pos.x - object_center.x) + 
-                                    (mouse_pos.y - object_center.y) * (mouse_pos.y - object_center.y);
-                        if (dist_sq <= (validObj->getRadius() + allowedClickError) * (validObj->getRadius() + allowedClickError)) {
-                            // setViewInfoObject(validObj);
-                            selectedObjects.push_back(validObj);
-                            wasSelectedObject = true;
-                        }
-                    }
-                }
-                // if chunk was clicked, but no specific object was selected
-                if (!wasSelectedObject) {
-                    selectedChunk = clickedChunk;
-                    for (auto& obj : clickedChunk->objects) {
-                        if (auto validObj = obj.lock()) {
-                            selectedObjects.push_back(validObj);
-                        }
-                    }
-                }
-            }
-        }
-        // If chunk is selected, draw it before anything else
-        if (auto validSelectedChunk = selectedChunk.lock()) {
-            draw_list->AddRect(toImVec2(Vec2<float>(window_pos) + validSelectedChunk->startPos),
-                                    toImVec2(Vec2<float>(window_pos) + validSelectedChunk->endPos), ImColor(colorInt(255, 255, 0, 50)), 0, 0, 2);
-        }
-        
-        // Draw all objects by chunks
-        for (auto chunk : chunkManager) {
-            for (auto& obj : chunk->objects) {
-                if (auto validObj = obj.lock()) {
-                    validObj->draw(draw_list, window_pos);
-                    
-                }
-            }
-        }
-        
-        // Draw debug layer
-        if (drawDebugLayer) {
-            for (auto& obj : selectedObjects)
-            {
-                if (auto validSelectedObject = obj.lock()) {
-                    validSelectedObject->drawHighlightion(draw_list, window_pos);
-                }
-            }
-        }
-    }
-
+    void render(ImDrawList *draw_list, ImVec2 window_pos, ImVec2 window_size, bool drawDebugLayer=true); // definition in simulation.cpp
+    
     /// @brief Adds a new object to the simulation.
     /// @tparam T The type of object to add. Must derive from SimulationObject.
     /// @tparam Args Variadic template for the arguments required to construct the object.
