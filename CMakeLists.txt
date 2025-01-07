@@ -18,25 +18,12 @@ set(IMGUI_DIR ${LIBS_DIR}/imgui)
 set(BACKENDS_DIR ${IMGUI_DIR}/backends)
 set(VEC2_DIR ${SRC_DIR}/vector2d)
 set(SIMULATION_DIR ${SRC_DIR}/simulation)
-set(BUILD_DIR ${PROJECT_ROOT}/build)
 
 # Find all source files
 file(GLOB_RECURSE SOURCES 
     ${SRC_DIR}/*.cpp 
     ${IMGUI_DIR}/*.cpp
 )
-
-# Define object directories
-set(OBJ_DIR ${BUILD_DIR}/objects)
-
-# Set the compiler flags for Debug and Release
-if(DEBUG)
-    set(CMAKE_BUILD_TYPE Debug)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
-else()
-    set(CMAKE_BUILD_TYPE Release)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
-endif()
 
 # Include directories
 include_directories(
@@ -46,28 +33,36 @@ include_directories(
     ${SIMULATION_DIR}
 )
 
-# Define libraries
-set(LIBS -lGL -lglfw)
+# Set the compiler flags for Debug and Release
+if(DEBUG)
+    set(CMAKE_BUILD_TYPE Debug)
+else()
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+
+# Enable Position Independent Code (PIC) for shared libraries
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+# Set CMake to use vcpkg toolchain for dependency management
+find_package(OpenGL REQUIRED)
+find_package(glfw3 REQUIRED)
 
 # Define the executable
 add_executable(simulation_try_1 ${SOURCES})
 
 # Link libraries
-target_link_libraries(simulation_try_1 ${LIBS})
+target_link_libraries(simulation_try_1 PRIVATE glfw OpenGL::GL)
 
-# Clean target with a different name (to avoid reserved name)
+# Clean target for removing build files
 add_custom_target(clean_build
-    COMMAND rm -rf ${OBJ_DIR} ${BUILD_DIR}/simulation_try_1
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target clean
     COMMENT "Clean build files"
 )
 
-# Debug and release targets (if you want them explicitly defined)
-add_custom_target(debug
-    COMMAND ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE=Debug ..
-    COMMENT "Build in Debug mode"
-)
-
-add_custom_target(release
-    COMMAND ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE=Release ..
-    COMMENT "Build in Release mode"
-)
+# Debug and Release configuration options
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    message(STATUS "Debug build enabled")
+    target_compile_definitions(simulation_try_1 PRIVATE DEBUG_MODE=1)
+else()
+    message(STATUS "Release build enabled")
+endif()
