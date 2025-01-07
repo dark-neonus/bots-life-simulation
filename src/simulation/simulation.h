@@ -95,6 +95,9 @@ public:
     /// @brief Tell simulation to delete object at the end of frame
     virtual void markForDeletion();
 
+    /// @brief Function that will be called before simulation destroy object
+    virtual void onDestroy() {}
+
     virtual void displayInfo() {
         ImGui::SeparatorText("Simulation Object");
         ImGui::Text("ID: %0*lo:", 6, id.get());
@@ -161,6 +164,7 @@ public:
     void afterUpdate() {
         while (!deathNote.empty()) {
             auto &obj = deathNote.front();
+            obj->onDestroy();
             // log(Logger::LOG, "Object [%0*lu] deletion process started\n", 6, obj->id.get());
             deathNote.pop();
 

@@ -205,4 +205,10 @@ public:
         ImGui::SliderFloat("Damage", &damage, 0.0f, 20.0f, "%.2f");
         ImGui::Checkbox("Debug drawing", &debug_drawing);
     }
+
+    void onDestroy() override {
+        if (auto validSimulation = simulation.lock()) {
+            validSimulation->addObject<FoodObject>(validSimulation, pos, health.getMax() * 0.3 + food.get() * 0.7, colorInt(100, 0, 0));
+        }
+    }
 };
