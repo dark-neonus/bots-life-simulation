@@ -35,11 +35,11 @@ public:
 
     /// @brief Increase current RangeValue.value by amount
     /// @param amount Amount to add to RangeValue.value
-    void increase(T amount) { value = std::min(value + amount, maxValue); }
+    void increase(T amount) { set(value + amount); }
 
     /// @brief Decrease current RangeValue.value by amount
     /// @param amount Amount to take from RangeValue.value
-    void decrease(T amount) { value = std::max(value - amount, minValue); }
+    void decrease(T amount) { set(value - amount); }
 
     /// @return Return RangeValue.maxValue
     T getMax() { return maxValue; }
