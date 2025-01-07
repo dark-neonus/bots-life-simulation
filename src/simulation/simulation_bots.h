@@ -90,6 +90,7 @@ public:
     /// @brief Get all objects within the bot's vision range.
     /// @return A set of weak pointers to the objects in the bot's vision.
     objectSet getObjectsInVision() {
+        // It may be faster to use std::vector<std::shared_ptr<SimulationObject>>
         objectSet objectsInVision;
 
         const int radius = getSeeDistance();
