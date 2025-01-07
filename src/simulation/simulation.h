@@ -80,9 +80,9 @@ public:
     /// @brief Draw object to ImGui window
     /// @param draw_list Object to draw on provided by ImGui
     /// @param window_pos Position of window to draw on. Must add it to objects position
-    virtual void draw(ImDrawList *draw_list, ImVec2 window_pos)
+    virtual void draw(ImDrawList *draw_list, ImVec2 drawing_delta_pos)
     {
-        draw_list->AddCircle(ImVec2(window_pos.x + pos.x, window_pos.y + pos.y), getRadius(), color, 24);
+        draw_list->AddCircle(ImVec2(drawing_delta_pos.x + pos.x, drawing_delta_pos.y + pos.y), getRadius(), color, 24);
     }
     
 
@@ -136,12 +136,12 @@ public:
     const int maxSeeDistance;
     const int allowedClickError = 10;
 
-
+    Camera camera;
 
     Simulation(int numberOfChunksX_, int numberOfChunksY_, int unit_ = 10)
         : unit(unit_),
         chunkManager(numberOfChunksX_, numberOfChunksY_, float(unit * 10)),
-        maxSeeDistance(chunkManager.chunkSize * 0.95)
+        maxSeeDistance(chunkManager.chunkSize * 0.95), camera(float(chunkManager.mapWidth), float(chunkManager.mapHeight))
     {
         // chunkManager.simulation = shared_from_this();
     }
@@ -223,6 +223,9 @@ public:
         selectedObjects.clear();
         selectedObjects.push_back(objectToSelect);
         selectedChunk.reset();
+        if (!camera.isPointInVision(objectToSelect->pos)) {
+            camera.moveTo(objectToSelect->pos);
+        }
     }
     /// @brief Retrieves the current info view object.
     std::shared_ptr<SimulationObject> getSelectedObject() {

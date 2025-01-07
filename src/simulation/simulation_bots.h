@@ -156,14 +156,14 @@ public:
         }
     }
 
-    void draw(ImDrawList* draw_list, ImVec2 window_pos) override
+    void draw(ImDrawList* draw_list, ImVec2 drawing_delta_pos) override
     {
-        draw_list->AddCircleFilled(ImVec2(window_pos.x + pos.x, window_pos.y + pos.y), getRadius(), color, 24);
+        draw_list->AddCircleFilled(ImVec2(drawing_delta_pos.x + pos.x, drawing_delta_pos.y + pos.y), getRadius(), color, 24);
         if (debug_drawing)
         {
             float radius_ = getRadius();
-            float center_x = window_pos.x + pos.x;
-            float center_y = window_pos.y + pos.y;
+            float center_x = drawing_delta_pos.x + pos.x;
+            float center_y = drawing_delta_pos.y + pos.y;
             constexpr int bar_height = 10;
             constexpr float bar_size_reduction = 0.3f;
             // Draw see distance circle

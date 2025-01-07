@@ -8,3 +8,4 @@
 #include "Logger.h"
 #include "objectSet.h"
 #include "IDManager.h"
+#include "Camera.h"

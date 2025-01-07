@@ -53,7 +53,7 @@ public:
     {
         if (newMaxValue < minValue)
         {
-            throw std::invalid_argument("Max value cant be < minValue(" + std::string(minValue) + ")");
+            throw std::invalid_argument("Max value cant be < minValue(" + std::to_string(minValue) + ")");
         }
         maxValue = newMaxValue;
         value = std::min(value, maxValue);
@@ -64,7 +64,7 @@ public:
     {
         if (newMinValue > maxValue)
         {
-            throw std::invalid_argument("Min value cant be > maxValue(" + std::string(maxValue) + ")");
+            throw std::invalid_argument("Min value cant be > maxValue(" + std::to_string(maxValue) + ")");
         }
         minValue = newMinValue;
         value = std::max(value, minValue);

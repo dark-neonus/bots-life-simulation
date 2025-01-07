@@ -1,6 +1,15 @@
 #include "gui.h"
+#include <chrono>
+
+
 
 void CreateGui(std::shared_ptr<Simulation> simulation, ImGuiIO& io) {
+    static auto logicTimeStart = std::chrono::high_resolution_clock::now(); 
+    static auto logicTimeEnd = std::chrono::high_resolution_clock::now();
+    static std::chrono::duration<double, std::milli> logicTimeElapsed;
+    static double logicFramerate;
+
+
     ImGuiID dockspace_id = ImGui::DockSpaceOverViewport();
     static bool dockspaceInit = true;
     ImGuiID dock_id_simulation, dock_id_infotab, dock_id_logger;
@@ -33,8 +42,13 @@ void CreateGui(std::shared_ptr<Simulation> simulation, ImGuiIO& io) {
         sim_window_pos = ImGui::GetCursorScreenPos();
         ImVec2 window_size = ImGui::GetWindowSize();
 
+        logicTimeStart = std::chrono::high_resolution_clock::now(); 
         simulation->update();
         simulation->afterUpdate();
+        logicTimeEnd = std::chrono::high_resolution_clock::now();
+        logicTimeElapsed = logicTimeEnd - logicTimeStart;
+        logicFramerate = 1000.0 / (logicTimeElapsed.count() == 0.0 ? 0.00001 : logicTimeElapsed.count());
+
         simulation->render(draw_list, sim_window_pos, window_size);
 
         ImGui::End();
@@ -58,6 +72,9 @@ void CreateGui(std::shared_ptr<Simulation> simulation, ImGuiIO& io) {
                     ImVec2 mouse_pos = ImGui::GetMousePos();
                     ImGui::Text("RelativeMousePos: (%.1f, %.1f)", mouse_pos.x - sim_window_pos.x, mouse_pos.y - sim_window_pos.y);
 
+                    ImGui::Dummy(ImVec2(0.0f, 10.0f));
+                    simulation->camera.drawCameraControls();
+
                     ImGui::Dummy(ImVec2(0.0f, 20.0f));
                 }
                 // FPS tab
@@ -66,6 +83,9 @@ void CreateGui(std::shared_ptr<Simulation> simulation, ImGuiIO& io) {
                     
                     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4((1.0f - std::min(1.0f, io.Framerate / 120.0f)) * 0.9, std::min(1.0f, io.Framerate / 120.0f) * 0.9, 0.0f, 1.0f));
                     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+                    ImGui::PopStyleColor();
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4((1.0f - std::min(1.0, logicFramerate / 120.0f)) * 0.9, std::min(1.0, logicFramerate / 120.0f) * 0.9, 0.0f, 1.0f));
+                    ImGui::Text("Simulation logic average %.4f ms/frame (%.1f FPS)", logicTimeElapsed.count(), logicFramerate);
                     ImGui::PopStyleColor();
                     ImGui::Dummy(ImVec2(0.0f, 20.0f));
                     ImGui::Text("Number of objects: %i", simulation->getNumberOfObjects());

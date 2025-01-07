@@ -25,10 +25,10 @@ public:
         }
     }
 
-    void draw(ImDrawList *draw_list, ImVec2 window_pos) override
+    void draw(ImDrawList *draw_list, ImVec2 drawing_delta_pos) override
     {
-        draw_list->AddRectFilled(ImVec2(window_pos.x + pos.x - getRadius(), window_pos.y + pos.y - getRadius()),
-                                 ImVec2(window_pos.x + pos.x + getRadius(), window_pos.y + pos.y + getRadius()),
+        draw_list->AddRectFilled(ImVec2(drawing_delta_pos.x + pos.x - getRadius(), drawing_delta_pos.y + pos.y - getRadius()),
+                                 ImVec2(drawing_delta_pos.x + pos.x + getRadius(), drawing_delta_pos.y + pos.y + getRadius()),
                                  color);
     }
 
@@ -67,9 +67,9 @@ public:
         // Do nothing for the moment
     }
 
-    void draw(ImDrawList *draw_list, ImVec2 window_pos) override
+    void draw(ImDrawList *draw_list, ImVec2 drawing_delta_pos) override
     {
-        draw_list->AddNgonFilled(ImVec2(pos.x + window_pos.x, pos.y + window_pos.y), getRadius(), color, numberOfFruits);
+        draw_list->AddNgonFilled(ImVec2(pos.x + drawing_delta_pos.x, pos.y + drawing_delta_pos.y), getRadius(), color, numberOfFruits);
     }
 
     int getRadius() override { return 10 + numberOfFruits * 2; }

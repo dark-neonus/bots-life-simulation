@@ -4,6 +4,8 @@
 #include "Vec2.h"
 #define _USE_MATH_DEFINES
 #include "math.h"
+#include <algorithm>
+
 
 // Always use inline for functions defined in headers
 
@@ -58,4 +60,22 @@ template <typename T, typename = std::enable_if_t<std::is_same<T, int>::value ||
                                                        std::is_same<T, double>::value>>
 int signum(T value) {
     return (value > T(0)) - (value < T(0));
+}
+
+/// @brief Find point between p1 and p2 that lays on line on lines position t
+/// @tparam T Type of vectors
+/// @param p1 First point representing 0.0
+/// @param p2 Second point representing 1.0
+/// @param t The interpolation factor
+/// @return Point resulted in interpolation
+template <typename T>
+Vec2<T> interpolate(const Vec2<T>& p1, const Vec2<T>& p2, T t) {
+    // Ensure t is clamped between 0.0 and 1.0
+    t = std::clamp(t, T(0.0), T(1.0));
+    
+    // Perform linear interpolation
+    return Vec2<T>(
+        p1.x + (p2.x - p1.x) * t,
+        p1.y + (p2.y - p1.y) * t
+    );
 }
