@@ -139,7 +139,7 @@ public:
         // Change values just to display debug values drawing
         if (debug_drawing)
         {
-            food.decrease(0.1);
+            // food.decrease(0.1);
             if (food.get() == 0)
             {
                 health.decrease(0.5);
@@ -148,6 +148,11 @@ public:
         auto objectsInVision = getObjectsInVision();
         if (health.get() == 0) {
             markForDeletion();
+        }
+        else if (health.get() < health.getMax() && food.get() >= food.getMax() / 2) {
+            // Healing logic
+            health.increase(0.1);
+            food.decrease(0.2);
         }
     }
 
