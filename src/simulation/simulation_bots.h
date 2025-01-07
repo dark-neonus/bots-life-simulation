@@ -146,6 +146,9 @@ public:
             }
         }
         auto objectsInVision = getObjectsInVision();
+        if (health.get() == 0) {
+            markForDeletion();
+        }
     }
 
     void markForDeletion() override {

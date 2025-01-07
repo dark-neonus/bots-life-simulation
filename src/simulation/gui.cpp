@@ -80,7 +80,7 @@ void CreateGui(std::shared_ptr<Simulation> simulation, ImGuiIO& io) {
                 ImGui::SetNextItemOpen(true, ImGuiCond_Once);
                 if (ImGui::CollapsingHeader("Object Info")) {
                     ImGui::Dummy(ImVec2(0.0f, 20.0f));
-                    auto objectToDisplayInfo = simulation->getInfoViewObject();
+                    auto objectToDisplayInfo = simulation->getSelectedObject();
                     auto selectedChunk = simulation->getSelectedChunk();
                     if (objectToDisplayInfo) {
                         objectToDisplayInfo->displayInfo();
@@ -105,7 +105,13 @@ void CreateGui(std::shared_ptr<Simulation> simulation, ImGuiIO& io) {
 }
 
 void CreateObjectListGui(std::shared_ptr<Simulation> simulation) {
-    static unsigned long selectedID = 0;
+    bool objectSelected = false;
+    unsigned long selectedID = 0;
+    if (auto selectedObject = simulation->getSelectedObject()) {
+        selectedID = simulation->getSelectedObject()->id.get();
+        objectSelected = true;
+    }
+     
     {
         ImGui::BeginChild("left pane", ImVec2(150, 200), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX | ImGuiChildFlags_ResizeY);
         // for (int i = 0; i < 100; i++)
@@ -121,8 +127,9 @@ void CreateObjectListGui(std::shared_ptr<Simulation> simulation) {
         for (auto obj : *simulationObjects.get()) {
             char label[128];
             sprintf(label, "[%0*lu] %s", 6, obj->id.get(), getTypeString(obj->type()));
-            if (ImGui::Selectable(label, selectedID == obj->id.get())) {
+            if (ImGui::Selectable(label, objectSelected && selectedID == obj->id.get())) {
                 selectedID = obj->id.get();
+                simulation->selectSingleObject(obj);
             }
         }
         
@@ -150,9 +157,14 @@ void CreateObjectListGui(std::shared_ptr<Simulation> simulation) {
             ImGui::EndTabBar();
         }
         ImGui::EndChild();
-        if (ImGui::Button("Revert")) {}
+        if (ImGui::Button("Delete")) {
+            if (auto selectedObject = simulation->getSelectedObject()) {
+                selectedObject->markForDeletion();
+                // simulation->log(Logger::LOG, "Object [%0*lu] marked for deletion\n", 6, selectedObject->id.get());
+            }
+        }
         ImGui::SameLine();
-        if (ImGui::Button("Save")) {}
+        // if (ImGui::Button("Save")) {}
         ImGui::EndGroup();
     }
 }

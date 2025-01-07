@@ -19,7 +19,10 @@ public:
 
     void update() override
     {
-        // do nothing
+        calories--;
+        if (calories == 0) {
+            markForDeletion();
+        }
     }
 
     void markForDeletion() override {

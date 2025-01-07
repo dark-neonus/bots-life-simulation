@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <stdexcept>
+#include <algorithm>
 
 #include "utilities/utilities.h"
 #include "utilities/objectSet.h"

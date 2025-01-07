@@ -3,6 +3,7 @@
 #include <vector>
 #include <queue>
 #include <stdexcept>
+#include <algorithm>
 
 #include "imgui.h"
 #include "utilities/utilities.h"
@@ -164,6 +165,7 @@ public:
     void afterUpdate() {
         while (!deathNote.empty()) {
             auto &obj = deathNote.front();
+            // log(Logger::LOG, "Object [%0*lu] deletion process started\n", 6, obj->id.get());
             deathNote.pop();
 
             if (auto chunk = obj->getChunk()) {
@@ -174,6 +176,7 @@ public:
             if (it != objects.end()) {
                 objects.erase(it);
             }
+            // log(Logger::LOG, "Object deleted successfully!\n");
         }
     }
 
@@ -215,8 +218,14 @@ public:
         return obj.get();
     }
 
+
+    void selectSingleObject(std::shared_ptr<SimulationObject> objectToSelect) {
+        selectedObjects.clear();
+        selectedObjects.push_back(objectToSelect);
+        selectedChunk.reset();
+    }
     /// @brief Retrieves the current info view object.
-    std::shared_ptr<SimulationObject> getInfoViewObject() {
+    std::shared_ptr<SimulationObject> getSelectedObject() {
         if (!selectedObjects.empty() && selectedChunk.expired()) {
             if (auto validSelectedObject = selectedObjects[selectedObjects.size() - 1].lock()) {
                 return validSelectedObject;  // Lock the weak pointer to get the shared pointer
