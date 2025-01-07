@@ -51,21 +51,23 @@ public:
     /// @param newMaxValue Value to set
     void setMax(T newMaxValue)
     {
-        if (newMaxValue <= minValue)
+        if (newMaxValue < minValue)
         {
-            throw std::invalid_argument("Max value cant be <= minValue(" + std::string(minValue) + ")");
+            throw std::invalid_argument("Max value cant be < minValue(" + std::string(minValue) + ")");
         }
         maxValue = newMaxValue;
+        value = std::min(value, maxValue);
     }
     /// @brief Set new value for RangeValue.minValue
     /// @param newMinValue Value to set
     void setMin(T newMinValue)
     {
-        if (newMinValue >= maxValue)
+        if (newMinValue > maxValue)
         {
-            throw std::invalid_argument("Min value cant be >= maxValue(" + std::string(maxValue) + ")");
+            throw std::invalid_argument("Min value cant be > maxValue(" + std::string(maxValue) + ")");
         }
         minValue = newMinValue;
+        value = std::max(value, minValue);
     }
 
     /// @return Value in range [0.0, 1.0] that represent current position of value between minValue and maxValue
