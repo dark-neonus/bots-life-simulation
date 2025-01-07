@@ -22,6 +22,12 @@ public:
         // do nothing
     }
 
+    void markForDeletion() override {
+        if (auto sim = simulation.lock()) {
+            sim->addToDeathNote(shared_from_this());
+        }
+    }
+
     void draw(ImDrawList *draw_list, ImVec2 window_pos) override
     {
         draw_list->AddRectFilled(ImVec2(window_pos.x + pos.x - getRadius(), window_pos.y + pos.y - getRadius()),
@@ -62,6 +68,12 @@ public:
     void update() override
     {
         // Do nothing for the moment
+    }
+
+    void markForDeletion() override {
+        if (auto sim = simulation.lock()) {
+            sim->addToDeathNote(shared_from_this());
+        }
     }
 
     void draw(ImDrawList *draw_list, ImVec2 window_pos) override

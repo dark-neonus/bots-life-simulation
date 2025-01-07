@@ -148,6 +148,12 @@ public:
         auto objectsInVision = getObjectsInVision();
     }
 
+    void markForDeletion() override {
+        if (auto sim = simulation.lock()) {
+            sim->addToDeathNote(shared_from_this());
+        }
+    }
+
     void draw(ImDrawList* draw_list, ImVec2 window_pos) override
     {
         draw_list->AddCircleFilled(ImVec2(window_pos.x + pos.x, window_pos.y + pos.y), getRadius(), color, 24);
