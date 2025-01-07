@@ -8,7 +8,6 @@
 // - Introduction, links and more at the top of imgui.cpp
 
 #include "imgui.h"
-#include "imgui_internal.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include <stdio.h>
@@ -22,6 +21,7 @@
 #include "simulation.h"
 #include "simulation_objects.h"
 #include "simulation_bots.h"
+#include "gui.h"
 
 // [Win32] Our example includes a copy of glfw3.lib pre-compiled with VS2010 to maximize ease of testing and compatibility with old VS compilers.
 // To link with VS2010-era libraries, VS2015+ requires linking with legacy_stdio_definitions.lib, which we do using this pragma.
@@ -39,6 +39,8 @@ static void glfw_error_callback(int error, const char* description)
 {
     fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
+
+void CreateGui(std::shared_ptr<Simulation> simulation, ImGuiIO& io);
 
 // Main code
 int main(int, char**)
@@ -131,8 +133,8 @@ int main(int, char**)
     //IM_ASSERT(font != nullptr);
 
     // Our state
-    bool show_demo_window = true;
-    bool show_another_window = false;
+    // bool show_demo_window = true;
+    // bool show_another_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     // Init of simulation here
@@ -199,97 +201,7 @@ int main(int, char**)
         ///////////////////////////////////////////////////
         ///////////////////////////////////////////////////
 
-        ImGuiID dockspace_id = ImGui::DockSpaceOverViewport();
-        static bool dockspaceInit = true;
-        ImGuiID dock_id_simulation, dock_id_infotab, dock_id_logger;
-        if (dockspaceInit) {
-            dockspaceInit = false;
-            ImGui::DockBuilderRemoveNode(dockspace_id);
-            ImGui::DockBuilderAddNode(dockspace_id);
-            ImGui::DockBuilderSetNodeSize(dockspace_id, ImGui::GetMainViewport()->Size);
-
-            ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Left, 0.7f, &dock_id_simulation, &dock_id_infotab);
-            ImGui::DockBuilderDockWindow("Simulation window", dock_id_simulation);
-            ImGui::DockBuilderDockWindow("Information", dock_id_infotab);
-
-            ImGui::DockBuilderFinish(dockspace_id);
-
-            ImGui::DockBuilderSplitNode(dock_id_simulation, ImGuiDir_Up, 0.8f, &dock_id_simulation, &dock_id_logger);
-            ImGui::DockBuilderDockWindow("Simulation window", dock_id_simulation);
-            ImGui::DockBuilderDockWindow("Logger", dock_id_logger);
-
-            ImGui::DockBuilderFinish(dock_id_simulation);
-
-        }
-
-        ImVec2 sim_window_pos = ImGui::GetCursorScreenPos();
-
-        {
-            ImGui::Begin("Simulation window");
-
-            ImDrawList* draw_list = ImGui::GetWindowDrawList();
-            sim_window_pos = ImGui::GetCursorScreenPos();
-            ImVec2 window_size = ImGui::GetWindowSize();
-
-            simulation->update();
-            simulation->afterUpdate();
-            simulation->render(draw_list, sim_window_pos, window_size);
-
-            ImGui::End();
-        }
-        
-        {
-            // Information window
-            ImGui::Begin("Information");
-
-            // Simulation properties
-            if (ImGui::CollapsingHeader("Simulation properties")) {
-                ImGui::Text("MapSize (%.1f, %.1f)", simulation->chunkManager.mapWidth, simulation->chunkManager.mapHeight);
-                ImGui::Text("UnitSize: %i", simulation->unit);
-                ImGui::Separator();
-                ImGui::Text("NumberOfChunksX: %i", simulation->chunkManager.numberOfChunksX);
-                ImGui::Text("NumberOfChunksY: %i", simulation->chunkManager.numberOfChunksY);
-                ImGui::Text("ChunkSize: %.1f | (10 * UnitSize)", simulation->chunkManager.chunkSize);
-
-                ImGui::Dummy(ImVec2(0.0f, 10.0f));
-                ImVec2 mouse_pos = ImGui::GetMousePos();
-                ImGui::Text("RelativeMousePos: (%.1f, %.1f)", mouse_pos.x - sim_window_pos.x, mouse_pos.y - sim_window_pos.y);
-
-                ImGui::Dummy(ImVec2(0.0f, 20.0f));
-            }
-            // FPS tab
-            ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-            if (ImGui::CollapsingHeader("Efficiency")) {
-                
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4((1.0f - std::min(1.0f, io.Framerate / 120.0f)) * 0.9, std::min(1.0f, io.Framerate / 120.0f) * 0.9, 0.0f, 1.0f));
-                ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-                ImGui::PopStyleColor();
-                ImGui::Dummy(ImVec2(0.0f, 20.0f));
-                ImGui::Text("Number of objects: %i", simulation->getNumberOfObjects());
-                ImGui::Dummy(ImVec2(0.0f, 20.0f));
-            }
-            
-            // Object info tab
-            ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-            if (ImGui::CollapsingHeader("Object Info")) {
-                ImGui::Dummy(ImVec2(0.0f, 20.0f));
-                auto objectToDisplayInfo = simulation->getInfoViewObject();
-                auto selectedChunk = simulation->getSelectedChunk();
-                if (objectToDisplayInfo) {
-                    objectToDisplayInfo->displayInfo();
-                }
-                else if (selectedChunk) {
-                    selectedChunk->displayInfo();
-                }
-            }
-            ImGui::End();
-        }
-
-        {
-            ImGui::Begin("Logger");
-            simulation->drawLogger("Logger");
-            ImGui::End();
-        }
+        CreateGui(simulation, io);
 
         // Rendering
         ImGui::Render();
@@ -327,3 +239,4 @@ int main(int, char**)
 
     return 0;
 }
+

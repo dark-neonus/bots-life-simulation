@@ -2,6 +2,10 @@
 
 // here we define function that cant be define in simulation.h or those who are very long
 
+const char* getTypeString(SimulationObjectType type) {
+    return SimulationObjectTypeNames[static_cast<int>(type)];
+}
+
 void SimulationObject::drawHighlightion(ImDrawList *draw_list, ImVec2 window_pos) {
     // static constexpr int selectionRubHeigt = 3;
     // static constexpr int selectionRubWidth = 2;

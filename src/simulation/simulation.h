@@ -20,6 +20,15 @@ enum class SimulationObjectType {
     TreeObject,
 };
 
+const char* const SimulationObjectTypeNames[4] = {
+    "BaseObject",
+    "BotObject",
+    "FoodObject",
+    "TreeObject"
+};
+
+const char* getTypeString(SimulationObjectType type);
+
 class SimulationObject : public std::enable_shared_from_this<SimulationObject>
 {
 private:
@@ -34,6 +43,8 @@ protected:
     // bool highlighted = false;
 public:
     Vec2<float> pos;
+
+    ObjectID id;
     
     /// @brief Constructs a SimulationObject with the given parameters.
     /// @param simulation_ A shared pointer to the parent simulation. Used to interact with the simulation context.
@@ -86,6 +97,7 @@ public:
 
     virtual void displayInfo() {
         ImGui::SeparatorText("Simulation Object");
+        ImGui::Text("ID: %0*lo:", 6, id.get());
         ImGui::Text("Position:");
         ImGui::InputFloat("x", &pos.x, 1.0f, 1.0f, "%.1f");
         ImGui::InputFloat("y", &pos.y, 1.0f, 1.0f, "%.1f");
@@ -99,6 +111,7 @@ class Simulation : public std::enable_shared_from_this<Simulation>
 {
 private:
     std::vector<std::shared_ptr<SimulationObject>> objects;
+    IDManager idManger;
 
     // std::weak_ptr<SimulationObject> viewInfoObject;
     std::vector<std::weak_ptr<SimulationObject>> selectedObjects;
@@ -176,6 +189,8 @@ public:
             throw std::invalid_argument("No chunk found for the given position. Pos: " + obj->pos.text());
         }
 
+        obj->id.set(idManger.getAssignValue());
+
         objects.push_back(obj);
         return obj.get();
     }
@@ -236,4 +251,7 @@ public:
         logger.AddLog("%s", formattedMessage);
     }
 
+    std::shared_ptr<std::vector<std::shared_ptr<SimulationObject>>> getObjects() {
+        return std::make_shared<std::vector<std::shared_ptr<SimulationObject>>>(objects);
+    }
 };
