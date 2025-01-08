@@ -1,9 +1,10 @@
 #include "gui.h"
+#include "simulation.h"
 #include <chrono>
 
 
 
-void CreateGui(std::shared_ptr<Simulation> simulation, ImGuiIO& io) {
+void createGui(std::shared_ptr<Simulation> simulation, ImGuiIO& io) {
     static auto logicTimeStart = std::chrono::high_resolution_clock::now(); 
     static auto logicTimeEnd = std::chrono::high_resolution_clock::now();
     static std::chrono::duration<double, std::milli> logicTimeElapsed;
@@ -68,6 +69,7 @@ void CreateGui(std::shared_ptr<Simulation> simulation, ImGuiIO& io) {
             if (cameraDirX || cameraDirY) {
                 simulation->camera.move(cameraDirX, cameraDirY);
             }
+            handleBotKeysEvent(simulation);
         }
 
         simulation->render(draw_list, sim_window_pos, window_size);
@@ -115,7 +117,7 @@ void CreateGui(std::shared_ptr<Simulation> simulation, ImGuiIO& io) {
                 }
 
                 if (ImGui::CollapsingHeader("Objects List")) {
-                    CreateObjectListGui(simulation);
+                    createObjectListGui(simulation);
                 }
                 
                 // Object info tab
@@ -146,7 +148,7 @@ void CreateGui(std::shared_ptr<Simulation> simulation, ImGuiIO& io) {
     }
 }
 
-void CreateObjectListGui(std::shared_ptr<Simulation> simulation) {
+void createObjectListGui(std::shared_ptr<Simulation> simulation) {
     bool objectSelected = false;
     unsigned long selectedID = 0;
     if (auto selectedObject = simulation->getSelectedObject()) {
@@ -208,5 +210,30 @@ void CreateObjectListGui(std::shared_ptr<Simulation> simulation) {
         ImGui::SameLine();
         // if (ImGui::Button("Save")) {}
         ImGui::EndGroup();
+    }
+}
+
+void handleBotKeysEvent(std::shared_ptr<Simulation> simulation) {
+    // Move current bot
+    auto selectedObject = simulation->getSelectedObject();
+    if (selectedObject && selectedObject->type() == SimulationObjectTypes::BotObject) {
+        auto selectedBot = std::dynamic_pointer_cast<BotObject>(selectedObject);
+        int moveDirX = 0;
+        int moveDirY = 0;
+        if (ImGui::IsKeyDown(ImGuiKey_A)) {
+            moveDirX -= 1;
+        }
+        if (ImGui::IsKeyDown(ImGuiKey_D)) {
+            moveDirX += 1;
+        }
+        if (ImGui::IsKeyDown(ImGuiKey_W)) {
+            moveDirY -= 1;
+        }
+        if (ImGui::IsKeyDown(ImGuiKey_S)) {
+            moveDirY += 1;
+        }
+        if (moveDirX || moveDirY) {
+            selectedBot->move(Vec2<float>(moveDirX, moveDirY), 1.0f);
+        }
     }
 }

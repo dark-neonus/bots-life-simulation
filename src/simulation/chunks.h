@@ -75,11 +75,18 @@ public:
         objects.erase(objectToMove);
     }
 
-    /// @brief Check if given object in this chunk. Use to check if object gone to another chunk after movement
+    /// @brief Check if given object in chunks objects.
     /// @param obj Object to check
     /// @return true if object in this cunk, false otherwise
     bool isObjectInChunk(std::shared_ptr<SimulationObject> obj) {
         return objects.find(obj) != objects.end();
+    }
+
+    /// @brief Check if given position inside this chunk. Use to check if object gone to another chunk after movement
+    /// @param obj Object to check
+    /// @return true if object in this cunk, false otherwise
+    bool isPosInsideChunk(Vec2<float> position) {
+        return (startPos <= position && position <= endPos);
     }
 
     float getSeeDistanceMultiplier() { return seeDistanceMultiplier.get(); }

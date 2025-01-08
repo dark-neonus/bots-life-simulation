@@ -29,8 +29,8 @@ public:
     {
     }
 
-    SimulationObjectType type() const override {
-        return SimulationObjectType::BotObject;
+    SimulationObjectTypes type() const override {
+        return SimulationObjectTypes::BotObject;
     }
 
     /// @brief Return see distance of bot including chunk multiplier
@@ -209,6 +209,32 @@ public:
     void onDestroy() override {
         if (auto validSimulation = simulation.lock()) {
             validSimulation->addObject<FoodObject>(validSimulation, pos, health.getMax() * 0.3 + food.get() * 0.7, colorInt(100, 0, 0));
+        }
+    }
+
+    // Actions
+
+    void move(Vec2<float> direction, float speedMultyplier = 1.0f) {
+        direction = direction.normalize();
+        speedMultyplier = std::clamp<float>(speedMultyplier, 0.0f, 1.0f);
+        if (auto validSimulation = simulation.lock()) {
+            pos = Vec2<float>(
+                std::clamp(pos.x + direction.x * speed * speedMultyplier,
+                            0.0f, validSimulation->chunkManager.mapWidth),
+                std::clamp(pos.y + direction.y * speed * speedMultyplier,
+                            0.0f, validSimulation->chunkManager.mapHeight)
+            );
+            if (auto validChunk = chunk.lock()) {
+                if (!validChunk->isPosInsideChunk(pos)) {
+                    validChunk->moveToChunk(shared_from_this(), validSimulation->chunkManager.whatChunkHere(pos));
+                }
+            }
+            else {
+                throw std::runtime_error("Invalid chunk pointer of BotObject!");
+            }
+        }
+        else {
+            throw std::runtime_error("Invalid simulation pointer of BotObject!");
         }
     }
 };

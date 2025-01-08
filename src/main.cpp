@@ -40,7 +40,7 @@ static void glfw_error_callback(int error, const char* description)
     fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
 
-void CreateGui(std::shared_ptr<Simulation> simulation, ImGuiIO& io);
+void createGui(std::shared_ptr<Simulation> simulation, ImGuiIO& io);
 
 // Main code
 int main(int, char**)
@@ -201,7 +201,7 @@ int main(int, char**)
         ///////////////////////////////////////////////////
         ///////////////////////////////////////////////////
 
-        CreateGui(simulation, io);
+        createGui(simulation, io);
 
         // Rendering
         ImGui::Render();

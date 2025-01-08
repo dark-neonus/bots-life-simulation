@@ -15,7 +15,7 @@ using objectSet = std::unordered_set<std::weak_ptr<SimulationObject>,
     std::hash<std::weak_ptr<SimulationObject>>,
     std::equal_to<std::weak_ptr<SimulationObject>>>;
 
-enum class SimulationObjectType {
+enum class SimulationObjectTypes {
     BaseObject,
     BotObject,
     FoodObject,
@@ -29,7 +29,7 @@ const char* const SimulationObjectTypeNames[4] = {
     "TreeObject"
 };
 
-const char* getTypeString(SimulationObjectType type);
+const char* getTypeString(SimulationObjectTypes type);
 
 class SimulationObject : public std::enable_shared_from_this<SimulationObject>
 {
@@ -58,8 +58,8 @@ public:
     {
     }
 
-    virtual SimulationObjectType type() const {
-        return SimulationObjectType::BaseObject;
+    virtual SimulationObjectTypes type() const {
+        return SimulationObjectTypes::BaseObject;
     }
 
     virtual int getRadius() {

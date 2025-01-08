@@ -1,7 +1,7 @@
 #include "simulation.h"
 
 // here we define function that cant be define in simulation.h
-const char* getTypeString(SimulationObjectType type) {
+const char* getTypeString(SimulationObjectTypes type) {
     return SimulationObjectTypeNames[static_cast<int>(type)];
 }
 

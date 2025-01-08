@@ -13,8 +13,8 @@ public:
     {
     }
 
-    SimulationObjectType type() const override {
-        return SimulationObjectType::FoodObject;
+    SimulationObjectTypes type() const override {
+        return SimulationObjectTypes::FoodObject;
     }
 
     void update() override
@@ -58,8 +58,8 @@ public:
     {
     }
 
-    SimulationObjectType type() const override {
-        return SimulationObjectType::TreeObject;
+    SimulationObjectTypes type() const override {
+        return SimulationObjectTypes::TreeObject;
     }
 
     void update() override
