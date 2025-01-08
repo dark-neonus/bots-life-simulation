@@ -208,7 +208,8 @@ public:
 
     void onDestroy() override {
         if (auto validSimulation = simulation.lock()) {
-            validSimulation->addObject<FoodObject>(validSimulation, pos, health.getMax() * 0.3 + food.get() * 0.7, colorInt(100, 0, 0));
+            float calories = health.getMax() * 0.3 + food.get() * 0.7;
+            validSimulation->addObject<FoodObject>(validSimulation, pos, colorInt(100, 0, 0), calories, calories, 0, 5.0f, true);
         }
     }
 

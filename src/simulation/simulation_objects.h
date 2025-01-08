@@ -3,25 +3,42 @@
 class FoodObject : public SimulationObject
 {
 private:
+    const float maxCalories;
+    const float growthRate;
+    const float decayRate;
+    bool isMature;
 protected:
     float calories;
 
 public:
-    FoodObject(std::shared_ptr<Simulation> simulation, Vec2<float> position, float calories_, ImVec4 color)
+    FoodObject(std::shared_ptr<Simulation> simulation, Vec2<float> position, ImVec4 color,
+        float maxCalories_, float calories_, float growthRate_, float decayRate_, bool isMature_)
         : SimulationObject(simulation, position, getRadius(), color),
-          calories(calories_)
+        maxCalories(maxCalories_),
+        growthRate(growthRate_),
+        decayRate(decayRate_),
+        isMature(isMature_),
+        calories(calories_)
     {
     }
-
-    SimulationObjectTypes type() const override {
-        return SimulationObjectTypes::FoodObject;
+     
+    SimulationObjectType type() const override {
+        return SimulationObjectType::FoodObject;
     }
 
-    void update() override
-    {
-        // calories--;
-        if (calories == 0) {
-            markForDeletion();
+    void update() override {
+        if (!isMature) {
+            calories += growthRate;
+            if (calories >= maxCalories) {
+                calories = maxCalories;
+                isMature = true;
+            }
+        }
+        else {
+            calories -= decayRate;
+            if (calories <= 0) {
+                markForDeletion();
+            }
         }
     }
 
@@ -48,13 +65,27 @@ public:
 class TreeObject : public SimulationObject
 {
 private:
+    float foodMaxCalories;
+    float foodGrowthRate;
+    float foodDecayRate;
+    bool foodIsMature;
+
+    float foodSpawnCooldown;
+    float foodSpawnCooldownMax;
 protected:
     int numberOfFruits;
 
 public:
-    TreeObject(std::shared_ptr<Simulation> simulation, Vec2<float> position, int numberOfFruits_)
+    TreeObject(std::shared_ptr<Simulation> simulation, Vec2<float> position, int numberOfFruits_,
+        float foodMaxCalories_, float foodGrowthRate_, float foodDecayRate_, float foodSpawnCooldownMax_, bool foodIsMature_)
         : SimulationObject(simulation, position, getRadius(), colorInt(60, 30, 0)),
-          numberOfFruits(numberOfFruits_)
+        foodMaxCalories(foodMaxCalories_),
+        foodGrowthRate(foodGrowthRate_),
+        foodDecayRate(foodDecayRate_),
+        foodIsMature(foodIsMature_),
+        foodSpawnCooldown(foodSpawnCooldownMax_),
+        foodSpawnCooldownMax(foodSpawnCooldownMax_),
+        numberOfFruits(numberOfFruits_)
     {
     }
 
@@ -64,7 +95,38 @@ public:
 
     void update() override
     {
-        // Do nothing for the moment
+        if (foodSpawnCooldown > 0.0f) {
+            foodSpawnCooldown -= 1.0f;
+        }
+        else {
+            spawnFood();
+            foodSpawnCooldown = foodSpawnCooldownMax;
+        }
+
+    }
+
+    void spawnFood() {
+        for (int i = 0; i < numberOfFruits; ++i) {
+
+            float angle = 2.0f * M_PI * i / numberOfFruits;
+
+            Vec2<float> foodPosition = Vec2<float>(
+                pos.x + cos(angle) * (getRadius() + 15),
+                pos.y + sin(angle) * (getRadius() + 15)
+            );
+
+            if (auto validSimulation = simulation.lock()) {
+                validSimulation->addObject<FoodObject>(
+                    validSimulation, foodPosition,
+                    colorInt(0, 255, 0),
+                    foodMaxCalories,
+                    foodMaxCalories * 0.1f,
+                    foodGrowthRate,
+                    foodDecayRate,
+                    foodIsMature
+                );
+            }
+        }
     }
 
     void draw(ImDrawList *draw_list, ImVec2 drawing_delta_pos) override

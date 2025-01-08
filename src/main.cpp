@@ -150,15 +150,15 @@ int main(int, char**)
     simulation->addObject<SimulationObject>(simulation, Vec2(60, 70), 30, colorInt(0, 125, 0));
 
     // Add FoodObjects
-    simulation->addObject<FoodObject>(simulation, Vec2(200, 200), simulation->unit * 10, colorInt(100, 0, 0));
-    simulation->addObject<FoodObject>(simulation, Vec2(250, 200), simulation->unit * 20, colorInt(100, 0, 0));
-    simulation->addObject<FoodObject>(simulation, Vec2(300, 200), simulation->unit * 30, colorInt(100, 0, 0));
-    simulation->addObject<FoodObject>(simulation, Vec2(350, 200), simulation->unit * 40, colorInt(100, 0, 0));
+    simulation->addObject<FoodObject>(simulation, Vec2(200, 200), colorInt(100, 0, 0), simulation->unit * 10, simulation->unit * 5, 1.0f, 2.0f, true);
+    simulation->addObject<FoodObject>(simulation, Vec2(250, 200), colorInt(100, 0, 0), simulation->unit * 20, simulation->unit * 10, 1.0f, 2.0f, true);
+    simulation->addObject<FoodObject>(simulation, Vec2(300, 200), colorInt(100, 0, 0), simulation->unit * 30, simulation->unit * 15, 1.0f, 2.0f, true);
+    simulation->addObject<FoodObject>(simulation, Vec2(350, 200), colorInt(100, 0, 0), simulation->unit * 40, simulation->unit * 20, 1.0f, 2.0f, true);
 
     // Add TreeObjects
-    simulation->addObject<TreeObject>(simulation, Vec2(200, 150), 3);
-    simulation->addObject<TreeObject>(simulation, Vec2(250, 150), 5);
-    simulation->addObject<TreeObject>(simulation, Vec2(350, 150), 10);
+    simulation->addObject<TreeObject>(simulation, Vec2(200, 150), 3, 700.0f, 1.0f, 0.5f, 500.0f, true);
+    simulation->addObject<TreeObject>(simulation, Vec2(250, 150), 5, 300.0f, 1.2f, 2.5f, 400.0f, false);
+    simulation->addObject<TreeObject>(simulation, Vec2(350, 150), 10, 200.0f, 1.0f, 1.5f, 700.0f, false);
 
     // Add BotObjects
     simulation->addObject<BotObject>(simulation, Vec2(300, 300), 100, 80, 30, 5.0f, 8);

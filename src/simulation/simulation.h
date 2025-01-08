@@ -147,13 +147,16 @@ public:
     }
 
     /// @brief Update all objects in simulation
-    void update()
-    {
-        for (auto& obj : objects)
-        {
-            obj->update();
+    void update() {
+        std::vector<std::shared_ptr<SimulationObject>> objects_to_update = objects;
+
+        for (auto& obj : objects_to_update) {
+            if (obj != nullptr) {
+                obj->update();
+            }
         }
     }
+
 
     /// @brief Adds a SimulationObject to the death note queue for deletion after the update.
     void addToDeathNote(std::shared_ptr<SimulationObject> obj) {
