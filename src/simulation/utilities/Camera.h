@@ -19,6 +19,9 @@ private:
 
     bool movingToDestination = false;
     Vec2<float> destination;
+
+    bool isMoving = false;
+    float speedMultyplier = 1.0f;
 public:
     Camera() {};
     Camera(float xLimit, float yLimit, float step_=5)
@@ -64,8 +67,10 @@ public:
     /// @param dirX If positive move right, if negative move left, if zero dont move in X axis
     /// @param dirY If positive move down, if negative move up, if zero dont move in Y axis
     void move(int dirX, int dirY, float step = 5.0f) {
-        _x.increase(signum(dirX) * step);
-        _y.increase(signum(dirY) * step);
+        _x.increase(signum(dirX) * step * speedMultyplier);
+        _y.increase(signum(dirY) * step * speedMultyplier);
+        speedMultyplier = std::min(3.0f, speedMultyplier + 0.01f);
+        isMoving = true;
     }
 
     /// @brief Draw X and Y controls for camera position on current ImGui window
@@ -94,6 +99,10 @@ public:
                 movingToDestination = false;
             }
         }
+        if (!isMoving) {
+            speedMultyplier = 1.0f;
+        }
+        isMoving = false;
     }
 
     void moveTo(Vec2<float> destination_) {

@@ -49,7 +49,29 @@ void CreateGui(std::shared_ptr<Simulation> simulation, ImGuiIO& io) {
         logicTimeElapsed = logicTimeEnd - logicTimeStart;
         logicFramerate = 1000.0 / (logicTimeElapsed.count() == 0.0 ? 0.00001 : logicTimeElapsed.count());
 
+        // Move camera whe arrow keys pressed and windwo focused
+        if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows)) {
+            int cameraDirX = 0;
+            int cameraDirY = 0;
+            if (ImGui::IsKeyDown(ImGuiKey_LeftArrow)) {
+                cameraDirX -= 1;
+            }
+            if (ImGui::IsKeyDown(ImGuiKey_RightArrow)) {
+                cameraDirX += 1;
+            }
+            if (ImGui::IsKeyDown(ImGuiKey_UpArrow)) {
+                cameraDirY -= 1;
+            }
+            if (ImGui::IsKeyDown(ImGuiKey_DownArrow)) {
+                cameraDirY += 1;
+            }
+            if (cameraDirX || cameraDirY) {
+                simulation->camera.move(cameraDirX, cameraDirY);
+            }
+        }
+
         simulation->render(draw_list, sim_window_pos, window_size);
+
 
         ImGui::End();
     }

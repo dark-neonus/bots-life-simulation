@@ -27,7 +27,7 @@ void SimulationObject::markForDeletion() {
 
 void Simulation::render(ImDrawList *draw_list, ImVec2 window_pos, ImVec2 window_size, bool drawDebugLayer) {
 
-    camera.setSize(window_size.x, window_size.y);
+    camera.setSize(window_size.x - 20, window_size.y - 40);
     camera.update();
     ImVec2 drawing_delta_pos = ImVec2(window_pos.x - camera.x(), window_pos.y - camera.y());
 
