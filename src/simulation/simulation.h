@@ -277,7 +277,7 @@ public:
         va_end(args);
 
         // Combine the prefix with the formatted message
-        snprintf(formattedMessage, sizeof(formattedMessage), "%s%s", prefix, messageBody);
+        snprintf(formattedMessage, sizeof(prefix) + sizeof(formattedMessage), "%s%s", prefix, messageBody);
 
         // Call AddLog with the combined message
         logger.AddLog("%s", formattedMessage);

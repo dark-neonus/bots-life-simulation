@@ -214,7 +214,8 @@ public:
 
     // Actions
 
-    void move(Vec2<float> direction, float speedMultyplier = 1.0f) {
+    void actionMove(Vec2<float> direction, float speedMultyplier = 1.0f) {
+        food.decrease(0.1);
         direction = direction.normalize();
         speedMultyplier = std::clamp<float>(speedMultyplier, 0.0f, 1.0f);
         if (auto validSimulation = simulation.lock()) {
@@ -236,5 +237,61 @@ public:
         else {
             throw std::runtime_error("Invalid simulation pointer of BotObject!");
         }
+    }
+
+    /// @brief Preform attack on specific bot
+    /// @param attackOwnKind Indicate if bot would attack its own kind
+    /// @param targetID If set, than bot will attack bot with given id, if can. If set to ULONG_MAX, will attack nearest bot
+    void actionAttack(bool attackOwnKind=false, unsigned long targetID=ULONG_MAX) {
+        // When each users program will have own type id, add logic for attackOwnKind
+        std::queue<std::shared_ptr<Chunk>> chunksToCheck;
+        if (auto validChunk = chunk.lock()) {
+            std::shared_ptr<Chunk> neighborChunk;
+            if (!validChunk->isPosInsideChunk(pos - getRadius()) || !validChunk->isPosInsideChunk(pos + getRadius())) {
+                if (auto validSimulation = simulation.lock()) {
+                    for (int y = -1; y < 2; y++) {
+                        for (int x = -1; x < 2; x++) {
+                            neighborChunk = validSimulation->chunkManager.getChunk(validChunk->xIndex + x, validChunk->yIndex + y);
+                            if (neighborChunk) {
+                                chunksToCheck.push(neighborChunk);
+                            }
+                        }
+                    }
+                }
+            } else {
+                chunksToCheck.push(validChunk);
+            }
+            float minDistance = validChunk->chunkSize * 10;
+            std::shared_ptr<SimulationObject> nearestBot;
+            while (!chunksToCheck.empty()) {
+                neighborChunk = chunksToCheck.front();
+                for (auto obj : neighborChunk->objects) {
+                    if (auto validObj = obj.lock()) {
+                        if (validObj->id.get() != id.get() &&
+                                (targetID == ULONG_MAX || validObj->id.get() == targetID) &&
+                                validObj->type() == SimulationObjectTypes::BotObject &&
+                                pos.sqrDistanceTo(validObj->pos) < minDistance) {
+                            minDistance = pos.sqrDistanceTo(validObj->pos);
+                            nearestBot = validObj;
+                        }
+                    }
+                }
+                chunksToCheck.pop();
+            }
+            // Small penalty for using actionAttack to prevent spam
+            food.decrease(0.1);
+            if (nearestBot && minDistance <= (getRadius() + nearestBot->getRadius()) * (getRadius() + nearestBot->getRadius())) {
+                rawAttack(std::static_pointer_cast<BotObject>(nearestBot));
+            }
+        }
+        else {
+            throw std::runtime_error("Invalid chunk pointer of BotObject!");
+        }
+    }
+
+    /// @brief Raw attack logic without any checks
+    void rawAttack(std::shared_ptr<BotObject> targetBot) {
+        targetBot->health.decrease(damage);
+        food.decrease(0.4);
     }
 };

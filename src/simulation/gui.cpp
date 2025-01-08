@@ -233,7 +233,10 @@ void handleBotKeysEvent(std::shared_ptr<Simulation> simulation) {
             moveDirY += 1;
         }
         if (moveDirX || moveDirY) {
-            selectedBot->move(Vec2<float>(moveDirX, moveDirY), 1.0f);
+            selectedBot->actionMove(Vec2<float>(moveDirX, moveDirY), 1.0f);
+        }
+        if (ImGui::IsKeyDown(ImGuiKey_Q)) {
+            selectedBot->actionAttack();
         }
     }
 }
