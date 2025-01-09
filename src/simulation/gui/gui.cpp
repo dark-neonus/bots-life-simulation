@@ -243,5 +243,11 @@ void handleBotKeysEvent(std::shared_ptr<Simulation> simulation) {
         if (ImGui::IsKeyDown(ImGuiKey_E)) {
             selectedBot->actionEat();
         }
+        if (ImGui::IsKeyDown(ImGuiKey_1)) {
+            selectedBot->actionSpawnBot();
+        }
+        if (ImGui::IsKeyDown(ImGuiKey_X)) {
+            selectedBot->actionSuicide();
+        }
     }
 }
