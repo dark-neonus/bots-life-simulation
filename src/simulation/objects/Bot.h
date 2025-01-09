@@ -140,6 +140,14 @@ public:
         return pos.sqrDistanceTo(object->pos) <= sqrSeeDistance;
     }
 
+    /// @brief Spawns a new bot if there is enough food and a valid simulation context.
+    /// @param Args The parameters of new bot to spawn.
+    void actionSpawnBot(float newHealth = -1.0f, float newFood = -1.0f,
+        int newSeeDistance = -1, float newSpeed = -1.0f, float newDamage = -1.0f);
+
+    /// @brief Forces the bot to write its name in the DeathNote.
+    void actionSuicide();
+
     void update() override
     {
         // Change values just to display debug values drawing
