@@ -1,8 +1,10 @@
 #include "gui.h"
-#include "simulation.h"
+
 #include <chrono>
+#include <memory>
 
-
+#include "simulation.h"
+#include "objects/Bot.h"
 
 void createGui(std::shared_ptr<Simulation> simulation, ImGuiIO& io) {
     static auto logicTimeStart = std::chrono::high_resolution_clock::now(); 
@@ -85,12 +87,12 @@ void createGui(std::shared_ptr<Simulation> simulation, ImGuiIO& io) {
             if (ImGui::BeginTabItem("Main")) {
                 // Simulation properties
                 if (ImGui::CollapsingHeader("Simulation properties")) {
-                    ImGui::Text("MapSize (%.1f, %.1f)", simulation->chunkManager.mapWidth, simulation->chunkManager.mapHeight);
+                    ImGui::Text("MapSize (%.1f, %.1f)", simulation->chunkManager->mapWidth, simulation->chunkManager->mapHeight);
                     ImGui::Text("UnitSize: %i", simulation->unit);
                     ImGui::Separator();
-                    ImGui::Text("NumberOfChunksX: %i", simulation->chunkManager.numberOfChunksX);
-                    ImGui::Text("NumberOfChunksY: %i", simulation->chunkManager.numberOfChunksY);
-                    ImGui::Text("ChunkSize: %.1f | (10 * UnitSize)", simulation->chunkManager.chunkSize);
+                    ImGui::Text("NumberOfChunksX: %i", simulation->chunkManager->numberOfChunksX);
+                    ImGui::Text("NumberOfChunksY: %i", simulation->chunkManager->numberOfChunksY);
+                    ImGui::Text("ChunkSize: %.1f | (10 * UnitSize)", simulation->chunkManager->chunkSize);
 
                     ImGui::Dummy(ImVec2(0.0f, 10.0f));
                     ImVec2 mouse_pos = ImGui::GetMousePos();
@@ -216,7 +218,7 @@ void createObjectListGui(std::shared_ptr<Simulation> simulation) {
 void handleBotKeysEvent(std::shared_ptr<Simulation> simulation) {
     // Move current bot
     auto selectedObject = simulation->getSelectedObject();
-    if (selectedObject && selectedObject->type() == SimulationObjectTypes::BotObject) {
+    if (selectedObject && selectedObject->type() == SimulationObjectType::BotObject) {
         auto selectedBot = std::dynamic_pointer_cast<BotObject>(selectedObject);
         int moveDirX = 0;
         int moveDirY = 0;

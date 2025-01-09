@@ -1,13 +1,19 @@
 #pragma once
 
+#include <memory>
+
 #include "chunks.h"
 #include "simulation.h"
-#include "simulation_objects.h"
+#include "objects/SimulationObject.h"
 #include "utilities/utilities.h"
+
+class FoodObject;
 
 #define DEFAULT_DEBUG_DRAWING true
 
-// std::shared_ptr<Chunk> whatChunkHere(Vec2<float> position);
+using objectSet = std::unordered_set<std::weak_ptr<SimulationObject>,
+    std::hash<std::weak_ptr<SimulationObject>>,
+    std::equal_to<std::weak_ptr<SimulationObject>>>;
 
 class BotObject : public SimulationObject
 {
@@ -29,8 +35,8 @@ public:
     {
     }
 
-    SimulationObjectTypes type() const override {
-        return SimulationObjectTypes::BotObject;
+    SimulationObjectType type() const override {
+        return SimulationObjectType::BotObject;
     }
 
     /// @brief Return see distance of bot including chunk multiplier
@@ -54,9 +60,9 @@ public:
 
         if (auto validSimulation = simulation.lock()) {
             // Find top left chunk in radius
-            std::shared_ptr<Chunk> topLeftChunk = validSimulation->chunkManager.whatChunkHere(position - radius);
+            std::shared_ptr<Chunk> topLeftChunk = validSimulation->chunkManager->whatChunkHere(position - radius);
             // Find bottom right chunk in radius
-            std::shared_ptr<Chunk> bottomRightChunk = validSimulation->chunkManager.whatChunkHere(position + radius);
+            std::shared_ptr<Chunk> bottomRightChunk = validSimulation->chunkManager->whatChunkHere(position + radius);
 
             // Get index of edge chunks(if radius out of map, return edge chunks)
             int startX = 0;
@@ -65,8 +71,8 @@ public:
                 startX = topLeftChunk->xIndex;
                 startY = topLeftChunk->yIndex;
             }
-            int endX = validSimulation->chunkManager.numberOfChunksX - 1;
-            int endY = validSimulation->chunkManager.numberOfChunksY - 1;
+            int endX = validSimulation->chunkManager->numberOfChunksX - 1;
+            int endY = validSimulation->chunkManager->numberOfChunksY - 1;
             if (bottomRightChunk) {
                 endX = bottomRightChunk->xIndex;
                 endY = bottomRightChunk->yIndex;
@@ -74,7 +80,7 @@ public:
             // chunks.resize((endY - startY + 1) * (endX - startX + 1));
             for (int y = startY; y <= endY; y++) {
                 for (int x = startX; x <= endX; x++) {
-                    chunks.push_back(validSimulation->chunkManager.getChunk(x, y));
+                    chunks.push_back(validSimulation->chunkManager->getChunk(x, y));
                 }
             }
 
@@ -209,7 +215,7 @@ public:
     void onDestroy() override {
         if (auto validSimulation = simulation.lock()) {
             float calories = health.getMax() * 0.3 + food.get() * 0.7;
-            validSimulation->addObject<FoodObject>(validSimulation, pos, colorInt(100, 0, 0), calories, calories, 0, 5.0f, true);
+            validSimulation->addObject(SimulationObjectType::FoodObject, validSimulation, pos, colorInt(100, 0, 0), calories, calories, 0, 5.0f, true);
         }
     }
 
@@ -222,13 +228,13 @@ public:
         if (auto validSimulation = simulation.lock()) {
             pos = Vec2<float>(
                 std::clamp(pos.x + direction.x * speed * speedMultyplier,
-                            0.0f, validSimulation->chunkManager.mapWidth),
+                            0.0f, validSimulation->chunkManager->mapWidth),
                 std::clamp(pos.y + direction.y * speed * speedMultyplier,
-                            0.0f, validSimulation->chunkManager.mapHeight)
+                            0.0f, validSimulation->chunkManager->mapHeight)
             );
             if (auto validChunk = chunk.lock()) {
                 if (!validChunk->isPosInsideChunk(pos)) {
-                    validChunk->moveToChunk(shared_from_this(), validSimulation->chunkManager.whatChunkHere(pos));
+                    validChunk->moveToChunk(shared_from_this(), validSimulation->chunkManager->whatChunkHere(pos));
                 }
             }
             else {
@@ -252,7 +258,7 @@ public:
                 if (auto validSimulation = simulation.lock()) {
                     for (int y = -1; y < 2; y++) {
                         for (int x = -1; x < 2; x++) {
-                            neighborChunk = validSimulation->chunkManager.getChunk(validChunk->xIndex + x, validChunk->yIndex + y);
+                            neighborChunk = validSimulation->chunkManager->getChunk(validChunk->xIndex + x, validChunk->yIndex + y);
                             if (neighborChunk) {
                                 chunksToCheck.push(neighborChunk);
                             }
@@ -270,7 +276,7 @@ public:
                     if (auto validObj = obj.lock()) {
                         if (validObj->id.get() != id.get() &&
                                 (targetID == ULONG_MAX || validObj->id.get() == targetID) &&
-                                validObj->type() == SimulationObjectTypes::BotObject &&
+                                validObj->type() == SimulationObjectType::BotObject &&
                                 pos.sqrDistanceTo(validObj->pos) < minDistance) {
                             minDistance = pos.sqrDistanceTo(validObj->pos);
                             nearestBot = validObj;

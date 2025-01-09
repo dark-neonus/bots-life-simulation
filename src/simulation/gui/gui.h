@@ -1,11 +1,9 @@
 #pragma once
 
-#include "simulation.h"
-#include "simulation_objects.h"
-#include "simulation_bots.h"
-
 #include "imgui.h"
 #include "imgui_internal.h"
+
+#include "simulation.h"
 
 /// @brief Create gui of simulation to draw on frame
 void createGui(std::shared_ptr<Simulation> simulation, ImGuiIO& io);

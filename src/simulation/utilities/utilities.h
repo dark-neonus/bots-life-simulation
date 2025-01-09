@@ -9,3 +9,4 @@
 #include "objectSet.h"
 #include "IDManager.h"
 #include "Camera.h"
+#include "objectSet.h"

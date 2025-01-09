@@ -1,15 +1,18 @@
 #pragma once
 
+#include "imgui.h"
+
 #include <vector>
 #include <stdexcept>
 #include <algorithm>
+#include <memory>
+#include <unordered_set>
 
 #include "utilities/utilities.h"
-#include "utilities/objectSet.h"
 #include "simulation.h"
+#include "objects/SimulationObject.h"
 
 class SimulationObject;
-class Simulation;
 
 using objectSet = std::unordered_set<std::weak_ptr<SimulationObject>,
     std::hash<std::weak_ptr<SimulationObject>>,
@@ -53,17 +56,7 @@ public:
     }
 
     /// @brief Removes a specific SimulationObject from the list of objects in the simulation.
-    void removeObject(std::shared_ptr<SimulationObject> obj) {
-        auto it = std::find_if(objects.begin(), objects.end(),
-            [&obj](const std::weak_ptr<SimulationObject>& wp) {
-                auto locked = wp.lock();
-                return locked == obj;     
-            });
-
-        if (it != objects.end()) {
-            objects.erase(it);
-        }
-    }
+    void removeObject(std::shared_ptr<SimulationObject> obj);
 
     /// @brief Move object from current chunk to another
     /// @param objectToMove Object of current chunk to move

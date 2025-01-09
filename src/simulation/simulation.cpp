@@ -1,29 +1,40 @@
 #include "simulation.h"
 
-// here we define function that cant be define in simulation.h
-const char* getTypeString(SimulationObjectTypes type) {
-    return SimulationObjectTypeNames[static_cast<int>(type)];
+Simulation::Simulation(int numberOfChunksX_, int numberOfChunksY_, int unit_) : unit(unit_),
+        chunkManager(std::make_unique<ChunkManager>(numberOfChunksX_, numberOfChunksY_, float(unit * 10))),
+        maxSeeDistance(chunkManager->chunkSize * 0.95),
+        camera(float(chunkManager->mapWidth), float(chunkManager->mapHeight))
+{
 }
 
-void SimulationObject::drawHighlightion(ImDrawList *draw_list, ImVec2 drawing_delta_pos) {
-    // static constexpr int selectionRubHeigt = 3;
-    // static constexpr int selectionRubWidth = 2;
-    Vec2<float> realPos = Vec2<float>(drawing_delta_pos) + pos;
-    if (auto validSimulation = simulation.lock()) {
-        int selectionRadius = getRadius() + validSimulation->allowedClickError;
-        draw_list->AddRect(toImVec2(realPos - selectionRadius), toImVec2(realPos + selectionRadius), ImColor(selectionColor), 0, 0, 3.0f);
-        draw_list->AddCircleFilled(toImVec2(realPos), getRadius(), ImColor(colorInt(0, 255, 255, 50)), 18);
-        draw_list->AddRect(toImVec2(realPos - 1), toImVec2(realPos + 1), ImColor(colorInt(255, 0, 255, 100)));
+void Simulation::update() {
+    std::vector<std::shared_ptr<SimulationObject>> objects_to_update = objects;
+
+    for (auto& obj : objects_to_update) {
+        if (obj != nullptr) {
+            obj->update();
+        }
     }
 }
 
-void SimulationObject::markForDeletion() {
-    if (auto validSimulation = simulation.lock()) {
-        validSimulation->addToDeathNote(shared_from_this());
+void Simulation::afterUpdate() {
+    while (!deathNote.empty()) {
+        auto &obj = deathNote.front();
+        obj->onDestroy();
+        // log(Logger::LOG, "Object [%0*lu] deletion process started\n", 6, obj->id.get());
+        deathNote.pop();
+
+        if (auto chunk = obj->getChunk()) {
+            chunk->removeObject(obj);
+        }
+
+        auto it = std::find(objects.begin(), objects.end(), obj);
+        if (it != objects.end()) {
+            objects.erase(it);
+        }
+        // log(Logger::LOG, "Object deleted successfully!\n");
     }
 }
-
-// Here we define just big functions ot those, which implementation in simulation.h isnt representative
 
 void Simulation::render(ImDrawList *draw_list, ImVec2 window_pos, ImVec2 window_size, bool drawDebugLayer) {
 
@@ -51,7 +62,7 @@ void Simulation::render(ImDrawList *draw_list, ImVec2 window_pos, ImVec2 window_
         // If mouse were clicked clear all previous selections
         selectedObjects.clear();
         selectedChunk.reset();
-        std::shared_ptr<Chunk> clickedChunk = chunkManager.whatChunkHere(Vec2<float>(mouse_map_pos) - Vec2<float>(window_pos));
+        std::shared_ptr<Chunk> clickedChunk = chunkManager->whatChunkHere(Vec2<float>(mouse_map_pos) - Vec2<float>(window_pos));
         if (clickedChunk) {
             for (auto& obj : clickedChunk->objects) {
                 if (auto validObj = obj.lock()) {
@@ -77,7 +88,7 @@ void Simulation::render(ImDrawList *draw_list, ImVec2 window_pos, ImVec2 window_
         }
     }
     // Draw map mesh
-    chunkManager.drawChunksMesh(draw_list, drawing_delta_pos);
+    chunkManager->drawChunksMesh(draw_list, drawing_delta_pos);
 
     // If chunk is selected, draw it before anything else
     if (auto validSelectedChunk = selectedChunk.lock()) {
@@ -86,7 +97,7 @@ void Simulation::render(ImDrawList *draw_list, ImVec2 window_pos, ImVec2 window_
     }
     
     // Draw all objects by chunks
-    for (auto chunk : chunkManager) {
+    for (auto chunk : *chunkManager.get()) {
         for (auto& obj : chunk->objects) {
             if (auto validObj = obj.lock()) {
                 validObj->draw(draw_list, drawing_delta_pos);
@@ -104,4 +115,98 @@ void Simulation::render(ImDrawList *draw_list, ImVec2 window_pos, ImVec2 window_
             }
         }
     }
+}
+
+void Simulation::selectSingleObject(std::shared_ptr<SimulationObject> objectToSelect) {
+    selectedObjects.clear();
+    selectedObjects.push_back(objectToSelect);
+    selectedChunk.reset();
+    if (!camera.isPointInVision(objectToSelect->pos)) {
+        camera.moveTo(objectToSelect->pos);
+    }
+}
+
+template <typename... Args>
+void Simulation::addObject(SimulationObjectType objectType, Args &&...args) {
+    switch (objectType)
+    {
+    case SimulationObjectType::BaseObject:
+        addObjectToSimulation<SimulationObject>(shared_from_this(), std::forward<Args>(args)...);
+        break;
+    case SimulationObjectType::FoodObject:
+        addObjectToSimulation<FoodObject>(shared_from_this(), std::forward<Args>(args)...);
+        break;
+    case SimulationObjectType::TreeObject:
+        addObjectToSimulation<TreeObject>(shared_from_this(), std::forward<Args>(args)...);
+        break;
+    case SimulationObjectType::BotObject:
+        addObjectToSimulation<BotObject>(shared_from_this(), std::forward<Args>(args)...);
+        break;
+    default:
+        std::runtime_error("Invalid boject type!");
+    }
+}
+
+template <typename T, typename... Args>
+T* addObjectToSimulation(std::shared_ptr<Simulation> simulation, Args&&... args)
+{
+    auto obj = std::make_shared<T>(std::forward<Args>(args)...);
+
+    // Check if position is valid (inside map)
+    if (obj->pos.x < 0 || obj->pos.y < 0 ||
+        obj->pos.x > simulation->chunkManager->mapWidth || obj->pos.y > simulation->chunkManager->mapHeight) {
+        throw std::invalid_argument("Position of object is out of simualtion map. Pos: " + obj->pos.text());
+    }
+    // !!!! This must be working code, just uncomment it !!!!
+    
+    // Assign chunk to object and object to chunk
+    std::shared_ptr<Chunk> objectsChunk = simulation->chunkManager->whatChunkHere(obj->pos);
+    if (objectsChunk) {
+        objectsChunk->addObject<T>(obj);
+        // No need for "obj->setChunk(objectsChunk)" because Chunk::addObject() do it
+    }
+    else {
+        throw std::invalid_argument("No chunk found for the given position. Pos: " + obj->pos.text());
+    }
+
+    obj->id.set(simulation->idManger.getAssignValue());
+
+    simulation->objects.push_back(obj);
+    return obj.get();
+}
+
+void Simulation::log(Logger::LogType logType, const char *fmt, ...)
+{
+    const char *prefix = "";
+    switch (logType)
+    {
+    case Logger::LOG:
+        prefix = "(LOG) ";
+        break;
+    case Logger::WARNING:
+        prefix = "[WARNING] ";
+        break;
+    case Logger::ERROR:
+        prefix = "<ERROR> ";
+        break;
+    default:
+        prefix = ".UNKNOWN. ";
+        break;
+    }
+
+    // Create a buffer for the full message (prefix + formatted message)
+    char formattedMessage[512]; // Adjust size as needed
+
+    // Format the variadic arguments into a separate buffer
+    char messageBody[512];
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(messageBody, sizeof(messageBody), fmt, args);
+    va_end(args);
+
+    // Combine the prefix with the formatted message
+    snprintf(formattedMessage, sizeof(prefix) + sizeof(formattedMessage), "%s%s", prefix, messageBody);
+
+    // Call AddLog with the combined message
+    logger.AddLog("%s", formattedMessage);
 }

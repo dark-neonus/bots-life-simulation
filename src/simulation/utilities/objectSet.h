@@ -1,5 +1,4 @@
-#ifndef HASH_SPECIALIZATIONS_H
-#define HASH_SPECIALIZATIONS_H
+#pragma once
 
 #include <memory>
 #include <unordered_set>
@@ -20,5 +19,3 @@ namespace std {
         }
     };
 }
-
-#endif // HASH_SPECIALIZATIONS_H
