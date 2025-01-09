@@ -240,5 +240,8 @@ void handleBotKeysEvent(std::shared_ptr<Simulation> simulation) {
         if (ImGui::IsKeyDown(ImGuiKey_Q)) {
             selectedBot->actionAttack();
         }
+        if (ImGui::IsKeyDown(ImGuiKey_E)) {
+            selectedBot->actionEat();
+        }
     }
 }

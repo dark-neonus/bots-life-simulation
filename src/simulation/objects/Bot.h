@@ -229,6 +229,13 @@ public:
     /// @brief Raw attack logic without any checks
     void rawAttack(std::shared_ptr<BotObject> targetBot);
 
+    /// @brief Preform eating on specific food object
+    /// @param targetID If set, than bot will food object bot with given id, if can. If set to ULONG_MAX, will eat nearest food object
+    void actionEat(unsigned long targetID=ULONG_MAX);
+
+    /// @brief Raw eat logic without any checks
+    void rawEat(std::shared_ptr<FoodObject> targetFood);
+
     /// @brief Spawns a new bot if there is enough food and a valid simulation context.
     void actionSpawnBot();
 

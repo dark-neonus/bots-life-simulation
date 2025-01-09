@@ -53,12 +53,23 @@ void BotObject::actionAttack(bool attackOwnKind, unsigned long targetID) {
             neighborChunk = chunksToCheck.front();
             for (auto obj : neighborChunk->objects) {
                 if (auto validObj = obj.lock()) {
-                    if (validObj->id.get() != id.get() &&
-                            (targetID == ULONG_MAX || validObj->id.get() == targetID) &&
+                    if (targetID == ULONG_MAX) {
+                        // Find nearest if targetID wasnt specified
+                        if (validObj->id.get() != id.get() &&
                             validObj->type() == SimulationObjectType::BotObject &&
                             pos.sqrDistanceTo(validObj->pos) < minDistance) {
-                        minDistance = pos.sqrDistanceTo(validObj->pos);
-                        nearestBot = validObj;
+                                minDistance = pos.sqrDistanceTo(validObj->pos);
+                                nearestBot = validObj;
+                            }
+                    }
+                    else if (validObj->id.get() == targetID) {
+                        // Find object with given ID
+                        if (validObj->type() == SimulationObjectType::BotObject) {
+                            nearestBot = validObj;
+                        }
+                        // Clear chunksToCheck since found desired object
+                        chunksToCheck = std::queue<std::shared_ptr<Chunk>>();
+                        break;
                     }
                 }
             }
@@ -78,6 +89,71 @@ void BotObject::actionAttack(bool attackOwnKind, unsigned long targetID) {
 void BotObject::rawAttack(std::shared_ptr<BotObject> targetBot) {
     targetBot->health.decrease(damage);
     food.decrease(0.4);
+}
+
+void BotObject::actionEat(unsigned long targetID) {
+    // When each users program will have own type id, add logic for attackOwnKind
+    std::queue<std::shared_ptr<Chunk>> chunksToCheck;
+    if (auto validChunk = chunk.lock()) {
+        std::shared_ptr<Chunk> neighborChunk;
+        if (!validChunk->isPosInsideChunk(pos - getRadius()) || !validChunk->isPosInsideChunk(pos + getRadius())) {
+            if (auto validSimulation = simulation.lock()) {
+                for (int y = -1; y < 2; y++) {
+                    for (int x = -1; x < 2; x++) {
+                        neighborChunk = validSimulation->chunkManager->getChunk(validChunk->xIndex + x, validChunk->yIndex + y);
+                        if (neighborChunk) {
+                            chunksToCheck.push(neighborChunk);
+                        }
+                    }
+                }
+            }
+        } else {
+            chunksToCheck.push(validChunk);
+        }
+        float minDistance = validChunk->chunkSize * 10;
+        std::shared_ptr<SimulationObject> nearestFood;
+        while (!chunksToCheck.empty()) {
+            neighborChunk = chunksToCheck.front();
+            for (auto obj : neighborChunk->objects) {
+                if (auto validObj = obj.lock()) {
+                    if (targetID == ULONG_MAX) {
+                        // Find nearest if targetID wasnt specified
+                        if (validObj->id.get() != id.get() &&
+                            validObj->type() == SimulationObjectType::FoodObject &&
+                            pos.sqrDistanceTo(validObj->pos) < minDistance) {
+                                minDistance = pos.sqrDistanceTo(validObj->pos);
+                                nearestFood = validObj;
+                            }
+                    }
+                    else if (validObj->id.get() == targetID) {
+                        // Find object with given ID
+                        if (validObj->type() == SimulationObjectType::FoodObject) {
+                            nearestFood = validObj;
+                        }
+                        // Clear chunksToCheck since found desired object
+                        chunksToCheck = std::queue<std::shared_ptr<Chunk>>();
+                        break;
+                    }
+                }
+            }
+            chunksToCheck.pop();
+        }
+        // Small penalty for using actionEat to prevent spam
+        food.decrease(0.05);
+        if (nearestFood && minDistance <= (getRadius() + nearestFood->getRadius()) * (getRadius() + nearestFood->getRadius())) {
+            rawEat(std::static_pointer_cast<FoodObject>(nearestFood));
+        }
+    }
+    else {
+        throw std::runtime_error("Invalid chunk pointer of BotObject!");
+    }
+}
+
+void BotObject::rawEat(std::shared_ptr<FoodObject> targetFood) {
+    // Calories needed for "chewing"
+    food.decrease(0.1);
+    float eatenCalories = targetFood->decreaseCalories(std::max(5.0f, food.getMax() / 20));
+    food.increase(eatenCalories);
 }
 
 void BotObject::actionSpawnBot() {
