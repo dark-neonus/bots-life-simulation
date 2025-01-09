@@ -140,12 +140,6 @@ public:
         return pos.sqrDistanceTo(object->pos) <= sqrSeeDistance;
     }
 
-    /// @brief Spawns a new bot if there is enough food and a valid simulation context.
-    void actionSpawnBot();
-
-    /// @brief Forces the bot to write its name in the DeathNote.
-    void actionSuicide();
-
     void update() override
     {
         // Change values just to display debug values drawing
@@ -225,85 +219,20 @@ public:
 
     // Actions
 
-    void actionMove(Vec2<float> direction, float speedMultyplier = 1.0f) {
-        food.decrease(0.1);
-        direction = direction.normalize();
-        speedMultyplier = std::clamp<float>(speedMultyplier, 0.0f, 1.0f);
-        if (auto validSimulation = simulation.lock()) {
-            pos = Vec2<float>(
-                std::clamp(pos.x + direction.x * speed * speedMultyplier,
-                            0.0f, validSimulation->chunkManager->mapWidth),
-                std::clamp(pos.y + direction.y * speed * speedMultyplier,
-                            0.0f, validSimulation->chunkManager->mapHeight)
-            );
-            if (auto validChunk = chunk.lock()) {
-                if (!validChunk->isPosInsideChunk(pos)) {
-                    validChunk->moveToChunk(shared_from_this(), validSimulation->chunkManager->whatChunkHere(pos));
-                }
-            }
-            else {
-                throw std::runtime_error("Invalid chunk pointer of BotObject!");
-            }
-        }
-        else {
-            throw std::runtime_error("Invalid simulation pointer of BotObject!");
-        }
-    }
+    void actionMove(Vec2<float> direction, float speedMultyplier = 1.0f);
 
     /// @brief Preform attack on specific bot
     /// @param attackOwnKind Indicate if bot would attack its own kind
     /// @param targetID If set, than bot will attack bot with given id, if can. If set to ULONG_MAX, will attack nearest bot
-    void actionAttack(bool attackOwnKind=false, unsigned long targetID=ULONG_MAX) {
-        // When each users program will have own type id, add logic for attackOwnKind
-        std::queue<std::shared_ptr<Chunk>> chunksToCheck;
-        if (auto validChunk = chunk.lock()) {
-            std::shared_ptr<Chunk> neighborChunk;
-            if (!validChunk->isPosInsideChunk(pos - getRadius()) || !validChunk->isPosInsideChunk(pos + getRadius())) {
-                if (auto validSimulation = simulation.lock()) {
-                    for (int y = -1; y < 2; y++) {
-                        for (int x = -1; x < 2; x++) {
-                            neighborChunk = validSimulation->chunkManager->getChunk(validChunk->xIndex + x, validChunk->yIndex + y);
-                            if (neighborChunk) {
-                                chunksToCheck.push(neighborChunk);
-                            }
-                        }
-                    }
-                }
-            } else {
-                chunksToCheck.push(validChunk);
-            }
-            float minDistance = validChunk->chunkSize * 10;
-            std::shared_ptr<SimulationObject> nearestBot;
-            while (!chunksToCheck.empty()) {
-                neighborChunk = chunksToCheck.front();
-                for (auto obj : neighborChunk->objects) {
-                    if (auto validObj = obj.lock()) {
-                        if (validObj->id.get() != id.get() &&
-                                (targetID == ULONG_MAX || validObj->id.get() == targetID) &&
-                                validObj->type() == SimulationObjectType::BotObject &&
-                                pos.sqrDistanceTo(validObj->pos) < minDistance) {
-                            minDistance = pos.sqrDistanceTo(validObj->pos);
-                            nearestBot = validObj;
-                        }
-                    }
-                }
-                chunksToCheck.pop();
-            }
-            // Small penalty for using actionAttack to prevent spam
-            food.decrease(0.1);
-            if (nearestBot && minDistance <= (getRadius() + nearestBot->getRadius()) * (getRadius() + nearestBot->getRadius())) {
-                rawAttack(std::static_pointer_cast<BotObject>(nearestBot));
-            }
-        }
-        else {
-            throw std::runtime_error("Invalid chunk pointer of BotObject!");
-        }
-    }
+    void actionAttack(bool attackOwnKind=false, unsigned long targetID=ULONG_MAX);
 
     /// @brief Raw attack logic without any checks
-    void rawAttack(std::shared_ptr<BotObject> targetBot) {
-        targetBot->health.decrease(damage);
-        food.decrease(0.4);
-    }
+    void rawAttack(std::shared_ptr<BotObject> targetBot);
+
+    /// @brief Spawns a new bot if there is enough food and a valid simulation context.
+    void actionSpawnBot();
+
+    /// @brief Forces the bot to write its name in the DeathNote.
+    void actionSuicide();
 
 };
