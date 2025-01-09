@@ -2,26 +2,26 @@
 
 #include "simulation.h"
 #include "objects/SimulationObject.h"
+#include "utilities/utilities.h"
 
 class FoodObject : public SimulationObject
 {
 private:
-    const float maxCalories;
-    const float growthRate;
-    const float decayRate;
+    RangeValue<float> calories;
+
+    float growthRate;
+    float decayRate;
+
     bool isMature;
-protected:
-    float calories;
 
 public:
     FoodObject(std::shared_ptr<Simulation> simulation, Vec2<float> position, ImVec4 color,
         float maxCalories_, float calories_, float growthRate_, float decayRate_, bool isMature_)
         : SimulationObject(simulation, position, getRadius(), color),
-        maxCalories(maxCalories_),
+        calories(calories_, 0.0f, maxCalories_),
         growthRate(growthRate_),
         decayRate(decayRate_),
-        isMature(isMature_),
-        calories(calories_)
+        isMature(isMature_)
     {
     }
      
@@ -29,19 +29,28 @@ public:
         return SimulationObjectType::FoodObject;
     }
 
+
+    float decreaseCalories(float amount) {
+        if (amount < 0) {
+            throw std::invalid_argument("Calories reduction amount cant be negative!");
+        }
+        float decreasedAmount = std::min(amount, calories.get());
+        calories.decrease(amount);
+        if (calories.get() == 0.0f) {
+            markForDeletion();
+        }
+        return decreasedAmount;
+    }
+
     void update() override {
         if (!isMature) {
-            calories += growthRate;
-            if (calories >= maxCalories) {
-                calories = maxCalories;
+            calories.increase(growthRate);
+            if (calories.get() >= calories.getMax()) {
                 isMature = true;
             }
         }
         else {
-            calories -= decayRate;
-            if (calories <= 0) {
-                markForDeletion();
-            }
+            decreaseCalories(decayRate);
         }
     }
 
@@ -52,7 +61,7 @@ public:
                                  color);
     }
 
-    int getRadius() override { return convertCaloriesToRadius(calories); }
+    int getRadius() override { return convertCaloriesToRadius(calories.get()); }
 
     void displayInfo() override {
         // Call parent class displayInfo to show basic information
@@ -61,6 +70,9 @@ public:
         // Add custom behavior for this class
         ImGui::SeparatorText("Food Object");
         // TODO: Here in future we need to specify min and max value for calories
-        ImGui::SliderFloat("Calories", &calories, 0.0f, 500.0f, "%.1f");
+        ImGui::SliderFloat("Calories", calories.valuePointer(), calories.getMin(), calories.getMax(), "%.1f");
+        ImGui::SliderFloat("GrowthRate", &growthRate, 0.0f, 50.0f, "%.1f");
+        ImGui::SliderFloat("DecayRate", &decayRate, 0.0f, 50.0f, "%.1f");
+        ImGui::Checkbox("Mature", &isMature);
     }
 };

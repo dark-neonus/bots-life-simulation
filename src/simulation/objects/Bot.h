@@ -296,4 +296,5 @@ public:
         targetBot->health.decrease(damage);
         food.decrease(0.4);
     }
+
 };
