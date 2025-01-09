@@ -18,7 +18,7 @@ public:
     /// @return true if value reached 0, false otherwise
     bool decrement() {
         decrease(1);
-        isMin();
+        return isMin();
     }
 
     /// @return true if value reached max, false otherwise
