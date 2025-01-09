@@ -64,3 +64,6 @@ __*
 
 # perf.data rule
 perf.data*
+
+# .VSCodeCounter rule for code counter extension
+.VSCodeCounter
