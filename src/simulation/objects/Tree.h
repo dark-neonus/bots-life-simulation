@@ -47,6 +47,7 @@ public:
 
     }
 
+    /// @brief Spawns a set of food objects around the Tree in a regular polygon pattern.
     void spawnFood() {
         for (int i = 0; i < numberOfFruits; ++i) {
 

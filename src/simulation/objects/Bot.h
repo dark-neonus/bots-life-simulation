@@ -140,6 +140,12 @@ public:
         return pos.sqrDistanceTo(object->pos) <= sqrSeeDistance;
     }
 
+    /// @brief Spawns a new bot if there is enough food and a valid simulation context.
+    void actionSpawnBot();
+
+    /// @brief Forces the bot to write its name in the DeathNote.
+    void actionSuicide();
+
     void update() override
     {
         // Change values just to display debug values drawing
@@ -149,6 +155,9 @@ public:
             if (food.get() == 0)
             {
                 health.decrease(0.5);
+            } else if (food.get() > food.getMax() * 0.3f) {
+                //actionSpawnBot();
+                //actionSuicide();
             }
         }
         auto objectsInVision = getObjectsInVision();

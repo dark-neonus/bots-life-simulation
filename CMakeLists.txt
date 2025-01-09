@@ -16,8 +16,8 @@ set(SRC_DIR ${PROJECT_ROOT}/src)
 set(LIBS_DIR ${PROJECT_ROOT}/libs)
 set(IMGUI_DIR ${LIBS_DIR}/imgui)
 set(BACKENDS_DIR ${IMGUI_DIR}/backends)
-# set(VEC2_DIR ${SRC_DIR}/vector2d)
 set(SIMULATION_DIR ${SRC_DIR}/simulation)
+set(GUI_DIR ${SIMULATION_DIR}/gui)  # Added correct path for gui.cpp
 
 # Find all source files
 file(GLOB_RECURSE SOURCES 
@@ -25,12 +25,17 @@ file(GLOB_RECURSE SOURCES
     ${IMGUI_DIR}/*.cpp
 )
 
+# Validate that the required file exists
+if(NOT EXISTS "${GUI_DIR}/gui.cpp")
+    message(FATAL_ERROR "Missing required file: ${GUI_DIR}/gui.cpp")
+endif()
+
 # Include directories
 include_directories(
     ${IMGUI_DIR}
     ${BACKENDS_DIR}
-    # ${VEC2_DIR}
     ${SIMULATION_DIR}
+    ${GUI_DIR}  # Include GUI directory
 )
 
 # Set the compiler flags for Debug and Release
