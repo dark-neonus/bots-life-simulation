@@ -60,13 +60,15 @@ public:
             if (auto validSimulation = simulation.lock()) {
                 validSimulation->addObject(
                     SimulationObjectType::FoodObject,
-                    validSimulation, foodPosition,
-                    colorInt(0, 255, 0),
-                    foodMaxCalories,
-                    foodMaxCalories * 0.1f,
-                    foodGrowthRate,
-                    foodDecayRate,
-                    foodIsMature
+                    std::make_shared<FoodObject>(
+                        validSimulation, foodPosition,
+                        colorInt(0, 255, 0),
+                        foodMaxCalories,
+                        foodMaxCalories * 0.1f,
+                        foodGrowthRate,
+                        foodDecayRate,
+                        foodIsMature
+                    )
                 );
             }
         }

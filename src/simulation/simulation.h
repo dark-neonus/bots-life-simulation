@@ -36,7 +36,6 @@ class Simulation : public std::enable_shared_from_this<Simulation>
 {
 private:
     std::vector<std::shared_ptr<SimulationObject>> objects;
-    IDManager idManger;
 
     // std::weak_ptr<SimulationObject> viewInfoObject;
     std::vector<std::weak_ptr<SimulationObject>> selectedObjects;
@@ -48,6 +47,7 @@ private:
     std::queue<std::shared_ptr<SimulationObject>> deathNote;
 
 public:
+    IDManager idManger;
     // This property must be first
     const int unit;
 
@@ -77,8 +77,7 @@ public:
     /// @param window_pos Position of window to draw on. Must add it to objects position
     void render(ImDrawList *draw_list, ImVec2 window_pos, ImVec2 window_size, bool drawDebugLayer = true); // definition in simulation.cpp
     
-    template <typename... Args>
-    void addObject(SimulationObjectType type, Args&&... args);
+    void addObject(SimulationObjectType type, std::shared_ptr<SimulationObject> obj);
 
     void selectSingleObject(std::shared_ptr<SimulationObject> objectToSelect);
 
@@ -123,5 +122,9 @@ public:
     std::shared_ptr<std::vector<std::shared_ptr<SimulationObject>>> getObjects()
     {
         return std::make_shared<std::vector<std::shared_ptr<SimulationObject>>>(objects);
+    }
+
+    void rawAddToObjectList(std::shared_ptr<SimulationObject> obj) {
+        objects.push_back(obj);
     }
 };

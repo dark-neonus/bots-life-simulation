@@ -142,27 +142,33 @@ int main(int, char**)
     std::shared_ptr<Simulation> simulation = std::make_shared<Simulation>(6, 6, 35);
 
     // Add SimulationObjects
-    simulation->addObject(SimulationObjectType::BaseObject, simulation, Vec2(0, 0), 3, colorInt(255, 0, 0));
-    simulation->addObject(SimulationObjectType::BaseObject, simulation, Vec2(100, 100), 5, colorInt(255, 255, 0));
-    simulation->addObject(SimulationObjectType::BaseObject, simulation, Vec2(100, 150), 5, colorInt(255, 255, 0));
-    simulation->addObject(SimulationObjectType::BaseObject, simulation, Vec2(150, 100), 5, colorInt(255, 255, 0));
-    simulation->addObject(SimulationObjectType::BaseObject, simulation, Vec2(50, 110), 10, colorInt(0, 0, 255, 120));
-    simulation->addObject(SimulationObjectType::BaseObject, simulation, Vec2(60, 70), 30, colorInt(0, 125, 0));
+    // Add BaseObjects
+    simulation->addObject(SimulationObjectType::BaseObject, std::make_shared<SimulationObject>(simulation, Vec2(0, 0), 3, colorInt(255, 0, 0)));
+    simulation->addObject(SimulationObjectType::BaseObject, std::make_shared<SimulationObject>(simulation, Vec2(100, 100), 5, colorInt(255, 255, 0)));
+    simulation->addObject(SimulationObjectType::BaseObject, std::make_shared<SimulationObject>(simulation, Vec2(100, 150), 5, colorInt(255, 255, 0)));
+    simulation->addObject(SimulationObjectType::BaseObject, std::make_shared<SimulationObject>(simulation, Vec2(150, 100), 5, colorInt(255, 255, 0)));
+    simulation->addObject(SimulationObjectType::BaseObject, std::make_shared<SimulationObject>(simulation, Vec2(50, 110), 10, colorInt(0, 0, 255, 120)));
+    simulation->addObject(SimulationObjectType::BaseObject, std::make_shared<SimulationObject>(simulation, Vec2(60, 70), 30, colorInt(0, 125, 0)));
 
     // Add FoodObjects
-    simulation->addObject(SimulationObjectType::FoodObject, simulation, Vec2(200, 200), colorInt(100, 0, 0), simulation->unit * 10, simulation->unit * 5, 1.0f, 2.0f, true);
-    simulation->addObject(SimulationObjectType::FoodObject, simulation, Vec2(250, 200), colorInt(100, 0, 0), simulation->unit * 20, simulation->unit * 10, 1.0f, 2.0f, true);
-    simulation->addObject(SimulationObjectType::FoodObject, simulation, Vec2(300, 200), colorInt(100, 0, 0), simulation->unit * 30, simulation->unit * 15, 1.0f, 2.0f, true);
-    simulation->addObject(SimulationObjectType::FoodObject, simulation, Vec2(350, 200), colorInt(100, 0, 0), simulation->unit * 40, simulation->unit * 20, 1.0f, 2.0f, true);
+    simulation->addObject(SimulationObjectType::FoodObject, std::make_shared<FoodObject>(simulation, Vec2(200, 200), colorInt(100, 0, 0), simulation->unit * 10, simulation->unit * 5, 1.0f, 2.0f, true));
+    simulation->addObject(SimulationObjectType::FoodObject, std::make_shared<FoodObject>(simulation, Vec2(250, 200), colorInt(100, 0, 0), simulation->unit * 20, simulation->unit * 10, 1.0f, 2.0f, true));
+    simulation->addObject(SimulationObjectType::FoodObject, std::make_shared<FoodObject>(simulation, Vec2(300, 200), colorInt(100, 0, 0), simulation->unit * 30, simulation->unit * 15, 1.0f, 2.0f, true));
+    simulation->addObject(SimulationObjectType::FoodObject, std::make_shared<FoodObject>(simulation, Vec2(350, 200), colorInt(100, 0, 0), simulation->unit * 40, simulation->unit * 20, 1.0f, 2.0f, true));
 
     // Add TreeObjects
-    simulation->addObject(SimulationObjectType::TreeObject, simulation, Vec2(200, 150), 3, 700.0f, 1.0f, 0.5f, 500.0f, true);
-    simulation->addObject(SimulationObjectType::TreeObject, simulation, Vec2(250, 150), 5, 300.0f, 1.2f, 2.5f, 400.0f, false);
-    simulation->addObject(SimulationObjectType::TreeObject, simulation, Vec2(350, 150), 10, 200.0f, 1.0f, 1.5f, 700.0f, false);
+    simulation->addObject(SimulationObjectType::TreeObject, std::make_shared<TreeObject>(simulation, Vec2(200, 150), 3, 700.0f, 1.0f, 0.5f, 500.0f, true));
+    simulation->addObject(SimulationObjectType::TreeObject, std::make_shared<TreeObject>(simulation, Vec2(250, 150), 5, 300.0f, 1.2f, 2.5f, 400.0f, false));
+    simulation->addObject(SimulationObjectType::TreeObject, std::make_shared<TreeObject>(simulation, Vec2(350, 150), 10, 200.0f, 1.0f, 1.5f, 700.0f, false));
 
     // Add BotObjects
-    simulation->addObject(SimulationObjectType::BotObject, simulation, Vec2(300, 300), 100, 80, 30, 5.0f, 8);
-    simulation->addObject(SimulationObjectType::BotObject, simulation, Vec2(400, 300), 200, 40, 20, 2.0f, 20);
+    simulation->addObject(SimulationObjectType::BotObject, std::make_shared<BotObject>(simulation, Vec2(300, 300), 100, 80, 30, 5.0f, 8));
+    simulation->addObject(SimulationObjectType::BotObject, 
+                                                                std::make_shared<BotObject>(
+                                                                    simulation, Vec2(400, 300), 200, 40, 20, 2.0f, 20
+                                                                )
+                                                                );
+
 
     // Spawn 400 bots for crash test
     // for (int y = 0; y < 20; y++) {

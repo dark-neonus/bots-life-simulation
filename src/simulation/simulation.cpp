@@ -1,4 +1,8 @@
 #include "simulation.h"
+#include "objects/SimulationObject.h"
+#include "objects/Food.h"
+#include "objects/Tree.h"
+#include "objects/Bot.h"
 
 Simulation::Simulation(int numberOfChunksX_, int numberOfChunksY_, int unit_) : unit(unit_),
         chunkManager(std::make_unique<ChunkManager>(numberOfChunksX_, numberOfChunksY_, float(unit * 10))),
@@ -126,38 +130,16 @@ void Simulation::selectSingleObject(std::shared_ptr<SimulationObject> objectToSe
     }
 }
 
-template <typename... Args>
-void Simulation::addObject(SimulationObjectType objectType, Args &&...args) {
-    switch (objectType)
-    {
-    case SimulationObjectType::BaseObject:
-        addObjectToSimulation<SimulationObject>(shared_from_this(), std::forward<Args>(args)...);
-        break;
-    case SimulationObjectType::FoodObject:
-        addObjectToSimulation<FoodObject>(shared_from_this(), std::forward<Args>(args)...);
-        break;
-    case SimulationObjectType::TreeObject:
-        addObjectToSimulation<TreeObject>(shared_from_this(), std::forward<Args>(args)...);
-        break;
-    case SimulationObjectType::BotObject:
-        addObjectToSimulation<BotObject>(shared_from_this(), std::forward<Args>(args)...);
-        break;
-    default:
-        std::runtime_error("Invalid boject type!");
-    }
-}
-
 template <typename T, typename... Args>
-T* addObjectToSimulation(std::shared_ptr<Simulation> simulation, Args&&... args)
+T* addObjectToSimulation(std::shared_ptr<Simulation> simulation, std::shared_ptr<T> obj_)
 {
-    auto obj = std::make_shared<T>(std::forward<Args>(args)...);
+    std::shared_ptr<T> obj = std::make_shared<T>(*obj_);
 
     // Check if position is valid (inside map)
     if (obj->pos.x < 0 || obj->pos.y < 0 ||
         obj->pos.x > simulation->chunkManager->mapWidth || obj->pos.y > simulation->chunkManager->mapHeight) {
         throw std::invalid_argument("Position of object is out of simualtion map. Pos: " + obj->pos.text());
     }
-    // !!!! This must be working code, just uncomment it !!!!
     
     // Assign chunk to object and object to chunk
     std::shared_ptr<Chunk> objectsChunk = simulation->chunkManager->whatChunkHere(obj->pos);
@@ -171,8 +153,28 @@ T* addObjectToSimulation(std::shared_ptr<Simulation> simulation, Args&&... args)
 
     obj->id.set(simulation->idManger.getAssignValue());
 
-    simulation->objects.push_back(obj);
+    simulation->rawAddToObjectList(obj);
     return obj.get();
+}
+
+void Simulation::addObject(SimulationObjectType objectType, std::shared_ptr<SimulationObject> obj) {
+    switch (objectType)
+    {
+    case SimulationObjectType::BaseObject:
+        addObjectToSimulation<SimulationObject>(shared_from_this(), std::dynamic_pointer_cast<SimulationObject>(obj));
+        break;
+    case SimulationObjectType::FoodObject:
+        addObjectToSimulation<FoodObject>(shared_from_this(), std::dynamic_pointer_cast<FoodObject>(obj));
+        break;
+    case SimulationObjectType::TreeObject:
+        addObjectToSimulation<TreeObject>(shared_from_this(), std::dynamic_pointer_cast<TreeObject>(obj));
+        break;
+    case SimulationObjectType::BotObject:
+        addObjectToSimulation<BotObject>(shared_from_this(), std::dynamic_pointer_cast<BotObject>(obj));
+        break;
+    default:
+        std::runtime_error("Invalid object type!");
+    }
 }
 
 void Simulation::log(Logger::LogType logType, const char *fmt, ...)
