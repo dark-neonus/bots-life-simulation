@@ -4,6 +4,7 @@
 
 #include "GeneralFunctions.h"
 #include "RangeValue.h"
+#include "Counter.h"
 #include "Vec2.h"
 #include "Logger.h"
 #include "objectSet.h"

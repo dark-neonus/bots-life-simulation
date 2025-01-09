@@ -12,7 +12,8 @@ private:
     float growthRate;
     float decayRate;
 
-    bool isMature;
+    Counter growingTime;
+    Counter matureTime;
 
 public:
     FoodObject(std::shared_ptr<Simulation> simulation, Vec2<float> position, ImVec4 color,
@@ -21,7 +22,8 @@ public:
         calories(calories_, 0.0f, maxCalories_),
         growthRate(growthRate_),
         decayRate(decayRate_),
-        isMature(isMature_)
+        growingTime(isMature_ ? int(calories.getMax() / growthRate) : 0, int(calories.getMax() / growthRate)),
+        matureTime(isMature_ ? 50 : 0, 50)
     {
     }
      
@@ -43,15 +45,31 @@ public:
     }
 
     void update() override {
-        if (!isMature) {
-            calories.increase(growthRate);
-            if (calories.get() >= calories.getMax()) {
-                isMature = true;
+        if (growingTime.isMax()) {
+            if (matureTime.isMax()) {
+                calories.decrease(decayRate);
+                
+            }
+            else {
+                matureTime.increment();
             }
         }
         else {
-            decreaseCalories(decayRate);
+            growingTime.increment();
+            calories.increase(growthRate);
         }
+        if (calories.get() == 0.0f) {
+            markForDeletion();
+        }
+        // if (!isMature) {
+        //     calories.increase(growthRate);
+        //     if (calories.get() >= calories.getMax()) {
+        //         isMature = true;
+        //     }
+        // }
+        // else {
+        //     decreaseCalories(decayRate);
+        // }
     }
 
     void draw(ImDrawList *draw_list, ImVec2 drawing_delta_pos) override
@@ -71,8 +89,9 @@ public:
         ImGui::SeparatorText("Food Object");
         // TODO: Here in future we need to specify min and max value for calories
         ImGui::SliderFloat("Calories", calories.valuePointer(), calories.getMin(), calories.getMax(), "%.1f");
+        ImGui::SliderInt("GrowingTime", growingTime.valuePointer(), growingTime.getMin(), growingTime.getMax());
         ImGui::SliderFloat("GrowthRate", &growthRate, 0.0f, 50.0f, "%.1f");
+        ImGui::SliderInt("MatureTime", matureTime.valuePointer(), matureTime.getMin(), matureTime.getMax());
         ImGui::SliderFloat("DecayRate", &decayRate, 0.0f, 50.0f, "%.1f");
-        ImGui::Checkbox("Mature", &isMature);
     }
 };
