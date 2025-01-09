@@ -3,7 +3,15 @@
 #include "objects/Food.h"
 #include "simulation.h"
 
-void BotObject::actionSpawnBot() {
+void BotObject::actionSpawnBot(float newHealth, float newFood,
+    int newSeeDistance, float newSpeed, float newDamage) {
+
+    if (newHealth < 0) newHealth = health.getMax();
+    if (newFood < 0) newFood = food.getMax();
+    if (newSeeDistance < 0) newSeeDistance = see_distance;
+    if (newSpeed < 0) newSpeed = speed;
+    if (newDamage < 0) newDamage = damage;
+
     const float spawnCost = food.getMax() * 0.3f;
 
     if (food.get() < spawnCost) {
@@ -16,7 +24,7 @@ void BotObject::actionSpawnBot() {
             pos.y - (rand() % 100 - 50)
         );
 
-        // Makes position of spawn valid
+        // Makes position of spawn valid 
         auto clamp = [](int value, int minVal, int maxVal) -> int {
             if (value < minVal) return minVal;
             if (value > maxVal) return maxVal;
