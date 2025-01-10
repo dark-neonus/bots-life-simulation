@@ -111,4 +111,14 @@ public:
         float destinationY = std::min(_y.getMax(), std::max(_y.getMin(), destination_.y - height()));
         destination = Vec2<float>(destinationX, destinationY);
     }
+
+    /// @brief Returns the top-left corner coordinates of the camera.
+    Vec2<float> getTopLeft() {
+        return Vec2<float>(x(), y());
+    }
+
+    /// @brief Returns the bottom-right corner coordinates of the camera.
+    Vec2<float> getBottomRight() {
+        return Vec2<float>(x() + width(), y() + height());
+    }
 };

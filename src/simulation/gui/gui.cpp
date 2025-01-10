@@ -11,7 +11,11 @@ void createGui(std::shared_ptr<Simulation> simulation, ImGuiIO& io) {
     static auto logicTimeEnd = std::chrono::high_resolution_clock::now();
     static std::chrono::duration<double, std::milli> logicTimeElapsed;
     static double logicFramerate;
-
+    static bool isSimulationRunning = true;
+    
+    if (ImGui::IsKeyPressed(ImGuiKey_Space)) {
+        isSimulationRunning = !isSimulationRunning;
+    }
 
     ImGuiID dockspace_id = ImGui::DockSpaceOverViewport();
     static bool dockspaceInit = true;
@@ -46,7 +50,7 @@ void createGui(std::shared_ptr<Simulation> simulation, ImGuiIO& io) {
         ImVec2 window_size = ImGui::GetWindowSize();
 
         logicTimeStart = std::chrono::high_resolution_clock::now(); 
-        simulation->update();
+        simulation->update(isSimulationRunning);
         simulation->afterUpdate();
         logicTimeEnd = std::chrono::high_resolution_clock::now();
         logicTimeElapsed = logicTimeEnd - logicTimeStart;

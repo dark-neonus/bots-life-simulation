@@ -61,7 +61,7 @@ public:
     Simulation(int numberOfChunksX_, int numberOfChunksY_, int unit_ = 10);
 
     /// @brief Update all objects in simulation
-    void update();
+    void update(bool isSimulationRunning);
 
     /// @brief Adds a SimulationObject to the death note queue for deletion after the update.
     void addToDeathNote(std::shared_ptr<SimulationObject> obj)
