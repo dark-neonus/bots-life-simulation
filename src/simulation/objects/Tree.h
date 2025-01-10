@@ -3,6 +3,7 @@
 #include "simulation.h"
 #include "objects/SimulationObject.h"
 #include "objects/Food.h"
+#include "protocols/shadows/ShadowTreeObject.h"
 
 class TreeObject : public SimulationObject
 {
@@ -16,7 +17,8 @@ private:
     float foodSpawnCooldownMax;
 protected:
     int numberOfFruits;
-
+private:
+    std::shared_ptr<ShadowTreeObject> shadow;
 public:
     TreeObject(std::shared_ptr<Simulation> simulation, Vec2<float> position, int numberOfFruits_,
         float foodMaxCalories_, float foodGrowthRate_, float foodDecayRate_, float foodSpawnCooldownMax_, bool foodIsMature_)
@@ -27,12 +29,20 @@ public:
         foodIsMature(foodIsMature_),
         foodSpawnCooldown(foodSpawnCooldownMax_),
         foodSpawnCooldownMax(foodSpawnCooldownMax_),
-        numberOfFruits(numberOfFruits_)
+        numberOfFruits(numberOfFruits_),
+        shadow(std::make_shared<ShadowTreeObject>(id.get(), pos, getRadius(), numberOfFruits))
     {
     }
 
     SimulationObjectType type() const override {
         return SimulationObjectType::TreeObject;
+    }
+
+    /// @brief Getter for the shadow object (const version).
+    /// @return A const shared pointer to the shadow object.
+    std::shared_ptr<const ShadowTreeObject> getShadow() const
+    {
+        return shadow;
     }
 
     void update() override

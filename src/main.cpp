@@ -167,12 +167,12 @@ int main(int, char**)
 
 
     // Spawn 400 bots for crash test
-     /*for (int y = 0; y < 20; y++) {
-         for (int x = 0; x < 20; x++) {
-             simulation->addObject(SimulationObjectType::BotObject, std::make_shared<BotObject>(simulation, Vec2(200 + x * 40, 200 + y * 40), 200, 80, 100, 2.0f, 20));
-         }
-     }*/
 
+    // for (int y = 0; y < 20; y++) {
+    //     for (int x = 0; x < 20; x++) {
+    //         simulation->addObject(SimulationObjectType::BotObject, std::make_shared<BotObject>(simulation, Vec2(200 + x*40, 200 + y*40), 200, 80, 100, 2.0f, 20));
+    //     }
+    // 
     // Main loop
 #ifdef __EMSCRIPTEN__
     // For an Emscripten build we are disabling file-system access, so let's not attempt to do a fopen() of the imgui.ini file.
