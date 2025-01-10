@@ -11,12 +11,17 @@
 #include "protocols/shadows/ShadowBotObject.h"
 
 class FoodObject;
+// class TreeObject;
 
 #define DEFAULT_DEBUG_DRAWING true
 
 using objectSet = std::unordered_set<std::weak_ptr<SimulationObject>,
                                      std::hash<std::weak_ptr<SimulationObject>>,
                                      std::equal_to<std::weak_ptr<SimulationObject>>>;
+
+using shadowObjectSet = std::unordered_set<std::shared_ptr<const ShadowSimulationObject>,
+                                           std::hash<std::shared_ptr<const ShadowSimulationObject>>,
+                                           std::equal_to<std::shared_ptr<const ShadowSimulationObject>>>;
 
 class BotObject : public SimulationObject
 {
@@ -31,7 +36,7 @@ private:
 
     std::shared_ptr<ShadowBotObject> shadow;
 
-    ProtocolsHolder protocolsHolder;
+    std::shared_ptr<ProtocolsHolder> protocolsHolder;
 
 public:
     BotObject(std::shared_ptr<Simulation> simulation, Vec2<int> position, float health_, float food_, int see_distance_, float speed_, float damage_)
@@ -40,7 +45,8 @@ public:
           SimulationObject(simulation, position, convertCaloriesToRadius(food_), colorInt(0, 75, 150)),
           shadow(std::make_shared<ShadowBotObject>(id.get(), pos, getRadius(),
                                                    health.get(), food.get(),
-                                                   see_distance, speed, damage))
+                                                   see_distance, speed, damage)),
+          protocolsHolder(std::make_shared<ProtocolsHolder>())
     {
     }
 
@@ -118,49 +124,9 @@ public:
         return chunks;
     }
 
-    /// @brief Get all objects within the bot's vision range.
-    /// @return A set of weak pointers to the objects in the bot's vision.
-    objectSet getObjectsInVision()
-    {
-        // It may be faster to use std::vector<std::shared_ptr<SimulationObject>>
-        objectSet objectsInVision;
-
-        const int radius = getSeeDistance();
-        const int sqrSeeDistance = radius * radius;
-        auto chunksInVision = getChunksInRadius(pos, radius);
-
-        for (const auto &chunk : chunksInVision)
-        {
-            for (const auto &chunkObject : chunk->getObjects())
-            {
-                if (auto validChunkObject = chunkObject.lock())
-                {
-                    if (isInVision(validChunkObject, sqrSeeDistance) && validChunkObject.get() != this)
-                    {
-                        objectsInVision.insert(validChunkObject);
-                    }
-                }
-            }
-        }
-
-        // Just leaving it here. To run need make Simulation::objects public
-        // objectSet objectsInVision;
-
-        // const int radius = getSeeDistance();
-        // const int sqrSeeDistance = radius * radius;
-        // // auto chunksInVision = getChunksInRadius(pos, radius);
-
-        // if (auto validSimulation = simulation.lock()) {
-        //     for (auto chunkObject : validSimulation->objects) {
-        //         if (isInVision(chunkObject, sqrSeeDistance) && chunkObject.get() != this) {
-        //             objectsInVision.insert(chunkObject);
-        //         }
-        //     }
-        // }
-
-        return objectsInVision;
-    }
-
+    /// @brief Get all objects shadows within the bot's vision range.
+    void getObjectsInVision();
+    
     /// @brief Check if the given object is within the bot's vision range.
     /// @param object The object to check.
     /// @param sqrSeeDistance getSeeDistance() * getSeeDistance() value
@@ -187,7 +153,7 @@ public:
             //     actionSuicide();
             // }
         }
-        auto objectsInVision = getObjectsInVision();
+        getObjectsInVision();
         if (health.get() == 0)
         {
             markForDeletion();

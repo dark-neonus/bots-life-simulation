@@ -9,9 +9,9 @@
 #include "shadows/ShadowTreeObject.h"
 #include "shadows/ShadowBotObject.h"
 
-using shadowObjectSet = std::unordered_set<std::shared_ptr<ShadowSimulationObject>,
-                                           std::hash<std::shared_ptr<ShadowSimulationObject>>,
-                                           std::equal_to<std::shared_ptr<ShadowSimulationObject>>>;
+using shadowObjectSet = std::unordered_set<std::shared_ptr<const ShadowSimulationObject>,
+                                           std::hash<std::shared_ptr<const ShadowSimulationObject>>,
+                                           std::equal_to<std::shared_ptr<const ShadowSimulationObject>>>;
 
 enum BotAction
 {
@@ -167,7 +167,7 @@ struct UpdateProtocol
     std::string lastActionMessage;
 
     /// @brief ShadowBotObject that represnt body of current bot
-    std::shared_ptr<ShadowBotObject> body;
+    std::shared_ptr<const ShadowBotObject> body;
     /*
      * Unordered set of shared_ptr<ShadowBotObject> representing
      * all objects that are in vision radius of bot;
@@ -178,7 +178,7 @@ struct UpdateProtocol
      * shared_ptr<ShadowBotObject> representing nearest bot
      * in the vision. Can be null_ptr if there is no bots in the vision.
      */
-    std::shared_ptr<ShadowBotObject> nearestBot;
+    std::shared_ptr<const ShadowBotObject> nearestBot;
     /*
      * Distance to the nearest bot in the vision.
      * If there is no bots in the vision, its value is -1.0f.
@@ -189,7 +189,7 @@ struct UpdateProtocol
      * shared_ptr<ShadowBotObject> representing nearest enemy(bot of different type)
      * in the vision. Can be null_ptr if there is no enemies in the vision.
      */
-    std::shared_ptr<ShadowBotObject> nearestEnemy;
+    std::shared_ptr<const ShadowBotObject> nearestEnemy;
     /*
      * Distance to the nearest enemy(bot of different type) in the vision.
      * If there is no enemies in the vision, its value is -1.0f.
@@ -200,7 +200,7 @@ struct UpdateProtocol
      * shared_ptr<ShadowFoodObject> representing nearest food
      * in the vision. Can be null_ptr if there is no food in the vision.
      */
-    std::shared_ptr<ShadowFoodObject> nearestFood;
+    std::shared_ptr<const ShadowFoodObject> nearestFood;
     /*
      * Distance to the nearest food in the vision.
      * If there is no food in the vision, its value is -1.0f.
@@ -211,7 +211,7 @@ struct UpdateProtocol
      * shared_ptr<ShadowTreeObject> representing nearest tree
      * in the vision. Can be null_ptr if there is no tree in the vision.
      */
-    std::shared_ptr<ShadowTreeObject> nearestTree;
+    std::shared_ptr<const ShadowTreeObject> nearestTree;
     /*
      * Distance to the nearest tree in the vision.
      * If there is no tree in the vision, its value is -1.0f.
