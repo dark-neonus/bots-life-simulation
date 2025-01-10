@@ -26,7 +26,7 @@ public:
     {
     }
 
-    ShadowSimulationObjectType type() const override { return ShadowSimulationObjectType::BotObject; }
+    ShadowSimulationObjectType type() const override { return ShadowSimulationObjectType::ShadowBotObj; }
 
     float health() const { return _health; }
     float food() const { return _food; }

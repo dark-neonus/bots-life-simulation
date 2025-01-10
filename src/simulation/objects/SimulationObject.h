@@ -5,6 +5,7 @@
 #include "simulation.h"
 #include "chunks.h"
 #include "utilities/utilities.h"
+#include "protocols/shadows/ShadowSimulationObject.h"
 
 class Simulation;
 class ObjectID;
@@ -31,7 +32,6 @@ const char* getTypeString(SimulationObjectType type);
 
 class SimulationObject : public std::enable_shared_from_this<SimulationObject>
 {
-private:
 protected:
     std::weak_ptr<Simulation> simulation;
     // It would be better if SimulationObject::chunk stay protected
@@ -45,6 +45,9 @@ public:
     Vec2<float> pos;
 
     ObjectID id;
+private:
+    std::shared_ptr<ShadowSimulationObject> shadow;
+public:
     
     /// @brief Constructs a SimulationObject with the given parameters.
     /// @param simulation_ A shared pointer to the parent simulation. Used to interact with the simulation context.
@@ -52,7 +55,11 @@ public:
     /// @param radius_ The radius of the object, defining its size.
     /// @param color_ The color of the object represented as an ImVec4 (RGBA format).
     SimulationObject(std::shared_ptr<Simulation> simulation_, Vec2<float> position, int radius_, ImVec4 color_)
-        : simulation(simulation_), radius(radius_), color(ImColor(color_)), pos(position)
+        : simulation(simulation_),
+        radius(radius_),
+        color(ImColor(color_)),
+        pos(position),
+        shadow(std::make_shared<ShadowSimulationObject>(id.get(), pos, getRadius()))
     {
     }
 
@@ -62,6 +69,12 @@ public:
 
     virtual int getRadius() {
         return radius;
+    }
+
+    /// @brief Getter for the shadow object (const version).
+    /// @return A const shared pointer to the shadow object.
+    std::shared_ptr<const ShadowSimulationObject> getBaseShadow() const {
+        return shadow;
     }
 
     std::shared_ptr<Chunk> getChunk() {

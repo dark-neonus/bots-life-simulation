@@ -4,10 +4,10 @@
 
 enum ShadowSimulationObjectType
 {
-    BaseObject,
-    FoodObject,
-    TreeObject,
-    BotObject
+    ShadowBaseObj,
+    ShadowFoodObj,
+    ShadowTreeObj,
+    ShadowBotObj
 };
 
 class ShadowSimulationObject
@@ -26,7 +26,7 @@ public:
     ShadowSimulationObject(unsigned long id_, Vec2<float> pos_, int radius_)
         : _id(id_), _pos(pos_), _radius(radius_) {}
 
-    virtual ShadowSimulationObjectType type() const { return ShadowSimulationObjectType::BaseObject; }
+    virtual ShadowSimulationObjectType type() const { return ShadowSimulationObjectType::ShadowBaseObj; }
 
     unsigned long id() const { return _id; }
     Vec2<float> pos() const { return _pos; }

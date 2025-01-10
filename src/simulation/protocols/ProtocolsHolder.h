@@ -16,4 +16,6 @@ public:
 
     KillProtocol killProtocol;
     KillProtocolResponce killProtocolResponce;
+
+    ProtocolsHolder() {}
 };

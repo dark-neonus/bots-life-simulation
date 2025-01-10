@@ -29,6 +29,8 @@ enum BotAction
 
 struct UpdateProtocolResponce
 {
+    UpdateProtocolResponce() {}
+
     /// @brief Indicate which action to perform and from which member get information
     BotAction actionType;
 
@@ -155,6 +157,8 @@ struct UpdateProtocolResponce
 
 struct UpdateProtocol
 {
+    UpdateProtocol() {}
+    
     /// @brief Type of action performed by bot on the last update
     BotAction lastActionType;
     /// @brief Indicate weather performing last action was successfull or not

@@ -23,6 +23,7 @@ struct InitProtocolResponce
     int b;
 
     // Constructor
+    InitProtocolResponce() {}
     InitProtocolResponce(
         int healthPoints_,
         int foodPoints_,
@@ -52,6 +53,7 @@ struct InitProtocol
     int costumeMessage;
 
     // Constructor
+    InitProtocol() {}
     InitProtocol(const Vec2<float> &botSpawnPosition_, int evolutionPoints_)
         : botSpawnPosition(botSpawnPosition_),
           evolutionPoints(evolutionPoints_) {}

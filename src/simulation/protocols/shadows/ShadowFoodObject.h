@@ -21,7 +21,7 @@ public:
           _calories(calories_), _isGrowing(isGrowing_),
           _isDecaying(isDecaying_) {}
 
-    ShadowSimulationObjectType type() const override { return ShadowSimulationObjectType::FoodObject; }
+    ShadowSimulationObjectType type() const override { return ShadowSimulationObjectType::ShadowFoodObj; }
 
     float calories() const { return _calories; }
     bool isGrowing() const { return _isGrowing; }

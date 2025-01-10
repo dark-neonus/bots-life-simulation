@@ -18,7 +18,7 @@ public:
     {
     }
 
-    ShadowSimulationObjectType type() const override { return ShadowSimulationObjectType::TreeObject; }
+    ShadowSimulationObjectType type() const override { return ShadowSimulationObjectType::ShadowTreeObj; }
 
     int numberOfFruits() const { return _numberOfFruits; }
 };
