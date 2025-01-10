@@ -5,22 +5,22 @@
 struct InitProtocolResponce
 {
     /// @brief Amount of points to spend on health parameter (health capacity)
-    int healthPoints;
+    int healthPoints = 1;
     /// @brief Amount of points to spend on food parameter (calories capacity)
-    int foodPoints;
+    int foodPoints = 1;
     /// @brief Amount of points to spend on vision parameter (distance of vision)
-    int visionPoints;
+    int visionPoints = 1;
     /// @brief Amount of points to spend on speed parameter (max distance per movement)
-    int speedPoints;
+    int speedPoints = 1;
     /// @brief Amount of points to spend on attack parameter (damage dealt by one hit)
-    int attackPoints;
+    int attackPoints = 1;
 
     /// @brief Red value of bot's color
-    int r;
+    int r = 0;
     /// @brief Green value of bot's color
-    int g;
+    int g = 10;
     /// @brief Blue value of bot's color
-    int b;
+    int b = 100;
 
     // Constructor
     InitProtocolResponce() {}

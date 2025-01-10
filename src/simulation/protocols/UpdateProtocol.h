@@ -32,7 +32,7 @@ struct UpdateProtocolResponce
     UpdateProtocolResponce() {}
 
     /// @brief Indicate which action to perform and from which member get information
-    BotAction actionType;
+    BotAction actionType = BotAction::DoNothing;
 
     struct DoNothingInfo
     {

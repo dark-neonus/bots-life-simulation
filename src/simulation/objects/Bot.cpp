@@ -354,10 +354,6 @@ void BotObject::getObjectsInVision()
                     default:
                         throw std::runtime_error("Invalid simulation object type!");
                     }
-                    
-                    // if (protocolsHolder->updateProtocol.distanceToNearestBot == -1.0f ||
-                    //     protocolsHolder->updateProtocol.distanceToNearestBot * protocolsHolder->updateProtocol.distanceToNearestBot < pos.sqrDistanceTo(validChunkObject->pos))
-                    // shadowsInVision.insert(validChunkObject->s);
                 }
             }
         }
@@ -376,9 +372,7 @@ void BotObject::getObjectsInVision()
         protocolsHolder->updateProtocol.distanceToNearestEnemy = sqrtf(protocolsHolder->updateProtocol.distanceToNearestEnemy);
     }
 
-    if (auto validSimulation = simulation.lock()) {
-        validSimulation->log(Logger::LOG, "Obj in vision: %i | Dist to nearest food: %f\n", protocolsHolder->updateProtocol.visibleObjects.size(), protocolsHolder->updateProtocol.distanceToNearestFood);
-    }
-
-    // return shadowsInVision;
+    // if (auto validSimulation = simulation.lock()) {
+    //     validSimulation->log(Logger::LOG, "Obj in vision: %i | Dist to nearest food: %f\n", protocolsHolder->updateProtocol.visibleObjects.size(), protocolsHolder->updateProtocol.distanceToNearestFood);
+    // }
 }
