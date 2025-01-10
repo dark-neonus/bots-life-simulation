@@ -14,5 +14,5 @@ public:
         _numberOfFruits(numberOfFruits_)
         {}
 
-    int numberOfFruits() { return _numberOfFruits; }
+    int numberOfFruits() const { return _numberOfFruits; }
 };

@@ -19,7 +19,7 @@ public:
         _calories(calories_), _isGrowing(isGrowing_),
         _isDecaying(isDecaying_) {}
 
-    float calories() { return _calories; }
-    bool isGrowing() { return _isGrowing; }
-    bool isDecaying() { return _isDecaying; }
+    float calories() const { return _calories; }
+    bool isGrowing() const { return _isGrowing; }
+    bool isDecaying() const { return _isDecaying; }
 };

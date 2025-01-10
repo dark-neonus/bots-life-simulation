@@ -6,8 +6,6 @@ class ShadowBotObject : public ShadowSimulationObject {
 private:
     friend class BotObject;
 
-    
-
     float _health;
     float _food;
     int _seeDistance;
@@ -26,9 +24,9 @@ public:
         _damage(damage_)
         {}
 
-    float health() { return _health; }
-    float food() { return _food; }
-    int seeDistance() { return _seeDistance; }
-    float speed() { return _speed; }
-    float damage() { return _damage; }
+    float health() const { return _health; }
+    float food() const { return _food; }
+    int seeDistance() const { return _seeDistance; }
+    float speed() const { return _speed; }
+    float damage() const { return _damage; }
 };
