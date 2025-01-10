@@ -10,8 +10,9 @@
 #include "protocols/ProtocolsHolder.h"
 #include "protocols/shadows/ShadowBotObject.h"
 
+#include "protocols/brain/BotBrain.h"
+
 class FoodObject;
-// class TreeObject;
 
 #define DEFAULT_DEBUG_DRAWING true
 
@@ -38,8 +39,16 @@ private:
 
     std::shared_ptr<ProtocolsHolder> protocolsHolder;
 
+    std::shared_ptr<BotBrain> brain;
+
 public:
-    BotObject(std::shared_ptr<Simulation> simulation, Vec2<int> position, float health_, float food_, int see_distance_, float speed_, float damage_)
+    BotObject(std::shared_ptr<Simulation> simulation,
+              Vec2<int> position,
+              float health_,
+              float food_,
+              int see_distance_,
+              float speed_,
+              float damage_)
         : health(health_, 0, health_), food(food_, 0, food_),
           see_distance(see_distance_), speed(speed_), damage(damage_),
           SimulationObject(simulation, position, convertCaloriesToRadius(food_), colorInt(0, 75, 150)),
@@ -60,6 +69,13 @@ public:
     std::shared_ptr<const ShadowBotObject> getShadow() const
     {
         return shadow;
+    }
+
+    /// @brief Set brain for the bot and connect their protocols holders
+    void setBrainObject(std::shared_ptr<BotBrain> brain_)
+    {
+        brain = brain_;
+        protocolsHolder = brain->protocolsHolder;
     }
 
     /// @brief Return see distance of bot including chunk multiplier
@@ -126,7 +142,7 @@ public:
 
     /// @brief Get all objects shadows within the bot's vision range.
     void getObjectsInVision();
-    
+
     /// @brief Check if the given object is within the bot's vision range.
     /// @param object The object to check.
     /// @param sqrSeeDistance getSeeDistance() * getSeeDistance() value

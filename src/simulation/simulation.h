@@ -4,6 +4,7 @@
 #include "utilities/utilities.h"
 #include "chunks.h"
 #include "objects/SimulationObject.h"
+#include "settings/SimulationSettings.h"
 
 #include <vector>
 #include <queue>
@@ -29,6 +30,7 @@ class SimulationObject;
 class FoodObject;
 class TreeObject;
 class BotObject;
+class BotBrain;
 
 class Simulation;
 
@@ -58,7 +60,9 @@ public:
 
     Camera camera;
 
-    Simulation(int numberOfChunksX_, int numberOfChunksY_, int unit_ = 10);
+    std::shared_ptr<const SimulationSettings> settings;
+
+    Simulation(std::shared_ptr<const SimulationSettings> settings_);
 
     /// @brief Update all objects in simulation
     void update(bool isSimulationRunning);
@@ -127,4 +131,8 @@ public:
     void rawAddToObjectList(std::shared_ptr<SimulationObject> obj) {
         objects.push_back(obj);
     }
+
+    /// @brief Create bot object in simulation with the given brain
+    /// @param brain Brain of new bot
+    std::shared_ptr<BotObject> addSmartBot(std::shared_ptr<BotBrain> brain, Vec2<float> pos);
 };

@@ -2,11 +2,12 @@
 
 #include "protocols/ProtocolsHolder.h"
 #include "objects/Bot.h"
-
+#include "simulation.h"
 class BotBrain
 {
 private:
     friend BotObject;
+    friend Simulation;
 protected:
     /// @brief Holder for all protocols of communication between brain and simulation
     std::shared_ptr<ProtocolsHolder> protocolsHolder;
