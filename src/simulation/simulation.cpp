@@ -3,6 +3,7 @@
 #include "objects/Food.h"
 #include "objects/Tree.h"
 #include "objects/Bot.h"
+#include "gui/gui.h"
 
 Simulation::Simulation(int numberOfChunksX_, int numberOfChunksY_, int unit_) : unit(unit_),
         chunkManager(std::make_unique<ChunkManager>(numberOfChunksX_, numberOfChunksY_, float(unit * 10))),
@@ -11,7 +12,11 @@ Simulation::Simulation(int numberOfChunksX_, int numberOfChunksY_, int unit_) : 
 {
 }
 
-void Simulation::update() {
+void Simulation::update(bool isSimulationRunning) {
+    if (!isSimulationRunning) {
+        return;
+    }
+
     std::vector<std::shared_ptr<SimulationObject>> objects_to_update = objects;
 
     for (auto& obj : objects_to_update) {
@@ -45,6 +50,15 @@ void Simulation::render(ImDrawList *draw_list, ImVec2 window_pos, ImVec2 window_
     camera.setSize(window_size.x - 20, window_size.y - 40);
     camera.update();
     ImVec2 drawing_delta_pos = ImVec2(window_pos.x - camera.x(), window_pos.y - camera.y());
+
+    auto cameraStartPos = camera.getTopLeft();
+    auto cameraEndPos = camera.getBottomRight();
+
+    int startChunkX = std::max(0, int(cameraStartPos.x / chunkManager->chunkSize - 1));
+    int startChunkY = std::max(0, int(cameraStartPos.y / chunkManager->chunkSize - 1));
+
+    int endChunkX = std::min(chunkManager->numberOfChunksX - 1, int(cameraEndPos.x / chunkManager->chunkSize + 1));
+    int endChunkY = std::min(chunkManager->numberOfChunksY - 1, int(cameraEndPos.y / chunkManager->chunkSize + 1));
 
     ImVec2 mouse_pos = ImGui::GetMousePos();
     ImVec2 mouse_map_pos = ImVec2(mouse_pos.x + camera.x(), mouse_pos.y + camera.y());
@@ -100,12 +114,24 @@ void Simulation::render(ImDrawList *draw_list, ImVec2 window_pos, ImVec2 window_
                                 toImVec2(Vec2<float>(drawing_delta_pos) + validSelectedChunk->endPos), ImColor(colorInt(255, 255, 0, 50)), 0, 0, 2);
     }
     
-    // Draw all objects by chunks
-    for (auto chunk : *chunkManager.get()) {
-        for (auto& obj : chunk->objects) {
-            if (auto validObj = obj.lock()) {
-                validObj->draw(draw_list, drawing_delta_pos);
-                
+    //Draw all objects by chunks
+    //for (auto chunk : *chunkManager.get()) {
+    //    for (auto& obj : chunk->objects) {
+    //        if (auto validObj = obj.lock()) {
+    //            validObj->draw(draw_list, drawing_delta_pos);
+    //            
+    //        }
+    //    }
+    //}
+
+    // Draw objects within visible chunks
+    for (int chunkY = startChunkY; chunkY <= endChunkY; ++chunkY) {
+        for (int chunkX = startChunkX; chunkX <= endChunkX; ++chunkX) {
+            auto chunk = chunkManager->getChunk(chunkX, chunkY);
+            for (auto& obj : chunk->objects) {
+                if (auto validObj = obj.lock()) {
+                    validObj->draw(draw_list, drawing_delta_pos);
+                }
             }
         }
     }
