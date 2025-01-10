@@ -2,7 +2,8 @@
 
 #include "ShadowSimulationObject.h"
 
-class ShadowFoodObject : public ShadowSimulationObject {
+class ShadowFoodObject : public ShadowSimulationObject
+{
 private:
     friend class FoodObject;
 
@@ -10,14 +11,17 @@ private:
 
     bool _isGrowing;
     bool _isDecaying;
+
 public:
     ShadowFoodObject() {}
     ShadowFoodObject(unsigned long id_, Vec2<float> pos_,
-                    float calories_, bool isGrowing_=false,
-                    bool isDecaying_=false)
-        : ShadowSimulationObject(id_, pos_),
-        _calories(calories_), _isGrowing(isGrowing_),
-        _isDecaying(isDecaying_) {}
+                     int radius_, float calories_,
+                     bool isGrowing_ = false, bool isDecaying_ = false)
+        : ShadowSimulationObject(id_, pos_, radius_),
+          _calories(calories_), _isGrowing(isGrowing_),
+          _isDecaying(isDecaying_) {}
+
+    ShadowSimulationObjectType type() const override { return ShadowSimulationObjectType::FoodObject; }
 
     float calories() const { return _calories; }
     bool isGrowing() const { return _isGrowing; }

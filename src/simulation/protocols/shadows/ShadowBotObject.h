@@ -2,7 +2,8 @@
 
 #include "ShadowSimulationObject.h"
 
-class ShadowBotObject : public ShadowSimulationObject {
+class ShadowBotObject : public ShadowSimulationObject
+{
 private:
     friend class BotObject;
 
@@ -15,14 +16,17 @@ private:
 public:
     ShadowBotObject() {}
     ShadowBotObject(unsigned long id_, Vec2<float> pos_,
-                    int health_, int food_,
-                    int seeDistance_, int speed_,
-                    int damage_)
-        : ShadowSimulationObject(id_, pos_),
-        _health(health_), _food(food_),
-        _seeDistance(seeDistance_), _speed(speed_),
-        _damage(damage_)
-        {}
+                    int radius_, int health_,
+                    int food_, int seeDistance_,
+                    int speed_, int damage_)
+        : ShadowSimulationObject(id_, pos_, radius_),
+          _health(health_), _food(food_),
+          _seeDistance(seeDistance_), _speed(speed_),
+          _damage(damage_)
+    {
+    }
+
+    ShadowSimulationObjectType type() const override { return ShadowSimulationObjectType::BotObject; }
 
     float health() const { return _health; }
     float food() const { return _food; }

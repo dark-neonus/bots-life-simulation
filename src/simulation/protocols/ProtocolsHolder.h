@@ -4,7 +4,8 @@
 #include "UpdateProtocol.h"
 #include "KillProtocol.h"
 
-class ProtocolsHolder {
+class ProtocolsHolder
+{
 private:
 public:
     InitProtocol initProtocol;

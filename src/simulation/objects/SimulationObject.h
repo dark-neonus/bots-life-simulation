@@ -14,9 +14,9 @@ class Chunk;
 #define SIMULATION_OBJECT_TYPE_ENUM
 enum class SimulationObjectType {
     BaseObject,
-    BotObject,
     FoodObject,
     TreeObject,
+    BotObject
 };
 #endif
 

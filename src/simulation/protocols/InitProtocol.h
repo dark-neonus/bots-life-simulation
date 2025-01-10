@@ -2,7 +2,8 @@
 
 #include "utilities/Vec2.h"
 
-struct InitProtocolResponce {
+struct InitProtocolResponce
+{
     /// @brief Amount of points to spend on health parameter (health capacity)
     int healthPoints;
     /// @brief Amount of points to spend on food parameter (calories capacity)
@@ -23,25 +24,26 @@ struct InitProtocolResponce {
 
     // Constructor
     InitProtocolResponce(
-        int healthPoints_, 
-        int foodPoints_, 
-        int visionPoints_, 
-        int speedPoints_, 
-        int attackPoints_, 
-        int r_, 
-        int g_, 
+        int healthPoints_,
+        int foodPoints_,
+        int visionPoints_,
+        int speedPoints_,
+        int attackPoints_,
+        int r_,
+        int g_,
         int b_)
         : healthPoints(healthPoints_),
-            foodPoints(foodPoints_),
-            visionPoints(visionPoints_),
-            speedPoints(speedPoints_),
-            attackPoints(attackPoints_),
-            r(r_),
-            g(g_),
-            b(b_) {}
+          foodPoints(foodPoints_),
+          visionPoints(visionPoints_),
+          speedPoints(speedPoints_),
+          attackPoints(attackPoints_),
+          r(r_),
+          g(g_),
+          b(b_) {}
 };
 
-struct InitProtocol {
+struct InitProtocol
+{
     /// @brief Position on which bot will be spawned
     Vec2<float> botSpawnPosition;
     /// @brief Maximal amount of evolution points that can be spent
@@ -50,7 +52,7 @@ struct InitProtocol {
     int costumeMessage;
 
     // Constructor
-    InitProtocol(const Vec2<float>& botSpawnPosition_, int evolutionPoints_)
+    InitProtocol(const Vec2<float> &botSpawnPosition_, int evolutionPoints_)
         : botSpawnPosition(botSpawnPosition_),
           evolutionPoints(evolutionPoints_) {}
 };

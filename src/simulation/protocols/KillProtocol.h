@@ -1,6 +1,7 @@
 #pragma once
 
-struct KillProtocolResponce {
+struct KillProtocolResponce
+{
     /*
      * Indicate if kill process went okay, or not.
      * It is good practise to set this to true, if everything is okay.
@@ -8,6 +9,7 @@ struct KillProtocolResponce {
     bool success;
 };
 
-struct KillProtocol {
+struct KillProtocol
+{
     /// Just nothing here :)
 };

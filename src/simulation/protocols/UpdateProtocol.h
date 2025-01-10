@@ -15,16 +15,16 @@ using shadowObjectSet = std::unordered_set<std::shared_ptr<ShadowSimulationObjec
 
 enum BotAction
 {
-    DoNothing,       ///< Perform no action
-    Move,            ///< Move in a specific direction
-    GoTo,            ///< Move to a target position
-    EatNearest,      ///< Eat the nearest consumable object
-    EatByID,         ///< Eat a specific object by ID
-    AttackNearest,   ///< Attack the nearest target
-    AttackByID,      ///< Attack a specific target by ID
-    Spawn,           ///< Spawn a new bot
-    SpawnSelfCopy,   ///< Spawn a copy of itself
-    Suicide          ///< Self-destruct
+    DoNothing,     ///< Perform no action
+    Move,          ///< Move in a specific direction
+    GoTo,          ///< Move to a target position
+    EatNearest,    ///< Eat the nearest consumable object
+    EatByID,       ///< Eat a specific object by ID
+    AttackNearest, ///< Attack the nearest target
+    AttackByID,    ///< Attack a specific target by ID
+    Spawn,         ///< Spawn a new bot
+    SpawnSelfCopy, ///< Spawn a copy of itself
+    Suicide        ///< Self-destruct
 };
 
 struct UpdateProtocolResponce
@@ -44,8 +44,8 @@ struct UpdateProtocolResponce
 
     struct MoveInfo
     {
-        Vec2<float> direction;       ///< Direction vector for movement
-        float speedMultiplier;       ///< Length of movement vector relative to speed, must be in range [0.0, 1.0]
+        Vec2<float> direction; ///< Direction vector for movement
+        float speedMultiplier; ///< Length of movement vector relative to speed, must be in range [0.0, 1.0]
     };
     MoveInfo moveArgs;
     /// @brief Set action to Move and set its arguments
@@ -62,7 +62,7 @@ struct UpdateProtocolResponce
 
     struct GoToInfo
     {
-        Vec2<float> targetPosition;  ///< Target position to move towards
+        Vec2<float> targetPosition; ///< Target position to move towards
     };
     GoToInfo goToArgs;
     /// @brief Set action to GoTo and set its arguments
@@ -85,7 +85,7 @@ struct UpdateProtocolResponce
 
     struct EatByIDInfo
     {
-        unsigned long objectID;                ///< ID of the object to eat
+        unsigned long objectID; ///< ID of the object to eat
     };
     EatByIDInfo eatByIDArgs;
     /// @brief Set action to EatByID and set its arguments
@@ -108,7 +108,7 @@ struct UpdateProtocolResponce
 
     struct AttackByIDInfo
     {
-        unsigned long targetID;                ///< ID of the target to attack
+        unsigned long targetID; ///< ID of the target to attack
     };
     AttackByIDInfo attackByIDArgs;
     /// @brief Set action to AttackByID and set its arguments
@@ -152,7 +152,6 @@ struct UpdateProtocolResponce
         actionType = BotAction::Suicide;
     }
 };
-
 
 struct UpdateProtocol
 {
