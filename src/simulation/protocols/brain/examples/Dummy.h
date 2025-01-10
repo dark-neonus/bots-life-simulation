@@ -5,10 +5,10 @@
 class DummyBotBrain : public BotBrain
 {
 public:
-    /// @brief User defined brain class must have constructor that takes 0 arguments
-    DummyBotBrain() {}
+    /// @brief User defined brain class must have constructor that takes 0 arguments and use ": BotBrain()"
+    DummyBotBrain() : BotBrain() {}
 
-    void init() override
+    void init() override 
     { // User defined brain class must have override init function that takes 0 arguments
         protocolsHolder->initProtocolResponce.r = 200;
         protocolsHolder->initProtocolResponce.g = 70;
@@ -23,7 +23,7 @@ public:
 
     void update() override
     { // User defined brain class must have override update function that takes 0 arguments
-        protocolsHolder->updateProtocolResponce.actionMove(Vec2<float>(-1.0f, 1.0f), 0.6f);
+        protocolsHolder->updateProtocolResponce.actionMove(Vec2<float>(1.0f, 1.0f), 0.6f);
     }
 
     void kill() override

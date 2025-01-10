@@ -57,6 +57,7 @@ public:
                                                    see_distance, speed, damage)),
           protocolsHolder(std::make_shared<ProtocolsHolder>())
     {
+        protocolsHolder->updateProtocol.body = std::const_pointer_cast<const ShadowBotObject>(shadow);
     }
 
     SimulationObjectType type() const override
@@ -72,11 +73,7 @@ public:
     }
 
     /// @brief Set brain for the bot and connect their protocols holders
-    void setBrainObject(std::shared_ptr<BotBrain> brain_)
-    {
-        brain = brain_;
-        protocolsHolder = brain->protocolsHolder;
-    }
+    void setBrainObject(std::shared_ptr<BotBrain> brain_);
 
     /// @brief Return see distance of bot including chunk multiplier
     int getSeeDistance() const
@@ -141,7 +138,7 @@ public:
     }
 
     /// @brief Get all objects shadows within the bot's vision range.
-    void getObjectsInVision();
+    void packProtocol();
 
     /// @brief Check if the given object is within the bot's vision range.
     /// @param object The object to check.
@@ -153,40 +150,7 @@ public:
         return pos.sqrDistanceTo(object->pos) <= sqrSeeDistance;
     }
 
-    void update() override
-    {
-        // Change values just to display debug values drawing
-        if (debug_drawing)
-        {
-            // food.decrease(0.1);
-            if (food.get() == 0)
-            {
-                health.decrease(0.5);
-            }
-            // else if (food.get() > food.getMax() * 0.3f)
-            // {
-            //     actionSpawnBot();
-            //     actionSuicide();
-            // }
-        }
-        getObjectsInVision();
-        if (health.get() == 0)
-        {
-            markForDeletion();
-        }
-        else if (health.get() < health.getMax() && food.get() >= food.getMax() / 2)
-        {
-            // Healing logic
-            health.increase(0.1);
-            food.decrease(0.2);
-        }
-        shadow->_health = health.get();
-        shadow->_food = food.get();
-        shadow->_seeDistance = getSeeDistance();
-        shadow->_speed = speed;
-        shadow->_damage = damage;
-        shadow->_pos = pos;
-    }
+    void update() override;
 
     void draw(ImDrawList *draw_list, ImVec2 drawing_delta_pos) override
     {
@@ -243,6 +207,8 @@ public:
     void onDestroy() override;
 
     // Actions
+
+    void parseProtocolResponce();
 
     void actionMove(Vec2<float> direction, float speedMultyplier = 1.0f);
 

@@ -7,6 +7,63 @@
 #include "objects/Tree.h"
 #include "simulation.h"
 
+#include "protocols/ProtocolsHolder.h"
+#include "protocols/brain/BotBrain.h"
+
+void BotObject::update()
+{
+    // Change values just to display debug values drawing
+    if (debug_drawing)
+    {
+        // food.decrease(0.1);
+        if (food.get() == 0)
+        {
+            health.decrease(0.5);
+        }
+        // else if (food.get() > food.getMax() * 0.3f)
+        // {
+        //     actionSpawnBot();
+        //     actionSuicide();
+        // }
+    }
+    if (health.get() == 0)
+    {
+        markForDeletion();
+    }
+    else if (health.get() < health.getMax() && food.get() >= food.getMax() / 2)
+    {
+        // Healing logic
+        health.increase(0.1);
+        food.decrease(0.2);
+    }
+    shadow->_health = health.get();
+    shadow->_food = food.get();
+    shadow->_seeDistance = getSeeDistance();
+    shadow->_speed = speed;
+    shadow->_damage = damage;
+    shadow->_pos = pos;
+    packProtocol();
+    brain->update();
+    parseProtocolResponce();
+}
+
+void BotObject::parseProtocolResponce() {
+    switch (static_cast<int>(protocolsHolder->updateProtocolResponce.actionType))
+    {
+    case BotAction::DoNothing:
+        break;
+    case BotAction::Move:
+        actionMove(
+            protocolsHolder->updateProtocolResponce.moveArgs.direction,
+            protocolsHolder->updateProtocolResponce.moveArgs.speedMultiplier
+            );
+        break;
+    
+    default:
+        break;
+    }
+}
+
 void BotObject::actionMove(Vec2<float> direction, float speedMultyplier)
 {
     food.decrease(0.1);
@@ -280,9 +337,10 @@ void BotObject::onDestroy()
                                        5.0f,
                                        true));
     }
+    brain->kill();
 }
 
-void BotObject::getObjectsInVision()
+void BotObject::packProtocol()
 {
     // It may be faster to use std::vector<std::shared_ptr<SimulationObject>>
 
@@ -375,4 +433,10 @@ void BotObject::getObjectsInVision()
     // if (auto validSimulation = simulation.lock()) {
     //     validSimulation->log(Logger::LOG, "Obj in vision: %i | Dist to nearest food: %f\n", protocolsHolder->updateProtocol.visibleObjects.size(), protocolsHolder->updateProtocol.distanceToNearestFood);
     // }
+}
+
+void BotObject::setBrainObject(std::shared_ptr<BotBrain> brain_)
+{
+    brain = brain_;
+    protocolsHolder = brain->protocolsHolder;
 }

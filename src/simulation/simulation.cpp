@@ -308,6 +308,8 @@ std::shared_ptr<BotObject> Simulation::addSmartBot(std::shared_ptr<BotBrain> bra
         )
     );
 
+    bot->setBrainObject(brain);
+
     // Check if position is valid (inside map)
     if (bot->pos.x < 0 || bot->pos.y < 0 ||
         bot->pos.x > chunkManager->mapWidth || bot->pos.y > chunkManager->mapHeight)
