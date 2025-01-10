@@ -14,7 +14,7 @@ class ShadowSimulationObject
 {
 private:
     friend class SimulationObject;
-
+protected:
     unsigned long _id;
 
     Vec2<float> _pos;

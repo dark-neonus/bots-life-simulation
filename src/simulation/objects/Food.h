@@ -57,6 +57,7 @@ public:
         {
             markForDeletion();
         }
+        shadow->_calories = calories.get();
         return decreasedAmount;
     }
 
@@ -82,6 +83,10 @@ public:
         {
             markForDeletion();
         }
+        shadow->_calories = calories.get();
+        shadow->_isGrowing = growingTime.isMax();
+        shadow->_isDecaying = growingTime.isMax() && matureTime.isMax();
+        shadow->_radius = getRadius();
     }
 
     void draw(ImDrawList *draw_list, ImVec2 drawing_delta_pos) override

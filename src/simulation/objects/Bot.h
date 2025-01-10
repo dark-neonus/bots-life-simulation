@@ -181,11 +181,11 @@ public:
             {
                 health.decrease(0.5);
             }
-            else if (food.get() > food.getMax() * 0.3f)
-            {
-                // actionSpawnBot();
-                // actionSuicide();
-            }
+            // else if (food.get() > food.getMax() * 0.3f)
+            // {
+            //     actionSpawnBot();
+            //     actionSuicide();
+            // }
         }
         auto objectsInVision = getObjectsInVision();
         if (health.get() == 0)
@@ -198,6 +198,12 @@ public:
             health.increase(0.1);
             food.decrease(0.2);
         }
+        shadow->_health = health.get();
+        shadow->_food = food.get();
+        shadow->_seeDistance = getSeeDistance();
+        shadow->_speed = speed;
+        shadow->_damage = damage;
+        shadow->_pos = pos;
     }
 
     void draw(ImDrawList *draw_list, ImVec2 drawing_delta_pos) override
