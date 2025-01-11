@@ -7,6 +7,8 @@
 // - Documentation        https://dearimgui.com/docs (same as your local docs/ folder).
 // - Introduction, links and more at the top of imgui.cpp
 
+#include <random>
+
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -20,6 +22,8 @@
 
 #include "gui.h"
 #include "simulation.h"
+
+#include "objects/Food.h"
 
 // [Win32] Our example includes a copy of glfw3.lib pre-compiled with VS2010 to maximize ease of testing and compatibility with old VS compilers.
 // To link with VS2010-era libraries, VS2015+ requires linking with legacy_stdio_definitions.lib, which we do using this pragma.
@@ -132,6 +136,13 @@ int guiLoop(std::shared_ptr<Simulation> simulation)
     // bool show_another_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
+    std::random_device rd;
+    std::mt19937 gen;
+    std::uniform_int_distribution<int> spawnChance = std::uniform_int_distribution<int>(0, 10);
+    std::uniform_int_distribution<int> distX = std::uniform_int_distribution<int>(0, simulation->chunkManager->mapWidth - 1);
+    std::uniform_int_distribution<int> distY = std::uniform_int_distribution<int>(0, simulation->chunkManager->mapHeight - 1);
+    
+
     // Init of simulation here
     // Create a shared pointer to the simulation
     // std::shared_ptr<Simulation> simulation = std::make_shared<Simulation>(6, 6, 35);
@@ -197,6 +208,25 @@ int guiLoop(std::shared_ptr<Simulation> simulation)
         ///////////////////////////////////////////////////
         ///////////////////////////////////////////////////
         ///////////////////////////////////////////////////
+
+        // if (spawnChance(gen) == 7) {
+        for (int i = 0; i < 20; i++) {
+            simulation->addObject(
+                SimulationObjectType::FoodObject,
+                std::dynamic_pointer_cast<SimulationObject> (
+                    std::make_shared<FoodObject>(
+                        simulation,
+                        Vec2(distX(gen), distY(gen)),
+                        colorInt(100, 0, 0),
+                        150,
+                        150,
+                        0.5f,
+                        1.0f,
+                        false
+                    )
+                )
+            );
+        }
 
         createGui(simulation, io);
 

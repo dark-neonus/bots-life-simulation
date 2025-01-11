@@ -23,7 +23,8 @@ public:
 
     void update() override
     { // User defined brain class must have override update function that takes 0 arguments
-        protocolsHolder->updateProtocolResponce.actionMove(Vec2<float>(1.0f, 1.0f), 0.6f);
+        // protocolsHolder->updateProtocolResponce.actionMove(Vec2<float>(-1.0f, -2.0f), 1.0f);
+        protocolsHolder->updateProtocolResponce.actionGoTo(Vec2<float>(200.0f, 500.0f));
     }
 
     void kill() override

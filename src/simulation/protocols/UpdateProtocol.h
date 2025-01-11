@@ -100,24 +100,30 @@ struct UpdateProtocolResponce
 
     struct AttackNearestInfo
     {
+        bool attackOwnKind; ///< Indicate whether bot will attack its own kind or not
     };
     AttackNearestInfo attackNearestArgs;
     /// @brief Set action to AttackNearest with no additional arguments
-    void actionAttackNearest()
+    /// @param attackOwnKind Indicate whether bot will attack its own kind or not
+    void actionAttackNearest(bool attackOwnKind)
     {
         actionType = BotAction::AttackNearest;
+        attackNearestArgs.attackOwnKind = attackOwnKind;
     }
 
     struct AttackByIDInfo
     {
+        bool attackOwnKind; ///< Indicate whether bot will attack its own kind or not
         unsigned long targetID; ///< ID of the target to attack
     };
     AttackByIDInfo attackByIDArgs;
     /// @brief Set action to AttackByID and set its arguments
+    /// @param attackOwnKind Indicate whether bot will attack its own kind or not
     /// @param targetID ID of the target to attack
-    void actionAttackByID(unsigned long targetID)
+    void actionAttackByID(bool attackOwnKind, unsigned long targetID)
     {
         actionType = BotAction::AttackByID;
+        attackByIDArgs.attackOwnKind = attackOwnKind;
         attackByIDArgs.targetID = targetID;
     }
 

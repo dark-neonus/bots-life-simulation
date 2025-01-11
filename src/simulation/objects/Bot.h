@@ -14,7 +14,7 @@
 
 class FoodObject;
 
-#define DEFAULT_DEBUG_DRAWING true
+#define DEFAULT_DEBUG_DRAWING false
 
 using objectSet = std::unordered_set<std::weak_ptr<SimulationObject>,
                                      std::hash<std::weak_ptr<SimulationObject>>,
@@ -211,6 +211,8 @@ public:
     void parseProtocolResponce();
 
     void actionMove(Vec2<float> direction, float speedMultyplier = 1.0f);
+    
+    void actionGoTo(Vec2<float> targetPos);
 
     /// @brief Preform attack on specific bot
     /// @param attackOwnKind Indicate if bot would attack its own kind

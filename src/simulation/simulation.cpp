@@ -47,20 +47,22 @@ void Simulation::afterUpdate()
     while (!deathNote.empty())
     {
         auto &obj = deathNote.front();
-        obj->onDestroy();
-        // log(Logger::LOG, "Object [%0*lu] deletion process started\n", 6, obj->id.get());
+        if (obj) {
+            obj->onDestroy();
+            // log(Logger::LOG, "Object [%0*lu] deletion process started\n", 6, obj->id.get());
+
+            if (auto chunk = obj->getChunk())
+            {
+                chunk->removeObject(obj);
+            }
+
+            auto it = std::find(objects.begin(), objects.end(), obj);
+            if (it != objects.end())
+            {
+                objects.erase(it);
+            }
+        }
         deathNote.pop();
-
-        if (auto chunk = obj->getChunk())
-        {
-            chunk->removeObject(obj);
-        }
-
-        auto it = std::find(objects.begin(), objects.end(), obj);
-        if (it != objects.end())
-        {
-            objects.erase(it);
-        }
         // log(Logger::LOG, "Object deleted successfully!\n");
     }
 }
@@ -288,6 +290,17 @@ std::shared_ptr<BotObject> Simulation::addSmartBot(std::shared_ptr<BotBrain> bra
     brain->protocolsHolder->initProtocol.evolutionPoints = 100;
     brain->init();
 
+    // TODO: change throw logic to cutting points
+    if (
+        brain->protocolsHolder->initProtocolResponce.healthPoints +
+        brain->protocolsHolder->initProtocolResponce.foodPoints +
+        brain->protocolsHolder->initProtocolResponce.visionPoints +
+        brain->protocolsHolder->initProtocolResponce.speedPoints +
+        brain->protocolsHolder->initProtocolResponce.attackPoints > settings->evolutionPointsSettings.amountOfPoints
+    ) {
+        throw std::invalid_argument("You spent more than maximum evolution points!");
+    }
+
     std::shared_ptr<BotObject> bot = std::make_shared<BotObject>(
         shared_from_this(),
         pos,
@@ -307,6 +320,13 @@ std::shared_ptr<BotObject> Simulation::addSmartBot(std::shared_ptr<BotBrain> bra
             brain->protocolsHolder->initProtocolResponce.attackPoints
         )
     );
+
+    bot->setColor(ImColor(colorInt(
+        std::max(0, std::min(brain->protocolsHolder->initProtocolResponce.r, 255)),
+        std::max(0, std::min(brain->protocolsHolder->initProtocolResponce.g, 255)),
+        std::max(0, std::min(brain->protocolsHolder->initProtocolResponce.b, 255)),
+        255
+    )));
 
     bot->setBrainObject(brain);
 

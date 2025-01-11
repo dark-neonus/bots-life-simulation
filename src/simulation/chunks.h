@@ -159,8 +159,9 @@ public:
     /// @param position Position to check
     /// @return Return chunk which contain given position. If there is no such chunk, return nullptr
     std::shared_ptr<Chunk> whatChunkHere(Vec2<float> position) {
-        int xIndex = static_cast<int>(position.x / chunkSize);
-        int yIndex = static_cast<int>(position.y / chunkSize);
+        // position.x - 1.0f fixes bug when object in the right bottom corner and chunkManger cant find chunk for this position
+        int xIndex = static_cast<int>(std::max(0.0f, position.x - 1.0f) / chunkSize);
+        int yIndex = static_cast<int>(std::max(0.0f, position.y - 1.0f) / chunkSize);
 
         return getChunk(xIndex, yIndex);
     }

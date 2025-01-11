@@ -19,8 +19,15 @@ private:
     std::shared_ptr<ShadowFoodObject> shadow;
 
 public:
-    FoodObject(std::shared_ptr<Simulation> simulation, Vec2<float> position, ImVec4 color,
-               float maxCalories_, float calories_, float growthRate_, float decayRate_, bool isMature_)
+    FoodObject(
+        std::shared_ptr<Simulation> simulation,
+        Vec2<float> position,
+        ImVec4 color,
+        float maxCalories_,
+        float calories_,
+        float growthRate_,
+        float decayRate_,
+        bool isMature_)
         : SimulationObject(simulation, position, getRadius(), color),
           calories(calories_, 0.0f, maxCalories_),
           growthRate(growthRate_),

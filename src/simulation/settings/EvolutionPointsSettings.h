@@ -2,6 +2,8 @@
 
 struct EvolutionPointsSettings
 {
+    int amountOfPoints;
+
     float HealthForPoint;
     float FoodForPoint;
     int VisionDistanceForPoint;
@@ -11,19 +13,22 @@ struct EvolutionPointsSettings
     float maxSeeDistanceSizeOfChunk;
 
     /// @brief Constructs EvolutionPointsSettings with default or provided values for all members.
+    /// @param amountOfPoints_ Points available to spend (default: 100).
     /// @param HealthForPoint_ Points required to increase health by one unit (default: 1.0f).
     /// @param FoodForPoint_ Points required to increase food value by one unit (default: 1.0f).
     /// @param VisionDistanceForPoint_ Points required to increase vision distance by one unit (default: 10).
     /// @param SpeedForPoint_ Points required to increase speed by one unit (default: 1.0f).
     /// @param DamageForPoint_ Points required to increase damage by one unit (default: 1.0f).
     EvolutionPointsSettings(
+        int amountOfPoints_ = 100,
         float HealthForPoint_ = 5.0f,
         float FoodForPoint_ = 5.0f,
-        int VisionDistanceForPoint_ = 2,
+        int VisionDistanceForPoint_ = 4,
         float SpeedForPoint_ = 0.3f,
         float DamageForPoint_ = 1.0f,
         float maxSeeDistanceSizeOfChunk_ = 0.95f)
-        : HealthForPoint(HealthForPoint_),
+        : amountOfPoints(amountOfPoints_),
+          HealthForPoint(HealthForPoint_),
           FoodForPoint(FoodForPoint_),
           VisionDistanceForPoint(VisionDistanceForPoint_),
           SpeedForPoint(SpeedForPoint_),

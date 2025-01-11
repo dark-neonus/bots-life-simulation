@@ -85,8 +85,7 @@ public:
         chunk = chunkToSet; 
     }
 
-    // bool isHighlighted() { return highlighted; }
-    // void setHighlightion(bool value) { highlighted = value; }
+    void setColor(ImU32 newColor) { color = newColor; }
 
     /// @brief Draw object to ImGui window
     /// @param draw_list Object to draw on provided by ImGui

@@ -20,11 +20,6 @@ void BotObject::update()
         {
             health.decrease(0.5);
         }
-        // else if (food.get() > food.getMax() * 0.3f)
-        // {
-        //     actionSpawnBot();
-        //     actionSuicide();
-        // }
     }
     if (health.get() == 0)
     {
@@ -42,10 +37,25 @@ void BotObject::update()
     shadow->_speed = speed;
     shadow->_damage = damage;
     shadow->_pos = pos;
+    food.decrease(0.1);
     packProtocol();
     brain->update();
     parseProtocolResponce();
 }
+
+// enum BotAction
+// {
+//     DoNothing,     ///< Perform no action
+//     Move,          ///< Move in a specific direction
+//     GoTo,          ///< Move to a target position
+//     EatNearest,    ///< Eat the nearest consumable object
+//     EatByID,       ///< Eat a specific object by ID
+//     AttackNearest, ///< Attack the nearest target
+//     AttackByID,    ///< Attack a specific target by ID
+//     Spawn,         ///< Spawn a new bot
+//     SpawnSelfCopy, ///< Spawn a copy of itself
+//     Suicide        ///< Self-destruct
+// };
 
 void BotObject::parseProtocolResponce() {
     switch (static_cast<int>(protocolsHolder->updateProtocolResponce.actionType))
@@ -58,17 +68,46 @@ void BotObject::parseProtocolResponce() {
             protocolsHolder->updateProtocolResponce.moveArgs.speedMultiplier
             );
         break;
+    case BotAction::GoTo:
+        actionGoTo(
+            protocolsHolder->updateProtocolResponce.goToArgs.targetPosition
+            );
+        break;
+    case BotAction::EatNearest:
+        actionEat();
+        break;
+    case BotAction::EatByID:
+        actionEat(
+            protocolsHolder->updateProtocolResponce.eatByIDArgs.objectID
+            );
+        break;
+    case BotAction::AttackNearest:
+        actionAttack(
+            protocolsHolder->updateProtocolResponce.attackNearestArgs.attackOwnKind
+        );
+        break;
+    case BotAction::AttackByID:
+        actionAttack(
+            protocolsHolder->updateProtocolResponce.attackByIDArgs.attackOwnKind,
+            protocolsHolder->updateProtocolResponce.attackByIDArgs.targetID
+            );
+        break;
+    
+    case BotAction::Suicide:
+        actionSuicide();
+        break;
     
     default:
+        throw std::invalid_argument("Invalid action type!");
         break;
     }
 }
 
 void BotObject::actionMove(Vec2<float> direction, float speedMultyplier)
 {
-    food.decrease(0.1);
     direction = direction.normalize();
     speedMultyplier = std::clamp<float>(speedMultyplier, 0.0f, 1.0f);
+    food.decrease(0.1 * speedMultyplier);
     if (auto validSimulation = simulation.lock())
     {
         pos = Vec2<float>(
@@ -92,6 +131,11 @@ void BotObject::actionMove(Vec2<float> direction, float speedMultyplier)
     {
         throw std::runtime_error("Invalid simulation pointer of BotObject!");
     }
+}
+
+void BotObject::actionGoTo(Vec2<float> targetPos) {
+    Vec2<float> delta = targetPos - pos;
+    actionMove(delta, delta.length() / speed);
 }
 
 void BotObject::actionAttack(bool attackOwnKind, unsigned long targetID)
@@ -429,10 +473,6 @@ void BotObject::packProtocol()
     if (protocolsHolder->updateProtocol.distanceToNearestEnemy != -1.0f) {
         protocolsHolder->updateProtocol.distanceToNearestEnemy = sqrtf(protocolsHolder->updateProtocol.distanceToNearestEnemy);
     }
-
-    // if (auto validSimulation = simulation.lock()) {
-    //     validSimulation->log(Logger::LOG, "Obj in vision: %i | Dist to nearest food: %f\n", protocolsHolder->updateProtocol.visibleObjects.size(), protocolsHolder->updateProtocol.distanceToNearestFood);
-    // }
 }
 
 void BotObject::setBrainObject(std::shared_ptr<BotBrain> brain_)
