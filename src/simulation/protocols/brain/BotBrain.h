@@ -35,4 +35,12 @@ public:
      * doing all thing needed to delete/kill bot (e.g. dealocate allocated memory).
      */
     virtual void kill() {}
+
+    // /// @brief Transform users brain object to format for spawning
+    // /// @tparam T Type of users brain to spawn
+    // /// @return Users brain object compressed to std::shared_tr<BotBrain>
+    // template <typename T>
+    // static std::shared_ptr<BotBrain> getBrainForSpawn() {
+    //     return std::dynamic_pointer_cast<BotBrain>(std::make_shared<T>());
+    // }
 };

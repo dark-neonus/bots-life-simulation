@@ -23,7 +23,6 @@ enum BotAction
     AttackNearest, ///< Attack the nearest target
     AttackByID,    ///< Attack a specific target by ID
     Spawn,         ///< Spawn a new bot
-    SpawnSelfCopy, ///< Spawn a copy of itself
     Suicide        ///< Self-destruct
 };
 
@@ -127,27 +126,17 @@ struct UpdateProtocolResponce
         attackByIDArgs.targetID = targetID;
     }
 
-    // struct SpawnInfo
-    // {
-    //     int spawnType;               ///< Type of object to spawn
-    // };
-    // SpawnInfo spawnArgs;
-    // /// @brief Set action to Spawn and set its arguments
-    // /// @param spawnType Type of object to spawn
-    // void actionSpawn(int spawnType)
-    // {
-    //     actionType = BotAction::Spawn;
-    //     spawnArgs.spawnType = spawnType;
-    // }
-
-    struct SpawnSelfCopyInfo
+    struct SpawnInfo
     {
+        std::shared_ptr<BotBrain> brain;               ///< Type of object to spawn
     };
-    SpawnSelfCopyInfo spawnSelfCopyArgs;
-    /// @brief Set action to SpawnSelfCopy with no additional arguments
-    void actionSpawnSelfCopy()
+    SpawnInfo spawnArgs;
+    /// @brief Set action to Spawn and set its arguments
+    /// @param spawnType Type of object to spawn
+    void actionSpawn(std::shared_ptr<BotBrain> brain)
     {
-        actionType = BotAction::SpawnSelfCopy;
+        actionType = BotAction::Spawn;
+        spawnArgs.brain = brain;
     }
 
     struct SuicideInfo

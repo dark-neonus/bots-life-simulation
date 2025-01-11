@@ -23,9 +23,9 @@ enum class SimulationObjectType {
 
 const char* const SimulationObjectTypeNames[4] = {
     "BaseObject",
-    "BotObject",
     "FoodObject",
-    "TreeObject"
+    "TreeObject",
+    "BotObject"
 };
 
 const char* getTypeString(SimulationObjectType type);
@@ -65,6 +65,11 @@ public:
 
     virtual SimulationObjectType type() const {
         return SimulationObjectType::BaseObject;
+    }
+
+    virtual void setID(unsigned long newID) {
+        id.set(newID);
+        shadow->_id = newID;
     }
 
     virtual int getRadius() {

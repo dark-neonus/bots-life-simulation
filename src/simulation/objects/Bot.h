@@ -48,16 +48,27 @@ public:
               float food_,
               int see_distance_,
               float speed_,
-              float damage_)
-        : health(health_, 0, health_), food(food_, 0, food_),
+              float damage_,
+              float maxHealth = -1.0f,
+              float maxFood = -1.0f)
+        : health(health_, 0, maxHealth == -1.0f ? health_ : maxHealth),
+          food(food_, 0, maxFood == -1.0f ? food_ : maxFood),
           see_distance(see_distance_), speed(speed_), damage(damage_),
           SimulationObject(simulation, position, convertCaloriesToRadius(food_), colorInt(0, 75, 150)),
-          shadow(std::make_shared<ShadowBotObject>(id.get(), pos, getRadius(),
-                                                   health.get(), food.get(),
-                                                   see_distance, speed, damage)),
+          shadow(std::make_shared<ShadowBotObject>(id.get(),
+                                                   pos,
+                                                   getRadius(),
+                                                   health.get(),
+                                                   food.get(),
+                                                   see_distance,
+                                                   speed,
+                                                   damage,
+                                                   health.getMax(),
+                                                   food.getMax())),
           protocolsHolder(std::make_shared<ProtocolsHolder>())
     {
-        protocolsHolder->updateProtocol.body = std::const_pointer_cast<const ShadowBotObject>(shadow);
+        // This sh*t dosnt work :(
+        protocolsHolder->updateProtocol.body = shadow;
     }
 
     SimulationObjectType type() const override
@@ -70,6 +81,13 @@ public:
     std::shared_ptr<const ShadowBotObject> getShadow() const
     {
         return shadow;
+    }
+
+    void setID(unsigned long newID) override {
+        id.set(newID);
+        shadow->_id = newID;
+        protocolsHolder->updateProtocol.body = shadow;
+        
     }
 
     /// @brief Set brain for the bot and connect their protocols holders
@@ -211,7 +229,7 @@ public:
     void parseProtocolResponce();
 
     void actionMove(Vec2<float> direction, float speedMultyplier = 1.0f);
-    
+
     void actionGoTo(Vec2<float> targetPos);
 
     /// @brief Preform attack on specific bot
@@ -230,9 +248,7 @@ public:
     void rawEat(std::shared_ptr<FoodObject> targetFood);
 
     /// @brief Spawns a new bot if there is enough food and a valid simulation context.
-    /// @param Args The parameters of new bot to spawn.
-    void actionSpawnBot(float newHealth = -1.0f, float newFood = -1.0f,
-                        int newSeeDistance = -1, float newSpeed = -1.0f, float newDamage = -1.0f);
+    void actionSpawnBot(std::shared_ptr<BotBrain> brain, int evolutionPoints=-1);
 
     /// @brief Forces the bot to write its name in the DeathNote.
     void actionSuicide();

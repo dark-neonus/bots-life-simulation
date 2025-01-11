@@ -23,7 +23,7 @@ struct EvolutionPointsSettings
         int amountOfPoints_ = 100,
         float HealthForPoint_ = 5.0f,
         float FoodForPoint_ = 5.0f,
-        int VisionDistanceForPoint_ = 4,
+        int VisionDistanceForPoint_ = 5,
         float SpeedForPoint_ = 0.3f,
         float DamageForPoint_ = 1.0f,
         float maxSeeDistanceSizeOfChunk_ = 0.95f)

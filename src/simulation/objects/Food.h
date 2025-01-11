@@ -90,6 +90,7 @@ public:
         {
             markForDeletion();
         }
+        shadow->_id = id.get();
         shadow->_calories = calories.get();
         shadow->_isGrowing = growingTime.isMax();
         shadow->_isDecaying = growingTime.isMax() && matureTime.isMax();

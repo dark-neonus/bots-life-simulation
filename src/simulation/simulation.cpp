@@ -1,4 +1,7 @@
 #include "simulation.h"
+
+#include <tuple>
+
 #include "objects/SimulationObject.h"
 #include "objects/Food.h"
 #include "objects/Tree.h"
@@ -12,13 +15,11 @@
 Simulation::Simulation(std::shared_ptr<const SimulationSettings> settings_)
     : unit(settings_->simulationSizeSettings.unit),
       chunkManager(
-        std::make_unique<ChunkManager>(
-            settings_->simulationSizeSettings.numberOfChunksX,
-            settings_->simulationSizeSettings.numberOfChunksY,
-            float(settings_->simulationSizeSettings.unitsPerChunk * settings_->simulationSizeSettings.unit)
-            )
-        ),
-      maxSeeDistance(chunkManager->chunkSize * settings_->evolutionPointsSettings.VisionDistanceForPoint),
+          std::make_unique<ChunkManager>(
+              settings_->simulationSizeSettings.numberOfChunksX,
+              settings_->simulationSizeSettings.numberOfChunksY,
+              float(settings_->simulationSizeSettings.unitsPerChunk * settings_->simulationSizeSettings.unit))),
+      maxSeeDistance(chunkManager->chunkSize * settings_->evolutionPointsSettings.maxSeeDistanceSizeOfChunk),
       camera(float(chunkManager->mapWidth), float(chunkManager->mapHeight)),
       settings(settings_)
 {
@@ -47,7 +48,8 @@ void Simulation::afterUpdate()
     while (!deathNote.empty())
     {
         auto &obj = deathNote.front();
-        if (obj) {
+        if (obj)
+        {
             obj->onDestroy();
             // log(Logger::LOG, "Object [%0*lu] deletion process started\n", 6, obj->id.get());
 
@@ -65,6 +67,11 @@ void Simulation::afterUpdate()
         deathNote.pop();
         // log(Logger::LOG, "Object deleted successfully!\n");
     }
+    while (!bornQueue.empty()) {
+        auto& bornArgs = bornQueue.front();
+        addSmartBot(std::get<0>(bornArgs), std::get<1>(bornArgs), 0.1f, 0.5f, std::get<2>(bornArgs));
+        bornQueue.pop();
+    } 
 }
 
 void Simulation::render(ImDrawList *draw_list, ImVec2 window_pos, ImVec2 window_size, bool drawDebugLayer)
@@ -221,7 +228,8 @@ T *addObjectToSimulation(std::shared_ptr<Simulation> simulation, std::shared_ptr
         throw std::invalid_argument("No chunk found for the given position. Pos: " + obj->pos.text());
     }
 
-    obj->id.set(simulation->idManger.getAssignValue());
+    obj->setID(simulation->idManger.getAssignValue());
+    
 
     simulation->rawAddToObjectList(obj);
     return obj.get();
@@ -284,49 +292,57 @@ void Simulation::log(Logger::LogType logType, const char *fmt, ...)
     logger.AddLog("%s", formattedMessage);
 }
 
-std::shared_ptr<BotObject> Simulation::addSmartBot(std::shared_ptr<BotBrain> brain, Vec2<float> pos)
+std::shared_ptr<BotObject> Simulation::addSmartBot(std::shared_ptr<BotBrain> brain,
+                                                   Vec2<float> pos,
+                                                   float startingHealthKoef,
+                                                   float startingFoodKoef,
+                                                   int evolutionPoints)
 {
     brain->protocolsHolder->initProtocol.botSpawnPosition = pos;
-    brain->protocolsHolder->initProtocol.evolutionPoints = 100;
+    brain->protocolsHolder->initProtocol.evolutionPoints = evolutionPoints == -1 ? settings->evolutionPointsSettings.amountOfPoints : evolutionPoints;
     brain->init();
 
     // TODO: change throw logic to cutting points
     if (
         brain->protocolsHolder->initProtocolResponce.healthPoints +
-        brain->protocolsHolder->initProtocolResponce.foodPoints +
-        brain->protocolsHolder->initProtocolResponce.visionPoints +
-        brain->protocolsHolder->initProtocolResponce.speedPoints +
-        brain->protocolsHolder->initProtocolResponce.attackPoints > settings->evolutionPointsSettings.amountOfPoints
-    ) {
+            brain->protocolsHolder->initProtocolResponce.foodPoints +
+            brain->protocolsHolder->initProtocolResponce.visionPoints +
+            brain->protocolsHolder->initProtocolResponce.speedPoints +
+            brain->protocolsHolder->initProtocolResponce.attackPoints >
+        settings->evolutionPointsSettings.amountOfPoints)
+    {
         throw std::invalid_argument("You spent more than maximum evolution points!");
     }
+
+    startingHealthKoef = std::clamp(startingHealthKoef, 0.0f, 1.0f);
+    startingFoodKoef = std::clamp(startingFoodKoef, 0.0f, 1.0f);
 
     std::shared_ptr<BotObject> bot = std::make_shared<BotObject>(
         shared_from_this(),
         pos,
-        settings->evolutionPointsSettings.PointsToHealth(
-            brain->protocolsHolder->initProtocolResponce.healthPoints
-        ),
-        settings->evolutionPointsSettings.PointsToFood(
-            brain->protocolsHolder->initProtocolResponce.foodPoints
-        ),
-        settings->evolutionPointsSettings.PointsToVisionDistance(
-            brain->protocolsHolder->initProtocolResponce.visionPoints
-        ),
-        settings->evolutionPointsSettings.PointsToSpeed(
-            brain->protocolsHolder->initProtocolResponce.speedPoints
-        ),
-        settings->evolutionPointsSettings.PointsToDamage(
-            brain->protocolsHolder->initProtocolResponce.attackPoints
-        )
-    );
+        settings->evolutionPointsSettings.PointsToHealth( // Health value
+            brain->protocolsHolder->initProtocolResponce.healthPoints) * startingHealthKoef,
+        settings->evolutionPointsSettings.PointsToFood( // Food value
+            brain->protocolsHolder->initProtocolResponce.foodPoints) * startingFoodKoef,
+        std::min(
+            settings->evolutionPointsSettings.PointsToVisionDistance( // See distance value
+                brain->protocolsHolder->initProtocolResponce.visionPoints),
+            maxSeeDistance),
+        settings->evolutionPointsSettings.PointsToSpeed( // Speed value
+            brain->protocolsHolder->initProtocolResponce.speedPoints),
+        settings->evolutionPointsSettings.PointsToDamage( // Damage value
+            brain->protocolsHolder->initProtocolResponce.attackPoints),
+        settings->evolutionPointsSettings.PointsToHealth( // Max health value
+            brain->protocolsHolder->initProtocolResponce.healthPoints),
+        settings->evolutionPointsSettings.PointsToFood( // Max food value
+            brain->protocolsHolder->initProtocolResponce.foodPoints)
+        );
 
     bot->setColor(ImColor(colorInt(
         std::max(0, std::min(brain->protocolsHolder->initProtocolResponce.r, 255)),
         std::max(0, std::min(brain->protocolsHolder->initProtocolResponce.g, 255)),
         std::max(0, std::min(brain->protocolsHolder->initProtocolResponce.b, 255)),
-        255
-    )));
+        255)));
 
     bot->setBrainObject(brain);
 
@@ -349,7 +365,7 @@ std::shared_ptr<BotObject> Simulation::addSmartBot(std::shared_ptr<BotBrain> bra
         throw std::invalid_argument("No chunk found for the given position. Pos: " + bot->pos.text());
     }
 
-    bot->id.set(idManger.getAssignValue());
+    bot->setID(idManger.getAssignValue());
 
     rawAddToObjectList(bot);
     return bot;

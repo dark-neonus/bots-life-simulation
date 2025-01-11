@@ -1,6 +1,7 @@
 #include "Bot.h"
 
 #include <cmath>
+#include <tuple>
 
 #include "objects/SimulationObject.h"
 #include "objects/Food.h"
@@ -12,35 +13,23 @@
 
 void BotObject::update()
 {
-    // Change values just to display debug values drawing
-    if (debug_drawing)
+    food.decrease(0.1);
+    if (food.get() == 0)
     {
-        // food.decrease(0.1);
-        if (food.get() == 0)
-        {
-            health.decrease(0.5);
-        }
+        health.decrease(0.5);
     }
+    packProtocol();
+    brain->update();
+    parseProtocolResponce();
     if (health.get() == 0)
     {
         markForDeletion();
-    }
-    else if (health.get() < health.getMax() && food.get() >= food.getMax() / 2)
+    } else if (health.get() < health.getMax() && food.get() >= food.getMax() / 2)
     {
         // Healing logic
         health.increase(0.1);
         food.decrease(0.2);
     }
-    shadow->_health = health.get();
-    shadow->_food = food.get();
-    shadow->_seeDistance = getSeeDistance();
-    shadow->_speed = speed;
-    shadow->_damage = damage;
-    shadow->_pos = pos;
-    food.decrease(0.1);
-    packProtocol();
-    brain->update();
-    parseProtocolResponce();
 }
 
 // enum BotAction
@@ -53,7 +42,6 @@ void BotObject::update()
 //     AttackNearest, ///< Attack the nearest target
 //     AttackByID,    ///< Attack a specific target by ID
 //     Spawn,         ///< Spawn a new bot
-//     SpawnSelfCopy, ///< Spawn a copy of itself
 //     Suicide        ///< Self-destruct
 // };
 
@@ -91,6 +79,11 @@ void BotObject::parseProtocolResponce() {
             protocolsHolder->updateProtocolResponce.attackByIDArgs.attackOwnKind,
             protocolsHolder->updateProtocolResponce.attackByIDArgs.targetID
             );
+        break;
+    case BotAction::Spawn:
+        actionSpawnBot(
+            protocolsHolder->updateProtocolResponce.spawnArgs.brain
+        );
         break;
     
     case BotAction::Suicide:
@@ -192,14 +185,17 @@ void BotObject::actionAttack(bool attackOwnKind, unsigned long targetID)
                         if (validObj->type() == SimulationObjectType::BotObject)
                         {
                             nearestBot = validObj;
+                            minDistance = pos.sqrDistanceTo(nearestBot->pos);
                         }
                         // Clear chunksToCheck since found desired object
-                        chunksToCheck = std::queue<std::shared_ptr<Chunk>>();
+                        while (!chunksToCheck.empty()) { chunksToCheck.pop(); }
                         break;
                     }
                 }
             }
-            chunksToCheck.pop();
+            if (!chunksToCheck.empty()) {
+                chunksToCheck.pop();
+            }
         }
         // Small penalty for using actionAttack to prevent spam
         food.decrease(0.1);
@@ -252,6 +248,7 @@ void BotObject::actionEat(unsigned long targetID)
         std::shared_ptr<SimulationObject> nearestFood;
         while (!chunksToCheck.empty())
         {
+            
             neighborChunk = chunksToCheck.front();
             for (auto obj : neighborChunk->objects)
             {
@@ -274,14 +271,17 @@ void BotObject::actionEat(unsigned long targetID)
                         if (validObj->type() == SimulationObjectType::FoodObject)
                         {
                             nearestFood = validObj;
+                            minDistance = pos.sqrDistanceTo(nearestFood->pos);
                         }
                         // Clear chunksToCheck since found desired object
-                        chunksToCheck = std::queue<std::shared_ptr<Chunk>>();
+                        while (!chunksToCheck.empty()) { chunksToCheck.pop(); }
                         break;
                     }
                 }
             }
-            chunksToCheck.pop();
+            if (!chunksToCheck.empty()) {
+                chunksToCheck.pop();
+            }
         }
         // Small penalty for using actionEat to prevent spam
         food.decrease(0.05);
@@ -304,58 +304,26 @@ void BotObject::rawEat(std::shared_ptr<FoodObject> targetFood)
     food.increase(eatenCalories);
 }
 
-void BotObject::actionSpawnBot(float newHealth, float newFood,
-                               int newSeeDistance, float newSpeed, float newDamage)
-{
-
-    if (newHealth < 0)
-        newHealth = health.getMax();
-    if (newFood < 0)
-        newFood = food.getMax();
-    if (newSeeDistance < 0)
-        newSeeDistance = see_distance;
-    if (newSpeed < 0)
-        newSpeed = speed;
-    if (newDamage < 0)
-        newDamage = damage;
-
-    const float spawnCost = food.getMax() * 0.3f;
-
-    if (food.get() < spawnCost)
-    {
-        return;
+void BotObject::actionSpawnBot(std::shared_ptr<BotBrain> brain, int evolutionPoints) {
+    if (auto validSimulation = simulation.lock()) {
+        if (evolutionPoints == -1) {
+            evolutionPoints = validSimulation->settings->evolutionPointsSettings.amountOfPoints;
+        }
+        float minusHealth = std::max(0.0f, evolutionPoints - food.get());
+        food.decrease(evolutionPoints);
+        health.decrease(minusHealth);
+        // If you try to spawn bot with evolution points more than mother can produce,
+        // it will kill mother bot and wont create child bot
+        if (health.get() > 0) {
+            validSimulation->addBotToBorn(
+                std::tuple<std::shared_ptr<BotBrain>, Vec2<float>, int>(
+                    brain, pos, evolutionPoints
+                )
+            );
+        }
     }
-
-    if (auto validSimulation = simulation.lock())
-    {
-        Vec2<int> newBotSpawnPos = Vec2<int>(
-            pos.x - (rand() % 100 - 50),
-            pos.y - (rand() % 100 - 50));
-
-        // Makes position of spawn valid
-        auto clamp = [](int value, int minVal, int maxVal) -> int
-        {
-            if (value < minVal)
-                return minVal;
-            if (value > maxVal)
-                return maxVal;
-            return value;
-        };
-
-        newBotSpawnPos.x = clamp(newBotSpawnPos.x, 20, validSimulation->chunkManager->mapWidth - 20);
-        newBotSpawnPos.y = clamp(newBotSpawnPos.y, 20, validSimulation->chunkManager->mapHeight - 20);
-
-        auto newBot = std::make_shared<BotObject>(
-            validSimulation,
-            newBotSpawnPos,
-            health.getMax(),
-            food.getMax(),
-            see_distance,
-            speed,
-            damage);
-
-        validSimulation->addObject(SimulationObjectType::BotObject, newBot);
-        food.decrease(spawnCost);
+    else {
+        throw std::runtime_error("Invalid simulation pointer of BotObject!");
     }
 }
 
@@ -386,7 +354,18 @@ void BotObject::onDestroy()
 
 void BotObject::packProtocol()
 {
-    // It may be faster to use std::vector<std::shared_ptr<SimulationObject>>
+    // Pack shadow object
+    shadow->_health = health.get();
+    shadow->_food = food.get();
+    shadow->_seeDistance = getSeeDistance();
+    shadow->_speed = speed;
+    shadow->_damage = damage;
+    shadow->_pos = pos;
+    if (!protocolsHolder->updateProtocol.body) {
+        protocolsHolder->updateProtocol.body = std::const_pointer_cast<const ShadowBotObject>(shadow);
+    }
+
+    // Pack visible objects
 
     const int radius = getSeeDistance();
     const int sqrSeeDistance = radius * radius;

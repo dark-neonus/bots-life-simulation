@@ -248,7 +248,8 @@ void handleBotKeysEvent(std::shared_ptr<Simulation> simulation) {
             selectedBot->actionEat();
         }
         if (ImGui::IsKeyDown(ImGuiKey_1)) {
-            selectedBot->actionSpawnBot();
+            // selectedBot->actionSpawnBot();
+            simulation->log(Logger::ERROR, "Spawn of bots with keys didnt setuped!");
         }
         if (ImGui::IsKeyDown(ImGuiKey_X)) {
             selectedBot->actionSuicide();

@@ -1,16 +1,18 @@
 #pragma once
 
+#include <vector>
+#include <queue>
+#include <stdexcept>
+#include <algorithm>
+#include <memory>
+#include <tuple>
+
 #include "imgui.h"
 #include "utilities/utilities.h"
 #include "chunks.h"
 #include "objects/SimulationObject.h"
 #include "settings/SimulationSettings.h"
 
-#include <vector>
-#include <queue>
-#include <stdexcept>
-#include <algorithm>
-#include <memory>
 
 #ifndef SIMULATION_OBJECT_TYPE_ENUM
 #define SIMULATION_OBJECT_TYPE_ENUM
@@ -47,6 +49,8 @@ private:
 
     // Queue of all object that will be deleted in Simulation::afterUpdate() after Simulation::update()
     std::queue<std::shared_ptr<SimulationObject>> deathNote;
+
+    std::queue<std::tuple<std::shared_ptr<BotBrain>, Vec2<float>, int>> bornQueue;
 
 public:
     IDManager idManger;
@@ -134,5 +138,13 @@ public:
 
     /// @brief Create bot object in simulation with the given brain
     /// @param brain Brain of new bot
-    std::shared_ptr<BotObject> addSmartBot(std::shared_ptr<BotBrain> brain, Vec2<float> pos);
+    std::shared_ptr<BotObject> addSmartBot(std::shared_ptr<BotBrain> brain,
+                                                   Vec2<float> pos,
+                                                   float startingHealthKoef = 1.0f,
+                                                   float startingFoodKoef = 1.0f,
+                                                   int evolutionPoints = -1);
+
+    void addBotToBorn(std::tuple<std::shared_ptr<BotBrain>, Vec2<float>, int> bornArgs) {
+        bornQueue.push(bornArgs);
+    }
 };

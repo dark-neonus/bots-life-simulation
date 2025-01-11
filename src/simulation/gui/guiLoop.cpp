@@ -210,7 +210,7 @@ int guiLoop(std::shared_ptr<Simulation> simulation)
         ///////////////////////////////////////////////////
 
         // if (spawnChance(gen) == 7) {
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 10; i++) {
             simulation->addObject(
                 SimulationObjectType::FoodObject,
                 std::dynamic_pointer_cast<SimulationObject> (
@@ -218,8 +218,8 @@ int guiLoop(std::shared_ptr<Simulation> simulation)
                         simulation,
                         Vec2(distX(gen), distY(gen)),
                         colorInt(100, 0, 0),
-                        150,
-                        150,
+                        250,
+                        350,
                         0.5f,
                         1.0f,
                         false
