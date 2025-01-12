@@ -82,7 +82,8 @@ void BotObject::parseProtocolResponce() {
         break;
     case BotAction::Spawn:
         actionSpawnBot(
-            protocolsHolder->updateProtocolResponce.spawnArgs.brain
+            protocolsHolder->updateProtocolResponce.spawnArgs.brain,
+            protocolsHolder->updateProtocolResponce.spawnArgs.evolutionPoints
         );
         break;
     

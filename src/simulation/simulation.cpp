@@ -302,6 +302,12 @@ std::shared_ptr<BotObject> Simulation::addSmartBot(std::shared_ptr<BotBrain> bra
     brain->protocolsHolder->initProtocol.evolutionPoints = evolutionPoints == -1 ? settings->evolutionPointsSettings.amountOfPoints : evolutionPoints;
     brain->init();
 
+    brain->protocolsHolder->initProtocolResponce.healthPoints = std::max(0, brain->protocolsHolder->initProtocolResponce.healthPoints);
+    brain->protocolsHolder->initProtocolResponce.foodPoints = std::max(0, brain->protocolsHolder->initProtocolResponce.foodPoints);
+    brain->protocolsHolder->initProtocolResponce.visionPoints = std::max(0, brain->protocolsHolder->initProtocolResponce.visionPoints);
+    brain->protocolsHolder->initProtocolResponce.speedPoints = std::max(0, brain->protocolsHolder->initProtocolResponce.speedPoints);
+    brain->protocolsHolder->initProtocolResponce.attackPoints = std::max(0, brain->protocolsHolder->initProtocolResponce.attackPoints);
+
     // TODO: change throw logic to cutting points
     if (
         brain->protocolsHolder->initProtocolResponce.healthPoints +
@@ -309,7 +315,7 @@ std::shared_ptr<BotObject> Simulation::addSmartBot(std::shared_ptr<BotBrain> bra
             brain->protocolsHolder->initProtocolResponce.visionPoints +
             brain->protocolsHolder->initProtocolResponce.speedPoints +
             brain->protocolsHolder->initProtocolResponce.attackPoints >
-        settings->evolutionPointsSettings.amountOfPoints)
+        brain->protocolsHolder->initProtocol.evolutionPoints)
     {
         throw std::invalid_argument("You spent more than maximum evolution points!");
     }

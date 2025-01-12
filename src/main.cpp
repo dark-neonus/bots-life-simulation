@@ -8,14 +8,15 @@
 #include "protocols/brain/examples/Dummy.h"
 #include "protocols/brain/examples/Survival.h"
 #include "protocols/brain/examples/Multiplier.h"
+#include "protocols/brain/examples/Evolutioner.h"
 
 int main()
 {
     std::shared_ptr<SimulationSettings> settings = std::make_shared<SimulationSettings>();
 
     settings->simulationSizeSettings.unit = 50;
-    settings->simulationSizeSettings.numberOfChunksX = 10;
-    settings->simulationSizeSettings.numberOfChunksY = 10;
+    settings->simulationSizeSettings.numberOfChunksX = 2;
+    settings->simulationSizeSettings.numberOfChunksY = 2;
 
     std::shared_ptr<Simulation> simulation = std::make_shared<Simulation>(
         std::const_pointer_cast<const SimulationSettings>(settings)
@@ -45,7 +46,7 @@ int main()
     for (int i = 0; i < 1; i++) {
         simulation->addSmartBot(
             std::dynamic_pointer_cast<BotBrain>(
-                std::make_shared<MultiplierBotBrain>()
+                std::make_shared<EvolutionerBotBrain>()
             ),
             // Vec2<float>(150.0f, 150.0f)
             Vec2<float>(distX(gen), distY(gen))

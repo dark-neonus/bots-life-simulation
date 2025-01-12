@@ -129,14 +129,17 @@ struct UpdateProtocolResponce
     struct SpawnInfo
     {
         std::shared_ptr<BotBrain> brain;               ///< Type of object to spawn
+        int evolutionPoints;               ///< Amount of evolution points given to child
     };
     SpawnInfo spawnArgs;
     /// @brief Set action to Spawn and set its arguments
     /// @param spawnType Type of object to spawn
-    void actionSpawn(std::shared_ptr<BotBrain> brain)
+    /// @param evolutionPoints Amount of evolution points given to child
+    void actionSpawn(std::shared_ptr<BotBrain> brain, int evolutionPoints = -1)
     {
         actionType = BotAction::Spawn;
         spawnArgs.brain = brain;
+        spawnArgs.evolutionPoints = evolutionPoints;
     }
 
     struct SuicideInfo
