@@ -117,18 +117,16 @@ void Simulation::render(ImDrawList *draw_list, ImVec2 window_pos, ImVec2 window_
         {
             for (auto &obj : clickedChunk->objects)
             {
-                if (auto validObj = obj.lock())
+                object_center = ImVec2(window_pos.x + obj->pos.x, window_pos.y + obj->pos.y);
+                dist_sq = (mouse_map_pos.x - object_center.x) * (mouse_map_pos.x - object_center.x) +
+                            (mouse_map_pos.y - object_center.y) * (mouse_map_pos.y - object_center.y);
+                if (dist_sq <= (obj->getRadius() + allowedClickError) * (obj->getRadius() + allowedClickError))
                 {
-                    object_center = ImVec2(window_pos.x + validObj->pos.x, window_pos.y + validObj->pos.y);
-                    dist_sq = (mouse_map_pos.x - object_center.x) * (mouse_map_pos.x - object_center.x) +
-                              (mouse_map_pos.y - object_center.y) * (mouse_map_pos.y - object_center.y);
-                    if (dist_sq <= (validObj->getRadius() + allowedClickError) * (validObj->getRadius() + allowedClickError))
-                    {
-                        // setViewInfoObject(validObj);
-                        selectedObjects.push_back(validObj);
-                        wasSelectedObject = true;
-                    }
+                    // setViewInfoObject(validObj);
+                    selectedObjects.push_back(obj);
+                    wasSelectedObject = true;
                 }
+                
             }
             // if chunk was clicked, but no specific object was selected
             if (!wasSelectedObject)
@@ -136,10 +134,7 @@ void Simulation::render(ImDrawList *draw_list, ImVec2 window_pos, ImVec2 window_
                 selectedChunk = clickedChunk;
                 for (auto &obj : clickedChunk->objects)
                 {
-                    if (auto validObj = obj.lock())
-                    {
-                        selectedObjects.push_back(validObj);
-                    }
+                    selectedObjects.push_back(obj);
                 }
             }
         }
@@ -172,10 +167,7 @@ void Simulation::render(ImDrawList *draw_list, ImVec2 window_pos, ImVec2 window_
             auto chunk = chunkManager->getChunk(chunkX, chunkY);
             for (auto &obj : chunk->objects)
             {
-                if (auto validObj = obj.lock())
-                {
-                    validObj->draw(draw_list, drawing_delta_pos);
-                }
+                obj->draw(draw_list, drawing_delta_pos);
             }
         }
     }

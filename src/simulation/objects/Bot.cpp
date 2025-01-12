@@ -166,32 +166,30 @@ void BotObject::actionAttack(bool attackOwnKind, unsigned long targetID)
             neighborChunk = chunksToCheck.front();
             for (auto obj : neighborChunk->objects)
             {
-                if (auto validObj = obj.lock())
+                if (targetID == ULONG_MAX)
                 {
-                    if (targetID == ULONG_MAX)
+                    // Find nearest if targetID wasnt specified
+                    if (obj->id.get() != id.get() &&
+                        obj->type() == SimulationObjectType::BotObject &&
+                        pos.sqrDistanceTo(obj->pos) < minDistance)
                     {
-                        // Find nearest if targetID wasnt specified
-                        if (validObj->id.get() != id.get() &&
-                            validObj->type() == SimulationObjectType::BotObject &&
-                            pos.sqrDistanceTo(validObj->pos) < minDistance)
-                        {
-                            minDistance = pos.sqrDistanceTo(validObj->pos);
-                            nearestBot = validObj;
-                        }
-                    }
-                    else if (validObj->id.get() == targetID)
-                    {
-                        // Find object with given ID
-                        if (validObj->type() == SimulationObjectType::BotObject)
-                        {
-                            nearestBot = validObj;
-                            minDistance = pos.sqrDistanceTo(nearestBot->pos);
-                        }
-                        // Clear chunksToCheck since found desired object
-                        while (!chunksToCheck.empty()) { chunksToCheck.pop(); }
-                        break;
+                        minDistance = pos.sqrDistanceTo(obj->pos);
+                        nearestBot = obj;
                     }
                 }
+                else if (obj->id.get() == targetID)
+                {
+                    // Find object with given ID
+                    if (obj->type() == SimulationObjectType::BotObject)
+                    {
+                        nearestBot = obj;
+                        minDistance = pos.sqrDistanceTo(nearestBot->pos);
+                    }
+                    // Clear chunksToCheck since found desired object
+                    while (!chunksToCheck.empty()) { chunksToCheck.pop(); }
+                    break;
+                }
+                
             }
             if (!chunksToCheck.empty()) {
                 chunksToCheck.pop();
@@ -252,32 +250,31 @@ void BotObject::actionEat(unsigned long targetID)
             neighborChunk = chunksToCheck.front();
             for (auto obj : neighborChunk->objects)
             {
-                if (auto validObj = obj.lock())
+            
+                if (targetID == ULONG_MAX)
                 {
-                    if (targetID == ULONG_MAX)
+                    // Find nearest if targetID wasnt specified
+                    if (obj->id.get() != id.get() &&
+                        obj->type() == SimulationObjectType::FoodObject &&
+                        pos.sqrDistanceTo(obj->pos) < minDistance)
                     {
-                        // Find nearest if targetID wasnt specified
-                        if (validObj->id.get() != id.get() &&
-                            validObj->type() == SimulationObjectType::FoodObject &&
-                            pos.sqrDistanceTo(validObj->pos) < minDistance)
-                        {
-                            minDistance = pos.sqrDistanceTo(validObj->pos);
-                            nearestFood = validObj;
-                        }
-                    }
-                    else if (validObj->id.get() == targetID)
-                    {
-                        // Find object with given ID
-                        if (validObj->type() == SimulationObjectType::FoodObject)
-                        {
-                            nearestFood = validObj;
-                            minDistance = pos.sqrDistanceTo(nearestFood->pos);
-                        }
-                        // Clear chunksToCheck since found desired object
-                        while (!chunksToCheck.empty()) { chunksToCheck.pop(); }
-                        break;
+                        minDistance = pos.sqrDistanceTo(obj->pos);
+                        nearestFood = obj;
                     }
                 }
+                else if (obj->id.get() == targetID)
+                {
+                    // Find object with given ID
+                    if (obj->type() == SimulationObjectType::FoodObject)
+                    {
+                        nearestFood = obj;
+                        minDistance = pos.sqrDistanceTo(nearestFood->pos);
+                    }
+                    // Clear chunksToCheck since found desired object
+                    while (!chunksToCheck.empty()) { chunksToCheck.pop(); }
+                    break;
+                }
+                
             }
             if (!chunksToCheck.empty()) {
                 chunksToCheck.pop();
@@ -393,50 +390,48 @@ void BotObject::packProtocol()
     {
         for (const auto &chunkObject : chunk->getObjects())
         {
-            if (auto validChunkObject = chunkObject.lock())
+            sqrDistanceToObj = pos.sqrDistanceTo(chunkObject->pos);
+            if (sqrDistanceToObj < sqrSeeDistance && chunkObject.get() != this)
             {
-                sqrDistanceToObj = pos.sqrDistanceTo(validChunkObject->pos);
-                if (sqrDistanceToObj < sqrSeeDistance && validChunkObject.get() != this)
+                switch (chunkObject->type())
                 {
-                    switch (validChunkObject->type())
+                case SimulationObjectType::BaseObject:
+                    break;
+                case SimulationObjectType::FoodObject:
+                    if (protocolsHolder->updateProtocol.distanceToNearestFood == -1.0f ||
+                        sqrDistanceToObj < protocolsHolder->updateProtocol.distanceToNearestFood)
                     {
-                    case SimulationObjectType::BaseObject:
-                        break;
-                    case SimulationObjectType::FoodObject:
-                        if (protocolsHolder->updateProtocol.distanceToNearestFood == -1.0f ||
-                            sqrDistanceToObj < protocolsHolder->updateProtocol.distanceToNearestFood)
-                        {
-                            protocolsHolder->updateProtocol.distanceToNearestFood = sqrDistanceToObj;
-                            protocolsHolder->updateProtocol.nearestFood = std::dynamic_pointer_cast<FoodObject>(validChunkObject)->getShadow();
-                        }
-                        protocolsHolder->updateProtocol.visibleObjects.insert(
-                            std::dynamic_pointer_cast<FoodObject>(validChunkObject)->getShadow());
-                        break;
-                    case SimulationObjectType::TreeObject:
-                        if (protocolsHolder->updateProtocol.distanceToNearestTree == -1.0f ||
-                            sqrDistanceToObj < protocolsHolder->updateProtocol.distanceToNearestTree)
-                        {
-                            protocolsHolder->updateProtocol.distanceToNearestTree = sqrDistanceToObj;
-                            protocolsHolder->updateProtocol.nearestTree = std::dynamic_pointer_cast<TreeObject>(validChunkObject)->getShadow();
-                        }
-                        protocolsHolder->updateProtocol.visibleObjects.insert(
-                            std::dynamic_pointer_cast<TreeObject>(validChunkObject)->getShadow());
-                        break;
-                    case SimulationObjectType::BotObject:
-                        if (protocolsHolder->updateProtocol.distanceToNearestBot == -1.0f ||
-                            sqrDistanceToObj < protocolsHolder->updateProtocol.distanceToNearestBot)
-                        {
-                            protocolsHolder->updateProtocol.distanceToNearestBot = sqrDistanceToObj;
-                            protocolsHolder->updateProtocol.nearestBot = std::dynamic_pointer_cast<BotObject>(validChunkObject)->getShadow();
-                        }
-                        protocolsHolder->updateProtocol.visibleObjects.insert(
-                            std::dynamic_pointer_cast<BotObject>(validChunkObject)->getShadow());
-                        break;
-                    default:
-                        throw std::runtime_error("Invalid simulation object type!");
+                        protocolsHolder->updateProtocol.distanceToNearestFood = sqrDistanceToObj;
+                        protocolsHolder->updateProtocol.nearestFood = std::dynamic_pointer_cast<FoodObject>(chunkObject)->getShadow();
                     }
+                    protocolsHolder->updateProtocol.visibleObjects.insert(
+                        std::dynamic_pointer_cast<FoodObject>(chunkObject)->getShadow());
+                    break;
+                case SimulationObjectType::TreeObject:
+                    if (protocolsHolder->updateProtocol.distanceToNearestTree == -1.0f ||
+                        sqrDistanceToObj < protocolsHolder->updateProtocol.distanceToNearestTree)
+                    {
+                        protocolsHolder->updateProtocol.distanceToNearestTree = sqrDistanceToObj;
+                        protocolsHolder->updateProtocol.nearestTree = std::dynamic_pointer_cast<TreeObject>(chunkObject)->getShadow();
+                    }
+                    protocolsHolder->updateProtocol.visibleObjects.insert(
+                        std::dynamic_pointer_cast<TreeObject>(chunkObject)->getShadow());
+                    break;
+                case SimulationObjectType::BotObject:
+                    if (protocolsHolder->updateProtocol.distanceToNearestBot == -1.0f ||
+                        sqrDistanceToObj < protocolsHolder->updateProtocol.distanceToNearestBot)
+                    {
+                        protocolsHolder->updateProtocol.distanceToNearestBot = sqrDistanceToObj;
+                        protocolsHolder->updateProtocol.nearestBot = std::dynamic_pointer_cast<BotObject>(chunkObject)->getShadow();
+                    }
+                    protocolsHolder->updateProtocol.visibleObjects.insert(
+                        std::dynamic_pointer_cast<BotObject>(chunkObject)->getShadow());
+                    break;
+                default:
+                    throw std::runtime_error("Invalid simulation object type!");
                 }
             }
+            
         }
     }
 

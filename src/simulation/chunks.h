@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <memory>
 #include <unordered_set>
+#include <list>
 
 #include "utilities/utilities.h"
 #include "simulation.h"
@@ -34,7 +35,7 @@ public:
     const Vec2<float> startPos;
     const Vec2<float> endPos;
 
-    objectSet objects;
+    std::list<std::shared_ptr<SimulationObject>> objects;
 
     Chunk(float startX, float startY, float chunkSize_, int xIndex_, int yIndex_)
         : xIndex(xIndex_), yIndex(yIndex_), chunkSize(chunkSize_),
@@ -47,11 +48,11 @@ public:
     template <typename T>
     void addObject(std::shared_ptr<T> obj) {
         obj->setChunk(shared_from_this());
-        objects.insert(obj);
+        objects.push_back(obj);
     }
 
     /// @brief Returns the set of all objects in the chunk.
-    objectSet getObjects() const {
+    std::list<std::shared_ptr<SimulationObject>> getObjects() const {
         return this->objects;
     }
 
@@ -65,14 +66,16 @@ public:
     void moveToChunk(std::shared_ptr<T> objectToMove, std::shared_ptr<Chunk> destinationChunk) {
         destinationChunk->addObject(objectToMove);
         objectToMove->setChunk(destinationChunk);
-        objects.erase(objectToMove);
+        objects.remove(std::shared_ptr<SimulationObject>(objectToMove));
     }
 
     /// @brief Check if given object in chunks objects.
     /// @param obj Object to check
     /// @return true if object in this cunk, false otherwise
     bool isObjectInChunk(std::shared_ptr<SimulationObject> obj) {
-        return objects.find(obj) != objects.end();
+        // return objects.find(obj) != objects.end();
+        throw std::runtime_error("Call of deprecated function!");
+        return false;
     }
 
     /// @brief Check if given position inside this chunk. Use to check if object gone to another chunk after movement
