@@ -161,7 +161,7 @@ void BotObject::actionAttack(bool attackOwnKind, unsigned long targetID)
             chunksToCheck.push(validChunk);
         }
         float minDistance = validChunk->chunkSize * 10;
-        std::shared_ptr<SimulationObject> nearestBot;
+        std::shared_ptr<BotObject> nearestBot;
         while (!chunksToCheck.empty())
         {
             neighborChunk = chunksToCheck.front();
@@ -176,8 +176,11 @@ void BotObject::actionAttack(bool attackOwnKind, unsigned long targetID)
                             validObj->type() == SimulationObjectType::BotObject &&
                             pos.sqrDistanceTo(validObj->pos) < minDistance)
                         {
-                            minDistance = pos.sqrDistanceTo(validObj->pos);
-                            nearestBot = validObj;
+                            auto nearestBotUnchecked = std::static_pointer_cast<BotObject>(validObj);
+                            if (attackOwnKind || nearestBotUnchecked->brain->populationName != brain->populationName) {
+                                minDistance = pos.sqrDistanceTo(validObj->pos);
+                                nearestBot = nearestBotUnchecked;
+                            }
                         }
                     }
                     else if (validObj->id.get() == targetID)
@@ -185,8 +188,11 @@ void BotObject::actionAttack(bool attackOwnKind, unsigned long targetID)
                         // Find object with given ID
                         if (validObj->type() == SimulationObjectType::BotObject)
                         {
-                            nearestBot = validObj;
-                            minDistance = pos.sqrDistanceTo(nearestBot->pos);
+                            auto nearestBotUnchecked = std::static_pointer_cast<BotObject>(validObj);
+                            if (attackOwnKind || nearestBotUnchecked->brain->populationName != brain->populationName) {
+                                minDistance = pos.sqrDistanceTo(validObj->pos);
+                                nearestBot = nearestBotUnchecked;
+                            }
                         }
                         // Clear chunksToCheck since found desired object
                         while (!chunksToCheck.empty()) { chunksToCheck.pop(); }
@@ -202,7 +208,7 @@ void BotObject::actionAttack(bool attackOwnKind, unsigned long targetID)
         food.decrease(0.1);
         if (nearestBot && minDistance <= (getRadius() + nearestBot->getRadius()) * (getRadius() + nearestBot->getRadius()))
         {
-            rawAttack(std::static_pointer_cast<BotObject>(nearestBot));
+            rawAttack(nearestBot);
         }
     }
     else
