@@ -12,7 +12,7 @@
 #include "chunks.h"
 #include "objects/SimulationObject.h"
 #include "settings/SimulationSettings.h"
-
+// #include "protocols/brain/BrainsRegistry.h"
 
 #ifndef SIMULATION_OBJECT_TYPE_ENUM
 #define SIMULATION_OBJECT_TYPE_ENUM
@@ -147,4 +147,6 @@ public:
     void addBotToBorn(std::tuple<std::shared_ptr<BotBrain>, Vec2<float>, int> bornArgs) {
         bornQueue.push(bornArgs);
     }
+
+    void initBotClasses();
 };

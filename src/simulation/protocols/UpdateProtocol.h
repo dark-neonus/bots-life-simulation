@@ -9,6 +9,8 @@
 #include "shadows/ShadowTreeObject.h"
 #include "shadows/ShadowBotObject.h"
 
+class BotBrain;
+
 using shadowObjectSet = std::unordered_set<std::shared_ptr<const ShadowSimulationObject>,
                                            std::hash<std::shared_ptr<const ShadowSimulationObject>>,
                                            std::equal_to<std::shared_ptr<const ShadowSimulationObject>>>;

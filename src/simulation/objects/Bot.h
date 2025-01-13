@@ -3,8 +3,8 @@
 #include <memory>
 
 #include "chunks.h"
-#include "simulation.h"
 #include "objects/SimulationObject.h"
+#include "simulation.h"
 #include "utilities/utilities.h"
 
 #include "protocols/ProtocolsHolder.h"
@@ -13,6 +13,7 @@
 #include "protocols/brain/BotBrain.h"
 
 class FoodObject;
+class BotBrain;
 
 #define DEFAULT_DEBUG_DRAWING false
 
@@ -200,27 +201,7 @@ public:
         }
     }
 
-    void displayInfo() override
-    {
-        // Call parent class displayInfo to show basic information
-        SimulationObject::displayInfo();
-
-        // Add custom behavior for this class
-        ImGui::SeparatorText("Bot Object");
-        // ImGui::InputFloat("Custom Value", &customValue, 1.0f, 1.0f, "%.2f");
-        ImGui::SliderFloat("Health", health.valuePointer(), health.getMin(), health.getMax(), "%.1f");
-        ImGui::SliderFloat("Food", food.valuePointer(), food.getMin(), food.getMax(), "%.1f calories");
-        // TODO: Here in future we need to specify min and max value for see distance
-        if (auto simulationValid = simulation.lock())
-        {
-            ImGui::SliderInt("See distance", &see_distance, 1, simulationValid->maxSeeDistance);
-        }
-        // TODO: Here in future we need to specify min and max value for speed
-        ImGui::SliderFloat("Speed", &speed, 0.1f, 10.0f, "%.2f");
-        // TODO: Here in future we need to specify min and max value for damage
-        ImGui::SliderFloat("Damage", &damage, 0.0f, 20.0f, "%.2f");
-        ImGui::Checkbox("Debug drawing", &debug_drawing);
-    }
+    void displayInfo();
 
     void onDestroy() override;
 

@@ -11,6 +11,8 @@
 #include "protocols/brain/BotBrain.h"
 
 #include "settings/SimulationSettings.h"
+#include "protocols/brain/BrainsRegistry.h"
+
 
 Simulation::Simulation(std::shared_ptr<const SimulationSettings> settings_)
     : unit(settings_->simulationSizeSettings.unit),
@@ -375,4 +377,15 @@ std::shared_ptr<BotObject> Simulation::addSmartBot(std::shared_ptr<BotBrain> bra
 
     rawAddToObjectList(bot);
     return bot;
+}
+
+void Simulation::initBotClasses() {
+    auto botNames = BrainsRegistry::getInstance().listRegisteredBots();
+    for (const auto& name : botNames) {
+        addSmartBot(
+            BrainsRegistry::getInstance().createBot(name),
+            Vec2<float>(150.0f, 150.0f)
+            // Vec2<float>(distX(gen), distY(gen))
+        );
+    }
 }

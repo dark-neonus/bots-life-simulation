@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <string>
 
 #include "protocols/ProtocolsHolder.h"
 #include "objects/Bot.h"
@@ -14,8 +15,11 @@ protected:
     /// @brief Holder for all protocols of communication between brain and simulation
     std::shared_ptr<ProtocolsHolder> protocolsHolder;
 public:
-    BotBrain()
-    : protocolsHolder(std::make_shared<ProtocolsHolder>()) {}
+    const std::string populationName;
+
+    BotBrain(std::string populationName_="DefaultType")
+    : populationName(populationName_),
+      protocolsHolder(std::make_shared<ProtocolsHolder>()) {}
 
     /*
      * Function that will be called on creation of the bot.

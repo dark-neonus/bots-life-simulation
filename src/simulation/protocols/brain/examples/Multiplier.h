@@ -5,10 +5,7 @@
 #include <memory>
 
 #include "protocols/brain/BotBrain.h"
-
-
-
-
+#include "protocols/brain/BrainsRegistry.h"
 
 
 class MultiplierBotBrain : public BotBrain
@@ -30,9 +27,9 @@ public:
     std::uniform_int_distribution<int> randomDirChance = std::uniform_int_distribution<int>(0, 7);
     float angle = 0.0f;
 
-    /// @brief User defined brain class must have constructor that takes 0 arguments and use ": BotBrain()"
+    /// @brief User defined brain class must have constructor that takes 0 arguments and use ": BotBrain(populationName)"
     MultiplierBotBrain() 
-    : BotBrain() 
+    : BotBrain("MultiplierLegion")
     {
     }
 
@@ -122,3 +119,5 @@ public:
 int MultiplierBotBrain::population = 0;
 int MultiplierBotBrain::death = 0;
 unsigned long MultiplierBotBrain::b_id = 0;
+
+REGISTER_BOT_CLASS(MultiplierBotBrain);
