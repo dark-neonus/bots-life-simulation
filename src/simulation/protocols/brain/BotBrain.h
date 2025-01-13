@@ -40,11 +40,15 @@ public:
      */
     virtual void kill() {}
 
-    // /// @brief Transform users brain object to format for spawning
-    // /// @tparam T Type of users brain to spawn
-    // /// @return Users brain object compressed to std::shared_tr<BotBrain>
-    // template <typename T>
-    // static std::shared_ptr<BotBrain> getBrainForSpawn() {
-    //     return std::dynamic_pointer_cast<BotBrain>(std::make_shared<T>());
-    // }
+    /*
+     * Check if given object can be reached
+     * (Compare distance between them to sum of their radiuses)
+     */
+    bool canReach(std::shared_ptr<ShadowSimulationObject> obj) {
+        return protocolsHolder->updateProtocol.body->pos().sqrDistanceTo(obj->pos()) <= 
+            (protocolsHolder->updateProtocol.body->radius() + obj->radius()) * (protocolsHolder->updateProtocol.body->radius() + obj->radius());
+    }
+
+    // I want to sleep, so I will implement this function in future
+    // bool isSameType()
 };
