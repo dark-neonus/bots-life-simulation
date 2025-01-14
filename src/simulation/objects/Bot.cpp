@@ -2,14 +2,45 @@
 
 #include <cmath>
 #include <tuple>
+#include <string>
 
 #include "objects/SimulationObject.h"
 #include "objects/Food.h"
 #include "objects/Tree.h"
 #include "simulation.h"
 
+#include "protocols/shadows/ShadowBotObject.h"
 #include "protocols/ProtocolsHolder.h"
 #include "protocols/brain/BotBrain.h"
+
+BotObject::BotObject(std::shared_ptr<Simulation> simulation,
+            Vec2<int> position,
+            float health_,
+            float food_,
+            int see_distance_,
+            float speed_,
+            float damage_,
+            float maxHealth,
+            float maxFood)
+    : health(health_, 0, maxHealth == -1.0f ? health_ : maxHealth),
+        food(food_, 0, maxFood == -1.0f ? food_ : maxFood),
+        see_distance(see_distance_), speed(speed_), damage(damage_),
+        SimulationObject(simulation, position, convertCaloriesToRadius(food_), colorInt(0, 75, 150)),
+        shadow(std::make_shared<ShadowBotObject>(id.get(),
+                                                pos,
+                                                getRadius(),
+                                                health.get(),
+                                                food.get(),
+                                                see_distance,
+                                                speed,
+                                                damage,
+                                                health.getMax(),
+                                                food.getMax())),
+        protocolsHolder(std::make_shared<ProtocolsHolder>())
+    {
+    // This sh*t dosnt work :(
+    protocolsHolder->updateProtocol.body = shadow;
+    }
 
 void BotObject::update()
 {
@@ -465,6 +496,7 @@ void BotObject::setBrainObject(std::shared_ptr<BotBrain> brain_)
 {
     brain = brain_;
     protocolsHolder = brain->protocolsHolder;
+    shadow->_populationName = brain->populationName;
 }
 
 void BotObject::displayInfo()
@@ -475,6 +507,7 @@ void BotObject::displayInfo()
     // Add custom behavior for this class
     ImGui::SeparatorText("Bot Object");
     ImGui::Text("Population Name: %s", brain->populationName.c_str());
+    // ImGui::Text("Shadow population Name: %s", shadow->populationName().c_str());
     // ImGui::InputFloat("Custom Value", &customValue, 1.0f, 1.0f, "%.2f");
     ImGui::SliderFloat("Health", health.valuePointer(), health.getMin(), health.getMax(), "%.1f");
     ImGui::SliderFloat("Food", food.valuePointer(), food.getMin(), food.getMax(), "%.1f calories");

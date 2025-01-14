@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include "ShadowSimulationObject.h"
 
 class ShadowBotObject : public ShadowSimulationObject
@@ -15,6 +17,8 @@ private:
 
     float _maxHealth;
     float _maxFood;
+
+    std::string _populationName;
 
 public:
     ShadowBotObject() {}
@@ -44,4 +48,6 @@ public:
 
     float maxHealth() const { return _maxHealth; }
     float maxFood() const { return _maxFood; }
+
+    std::string populationName() const { return _populationName; }
 };

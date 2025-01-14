@@ -19,7 +19,8 @@ public:
 
     BotBrain(std::string populationName_="DefaultType")
     : populationName(populationName_),
-      protocolsHolder(std::make_shared<ProtocolsHolder>()) {}
+      protocolsHolder(std::make_shared<ProtocolsHolder>()) {
+      }
 
     /*
      * Function that will be called on creation of the bot.
@@ -44,11 +45,13 @@ public:
      * Check if given object can be reached
      * (Compare distance between them to sum of their radiuses)
      */
-    bool canReach(std::shared_ptr<ShadowSimulationObject> obj) {
+    bool canReach(std::shared_ptr<const ShadowSimulationObject> obj) {
         return protocolsHolder->updateProtocol.body->pos().sqrDistanceTo(obj->pos()) <= 
             (protocolsHolder->updateProtocol.body->radius() + obj->radius()) * (protocolsHolder->updateProtocol.body->radius() + obj->radius());
     }
 
     // I want to sleep, so I will implement this function in future
-    // bool isSameType()
+    bool isSamePopulation(std::shared_ptr<const ShadowBotObject> obj) {
+        return populationName == obj->populationName();
+    }
 };

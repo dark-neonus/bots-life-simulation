@@ -65,7 +65,7 @@ public:
     { // User defined brain class must have override update function that takes 0 arguments
         // std::cout << "process_bot_: " << protocolsHolder->updateProtocol.body->id() << "\n";
         if (auto validFocusedFood = focusedFood.lock()) {
-            if (protocolsHolder->updateProtocol.body->pos() == validFocusedFood->pos()) {
+            if (canReach(validFocusedFood)) {
                 if (protocolsHolder->updateProtocol.body->food() >= 0.9f * protocolsHolder->updateProtocol.body->maxFood() &&
                     protocolsHolder->updateProtocol.body->health() == protocolsHolder->updateProtocol.body->maxHealth()) {
                     protocolsHolder->updateProtocolResponce.actionSpawn(

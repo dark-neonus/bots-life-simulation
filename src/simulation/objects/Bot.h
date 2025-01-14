@@ -51,26 +51,7 @@ public:
               float speed_,
               float damage_,
               float maxHealth = -1.0f,
-              float maxFood = -1.0f)
-        : health(health_, 0, maxHealth == -1.0f ? health_ : maxHealth),
-          food(food_, 0, maxFood == -1.0f ? food_ : maxFood),
-          see_distance(see_distance_), speed(speed_), damage(damage_),
-          SimulationObject(simulation, position, convertCaloriesToRadius(food_), colorInt(0, 75, 150)),
-          shadow(std::make_shared<ShadowBotObject>(id.get(),
-                                                   pos,
-                                                   getRadius(),
-                                                   health.get(),
-                                                   food.get(),
-                                                   see_distance,
-                                                   speed,
-                                                   damage,
-                                                   health.getMax(),
-                                                   food.getMax())),
-          protocolsHolder(std::make_shared<ProtocolsHolder>())
-    {
-        // This sh*t dosnt work :(
-        protocolsHolder->updateProtocol.body = shadow;
-    }
+              float maxFood = -1.0f);
 
     SimulationObjectType type() const override
     {
@@ -88,7 +69,6 @@ public:
         id.set(newID);
         shadow->_id = newID;
         protocolsHolder->updateProtocol.body = shadow;
-        
     }
 
     /// @brief Set brain for the bot and connect their protocols holders
