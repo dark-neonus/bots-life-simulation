@@ -50,8 +50,22 @@ public:
             (protocolsHolder->updateProtocol.body->radius() + obj->radius()) * (protocolsHolder->updateProtocol.body->radius() + obj->radius());
     }
 
-    // I want to sleep, so I will implement this function in future
+    /*
+     * Check if given bot is from the same population
+     */
     bool isSamePopulation(std::shared_ptr<const ShadowBotObject> obj) {
         return populationName == obj->populationName();
     }
+
+    /*
+     * Check if there are any friends in vision
+     * (Check if protocolsHolder->updateProtocol.distanceToNearestFriend != -1.0f)
+     */
+    bool seeFriend() { return protocolsHolder->updateProtocol.distanceToNearestFriend != -1.0f; }
+
+    /*
+     * Check if there are any friends in vision
+     * (Check if protocolsHolder->updateProtocol.distanceToNearestEnemy != -1.0f)
+     */
+    bool seeEnemy() { return protocolsHolder->updateProtocol.distanceToNearestEnemy != -1.0f; }
 };

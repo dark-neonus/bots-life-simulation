@@ -15,6 +15,18 @@ using shadowObjectSet = std::unordered_set<std::shared_ptr<const ShadowSimulatio
                                            std::hash<std::shared_ptr<const ShadowSimulationObject>>,
                                            std::equal_to<std::shared_ptr<const ShadowSimulationObject>>>;
 
+using shadowFoodSet = std::unordered_set<std::shared_ptr<const ShadowFoodObject>,
+                                           std::hash<std::shared_ptr<const ShadowFoodObject>>,
+                                           std::equal_to<std::shared_ptr<const ShadowFoodObject>>>;
+
+using shadowTreeSet = std::unordered_set<std::shared_ptr<const ShadowTreeObject>,
+                                           std::hash<std::shared_ptr<const ShadowTreeObject>>,
+                                           std::equal_to<std::shared_ptr<const ShadowTreeObject>>>;
+
+using shadowBotsSet = std::unordered_set<std::shared_ptr<const ShadowBotObject>,
+                                           std::hash<std::shared_ptr<const ShadowBotObject>>,
+                                           std::equal_to<std::shared_ptr<const ShadowBotObject>>>;
+
 enum BotAction
 {
     DoNothing,     ///< Perform no action
@@ -169,10 +181,35 @@ struct UpdateProtocol
     /// @brief ShadowBotObject that represnt body of current bot
     std::shared_ptr<const ShadowBotObject> body;
     /*
-     * Unordered set of shared_ptr<ShadowBotObject> representing
+     * Unordered set of shared_ptr<ShadowSimulationObject> representing
      * all objects that are in vision radius of bot;
      */
     shadowObjectSet visibleObjects;
+    /*
+     * Unordered set of shared_ptr<ShadowFoodObject> representing
+     * all food objects that are in vision radius of bot;
+     */
+    shadowFoodSet visibleFood;
+    /*
+     * Unordered set of shared_ptr<ShadowTreeObject> representing
+     * all tree objects that are in vision radius of bot;
+     */
+    shadowTreeSet visibleTree;
+    /*
+     * Unordered set of shared_ptr<ShadowBotObject> representing
+     * all bot objects that are in vision radius of bot;
+     */
+    shadowBotsSet visibleBots;
+    /*
+     * Unordered set of shared_ptr<ShadowBotObject> representing
+     * all bot objects from the same population that are in vision radius of bot;
+     */
+    shadowBotsSet visibleFriends;
+    /*
+     * Unordered set of shared_ptr<ShadowBotObject> representing
+     * all bot objects from different population that are in vision radius of bot;
+     */
+    shadowBotsSet visibleEnemies;
 
     /*
      * shared_ptr<ShadowBotObject> representing nearest bot
@@ -184,6 +221,17 @@ struct UpdateProtocol
      * If there is no bots in the vision, its value is -1.0f.
      */
     float distanceToNearestBot;
+
+    /*
+     * shared_ptr<ShadowBotObject> representing nearest bot of the same population
+     * in the vision. Can be null_ptr if there is no friends in the vision.
+     */
+    std::shared_ptr<const ShadowBotObject> nearestFriend;
+    /*
+     * Distance to the nearest bot of the same population in the vision.
+     * If there is no friends in the vision, its value is -1.0f.
+     */
+    float distanceToNearestFriend;
 
     /*
      * shared_ptr<ShadowBotObject> representing nearest enemy(bot of different type)

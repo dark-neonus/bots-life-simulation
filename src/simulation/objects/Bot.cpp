@@ -410,8 +410,13 @@ void BotObject::packProtocol()
     auto chunksInVision = getChunksInRadius(pos, radius);
 
     protocolsHolder->updateProtocol.visibleObjects.clear();
+    protocolsHolder->updateProtocol.visibleFood.clear();
+    protocolsHolder->updateProtocol.visibleTree.clear();
+    protocolsHolder->updateProtocol.visibleFriends.clear();
+    protocolsHolder->updateProtocol.visibleEnemies.clear();
 
     protocolsHolder->updateProtocol.distanceToNearestBot = -1.0f;
+    protocolsHolder->updateProtocol.distanceToNearestFriend = -1.0f;
     protocolsHolder->updateProtocol.distanceToNearestEnemy = -1.0f;
     protocolsHolder->updateProtocol.distanceToNearestFood = -1.0f;
     protocolsHolder->updateProtocol.distanceToNearestTree = -1.0f;
@@ -419,13 +424,14 @@ void BotObject::packProtocol()
     float sqrDistanceToObj;
 
     protocolsHolder->updateProtocol.nearestBot = nullptr;
+    protocolsHolder->updateProtocol.nearestFriend = nullptr;
     protocolsHolder->updateProtocol.nearestEnemy = nullptr;
     protocolsHolder->updateProtocol.nearestFood = nullptr;
     protocolsHolder->updateProtocol.nearestTree = nullptr;
 
-    std::shared_ptr<FoodObject> foodObj;
-    std::shared_ptr<TreeObject> treeObj;
-    std::shared_ptr<BotObject> botObj;
+    std::shared_ptr<const ShadowFoodObject> foodObj;
+    std::shared_ptr<const ShadowTreeObject> treeObj;
+    std::shared_ptr<const ShadowBotObject> botObj;
 
     for (const auto &chunk : chunksInVision)
     {
@@ -447,8 +453,10 @@ void BotObject::packProtocol()
                             protocolsHolder->updateProtocol.distanceToNearestFood = sqrDistanceToObj;
                             protocolsHolder->updateProtocol.nearestFood = std::dynamic_pointer_cast<FoodObject>(validChunkObject)->getShadow();
                         }
-                        protocolsHolder->updateProtocol.visibleObjects.insert(
-                            std::dynamic_pointer_cast<FoodObject>(validChunkObject)->getShadow());
+                        foodObj = std::dynamic_pointer_cast<FoodObject>(validChunkObject)->getShadow();
+                        protocolsHolder->updateProtocol.visibleObjects.insert(foodObj);
+                        protocolsHolder->updateProtocol.visibleFood.insert(foodObj);
+
                         break;
                     case SimulationObjectType::TreeObject:
                         if (protocolsHolder->updateProtocol.distanceToNearestTree == -1.0f ||
@@ -457,18 +465,31 @@ void BotObject::packProtocol()
                             protocolsHolder->updateProtocol.distanceToNearestTree = sqrDistanceToObj;
                             protocolsHolder->updateProtocol.nearestTree = std::dynamic_pointer_cast<TreeObject>(validChunkObject)->getShadow();
                         }
-                        protocolsHolder->updateProtocol.visibleObjects.insert(
-                            std::dynamic_pointer_cast<TreeObject>(validChunkObject)->getShadow());
+                        treeObj = std::dynamic_pointer_cast<TreeObject>(validChunkObject)->getShadow();
+                        protocolsHolder->updateProtocol.visibleObjects.insert(treeObj);
+                        protocolsHolder->updateProtocol.visibleTree.insert(treeObj);
                         break;
                     case SimulationObjectType::BotObject:
-                        if (protocolsHolder->updateProtocol.distanceToNearestBot == -1.0f ||
-                            sqrDistanceToObj < protocolsHolder->updateProtocol.distanceToNearestBot)
-                        {
-                            protocolsHolder->updateProtocol.distanceToNearestBot = sqrDistanceToObj;
-                            protocolsHolder->updateProtocol.nearestBot = std::dynamic_pointer_cast<BotObject>(validChunkObject)->getShadow();
+                        botObj = std::dynamic_pointer_cast<BotObject>(validChunkObject)->getShadow();
+                        if (botObj->populationName() == protocolsHolder->updateProtocol.body->populationName()) {
+                            // Bot is from the same population (Friend)
+                            if (protocolsHolder->updateProtocol.distanceToNearestFriend == -1.0f ||
+                                sqrDistanceToObj < protocolsHolder->updateProtocol.distanceToNearestFriend) {
+                                    protocolsHolder->updateProtocol.distanceToNearestFriend = sqrDistanceToObj;
+                                    protocolsHolder->updateProtocol.nearestFriend = botObj;
+                                }
+                            protocolsHolder->updateProtocol.visibleFriends.insert(botObj);
                         }
-                        protocolsHolder->updateProtocol.visibleObjects.insert(
-                            std::dynamic_pointer_cast<BotObject>(validChunkObject)->getShadow());
+                        else {
+                            // Bot is from different population (Enemy)
+                            if (protocolsHolder->updateProtocol.distanceToNearestEnemy == -1.0f ||
+                                sqrDistanceToObj < protocolsHolder->updateProtocol.distanceToNearestEnemy) {
+                                    protocolsHolder->updateProtocol.distanceToNearestEnemy = sqrDistanceToObj;
+                                    protocolsHolder->updateProtocol.nearestEnemy = botObj;
+                                }
+                            protocolsHolder->updateProtocol.visibleEnemies.insert(botObj);
+                        }
+                        protocolsHolder->updateProtocol.visibleObjects.insert(botObj);
                         break;
                     default:
                         throw std::runtime_error("Invalid simulation object type!");
@@ -487,8 +508,20 @@ void BotObject::packProtocol()
     if (protocolsHolder->updateProtocol.distanceToNearestBot != -1.0f) {
         protocolsHolder->updateProtocol.distanceToNearestBot = sqrtf(protocolsHolder->updateProtocol.distanceToNearestBot);
     }
+    if (protocolsHolder->updateProtocol.distanceToNearestFriend != -1.0f) {
+        protocolsHolder->updateProtocol.distanceToNearestFriend = sqrtf(protocolsHolder->updateProtocol.distanceToNearestFriend);
+        // Set nearest bot object
+        protocolsHolder->updateProtocol.nearestBot = protocolsHolder->updateProtocol.nearestFriend;
+        protocolsHolder->updateProtocol.distanceToNearestBot = protocolsHolder->updateProtocol.distanceToNearestFriend;
+    }
     if (protocolsHolder->updateProtocol.distanceToNearestEnemy != -1.0f) {
         protocolsHolder->updateProtocol.distanceToNearestEnemy = sqrtf(protocolsHolder->updateProtocol.distanceToNearestEnemy);
+        // Re-set nearest bot if enemy is more near than friend or there are no friends
+        if (protocolsHolder->updateProtocol.distanceToNearestFriend == -1 ||
+                protocolsHolder->updateProtocol.distanceToNearestFriend <= protocolsHolder->updateProtocol.distanceToNearestEnemy) {
+            protocolsHolder->updateProtocol.nearestBot = protocolsHolder->updateProtocol.nearestEnemy;
+            protocolsHolder->updateProtocol.distanceToNearestBot = protocolsHolder->updateProtocol.distanceToNearestEnemy;
+        }
     }
 }
 
