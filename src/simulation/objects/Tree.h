@@ -20,8 +20,15 @@ protected:
 private:
     std::shared_ptr<ShadowTreeObject> shadow;
 public:
-    TreeObject(std::shared_ptr<Simulation> simulation, Vec2<float> position, int numberOfFruits_,
-        float foodMaxCalories_, float foodGrowthRate_, float foodDecayRate_, float foodSpawnCooldownMax_, bool foodIsMature_)
+    TreeObject(
+        std::shared_ptr<Simulation> simulation,
+        Vec2<float> position,
+        int numberOfFruits_,
+        float foodMaxCalories_,
+        float foodGrowthRate_,
+        float foodDecayRate_,
+        float foodSpawnCooldownMax_,
+        bool foodIsMature_)
         : SimulationObject(simulation, position, getRadius(), colorInt(60, 30, 0)),
         foodMaxCalories(foodMaxCalories_),
         foodGrowthRate(foodGrowthRate_),

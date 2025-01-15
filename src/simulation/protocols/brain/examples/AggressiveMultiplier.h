@@ -8,7 +8,7 @@
 #include "protocols/brain/BrainsRegistry.h"
 
 
-class MultiplierBotBrain : public BotBrain
+class AggressiveMultiplierBotBrain : public BotBrain
 {
 private:
     static int population;
@@ -29,22 +29,22 @@ public:
     float angle = 0.0f;
 
     /// @brief User defined brain class must have constructor that takes 0 arguments and use ": BotBrain(populationName)"
-    MultiplierBotBrain() 
-    : BotBrain("MultiplierLegion")
+    AggressiveMultiplierBotBrain() 
+    : BotBrain("AgressiveMultiplierLegion")
     {
     }
 
     void init() override 
     { // User defined brain class must have override init function that takes 0 arguments
-        protocolsHolder->initProtocolResponce.r = 50;
-        protocolsHolder->initProtocolResponce.g = 200;
-        protocolsHolder->initProtocolResponce.b = 130;
+        protocolsHolder->initProtocolResponce.r = 210;
+        protocolsHolder->initProtocolResponce.g = 130;
+        protocolsHolder->initProtocolResponce.b = 30;
 
-        protocolsHolder->initProtocolResponce.healthPoints = 5;
-        protocolsHolder->initProtocolResponce.foodPoints = 39;
-        protocolsHolder->initProtocolResponce.visionPoints = 35;
-        protocolsHolder->initProtocolResponce.speedPoints = 20;
-        protocolsHolder->initProtocolResponce.attackPoints = 1;
+        protocolsHolder->initProtocolResponce.healthPoints = int(0.05 * protocolsHolder->initProtocol.evolutionPoints);
+        protocolsHolder->initProtocolResponce.foodPoints = int(0.25 * protocolsHolder->initProtocol.evolutionPoints);
+        protocolsHolder->initProtocolResponce.visionPoints = int(0.37 * protocolsHolder->initProtocol.evolutionPoints);
+        protocolsHolder->initProtocolResponce.speedPoints = int(0.25 * protocolsHolder->initProtocol.evolutionPoints);
+        protocolsHolder->initProtocolResponce.attackPoints = int(0.07 * protocolsHolder->initProtocol.evolutionPoints);
 
         angle = circleAngle(gen);
         population++;
@@ -59,21 +59,39 @@ public:
     }
 
     int focusTime = 0;
+    int bornAmount = 0;
 
     std::weak_ptr<const ShadowSimulationObject> focusedFood;
 
     void update() override
     { // User defined brain class must have override update function that takes 0 arguments
         // std::cout << "process_bot_: " << protocolsHolder->updateProtocol.body->id() << "\n";
+        // if (bornAmount >= 2 && population > 120 || bornAmount >= 1 && population > 500) {
+        //     protocolsHolder->updateProtocolResponce.actionSuicide();
+        //     return;
+        // }
+        if (seeEnemy() &&
+            // protocolsHolder->updateProtocol.nearestEnemy->speed() + 2 < protocolsHolder->updateProtocol.body->speed() &&
+            protocolsHolder->updateProtocol.body->food() >= 0.6f * protocolsHolder->updateProtocol.body->maxFood()) {
+            if (canReach(protocolsHolder->updateProtocol.nearestEnemy)) {
+                protocolsHolder->updateProtocolResponce.actionAttackByID(false, protocolsHolder->updateProtocol.nearestEnemy->id());
+            }
+            else {
+                protocolsHolder->updateProtocolResponce.actionGoTo(protocolsHolder->updateProtocol.nearestEnemy->pos());
+            }
+            return;
+        }
         if (auto validFocusedFood = focusedFood.lock()) {
             if (canReach(validFocusedFood)) {
                 if (protocolsHolder->updateProtocol.body->food() >= 0.9f * protocolsHolder->updateProtocol.body->maxFood() &&
                     protocolsHolder->updateProtocol.body->health() == protocolsHolder->updateProtocol.body->maxHealth()) {
                     protocolsHolder->updateProtocolResponce.actionSpawn(
                         std::dynamic_pointer_cast<BotBrain>(
-                            std::make_shared<MultiplierBotBrain>()
-                        )
+                            std::make_shared<AggressiveMultiplierBotBrain>()
+                        ),
+                        protocolsHolder->initProtocol.evolutionPoints + 5
                     );
+                    bornAmount++;
                 }
                 else {
                     // std::cout << "try to eat: " << validFocusedFood->id() << "\n";
@@ -117,8 +135,8 @@ public:
     }
 };
 
-int MultiplierBotBrain::population = 0;
-int MultiplierBotBrain::death = 0;
-unsigned long MultiplierBotBrain::b_id = 0;
+int AggressiveMultiplierBotBrain::population = 0;
+int AggressiveMultiplierBotBrain::death = 0;
+unsigned long AggressiveMultiplierBotBrain::b_id = 0;
 
-REGISTER_BOT_CLASS(MultiplierBotBrain);
+REGISTER_BOT_CLASS(AggressiveMultiplierBotBrain);

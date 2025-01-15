@@ -1,14 +1,16 @@
 #include <memory>
-#include <random>
 
 #include "settings/SimulationSettings.h"
 #include "simulation.h"
+#include "objects/Tree.h"
 #include "gui/guiLoop.h"
 #include "protocols/brain/BotBrain.h"
 #include "protocols/brain/examples/Dummy.h"
 #include "protocols/brain/examples/Survival.h"
-#include "protocols/brain/examples/Multiplier.h"
+// #include "protocols/brain/examples/Multiplier.h"
 #include "protocols/brain/examples/Evolutioner.h"
+#include "protocols/brain/examples/AggressiveMultiplier.h"
+#include "protocols/brain/examples/AggressiveMultiplier2.h"
 
 int main()
 {
@@ -30,12 +32,32 @@ int main()
     //     Vec2<float>(150.0f, 150.0f)
     // );
 
+    simulation->initBotClasses();
+
     std::random_device rd;
     std::mt19937 gen;
-    std::uniform_int_distribution<int> distX = std::uniform_int_distribution<int>(0, simulation->chunkManager->mapWidth - 1);
-    std::uniform_int_distribution<int> distY = std::uniform_int_distribution<int>(0, simulation->chunkManager->mapHeight - 1);
+    std::uniform_int_distribution<int> distX = std::uniform_int_distribution<int>(100, simulation->chunkManager->mapWidth - 100);
+    std::uniform_int_distribution<int> distY = std::uniform_int_distribution<int>(100, simulation->chunkManager->mapHeight - 100);
+    std::uniform_int_distribution<int> fruitAmountRandom = std::uniform_int_distribution<int>(3, 4);
+    std::uniform_int_distribution<int> maxCalories = std::uniform_int_distribution<int>(50, 200);
+    std::uniform_int_distribution<int> respawnTime = std::uniform_int_distribution<int>(250, 600);
 
-    simulation->initBotClasses();
+    for (int i = 0; i < simulation->chunkManager->numberOfChunksX * simulation->chunkManager->numberOfChunksY * 2; i++) {
+        simulation->addObject(SimulationObjectType::TreeObject,
+            std::dynamic_pointer_cast<SimulationObject> (
+                std::make_shared<TreeObject>(
+                    simulation,
+                    Vec2<float>(distX(gen), distY(gen)),
+                    fruitAmountRandom(gen),
+                    maxCalories(gen),
+                    0.5f,
+                    1.5f,
+                    respawnTime(gen),
+                    false
+                )
+            )
+        );
+    }
 
     // for (int i = 0; i < 1000; i++) {
     //     simulation->addSmartBot(

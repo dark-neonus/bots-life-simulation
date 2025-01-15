@@ -1,6 +1,8 @@
 #include "simulation.h"
 
 #include <tuple>
+#include <random>
+#include <memory>
 
 #include "objects/SimulationObject.h"
 #include "objects/Food.h"
@@ -380,12 +382,16 @@ std::shared_ptr<BotObject> Simulation::addSmartBot(std::shared_ptr<BotBrain> bra
 }
 
 void Simulation::initBotClasses() {
+    std::random_device rd;
+    std::mt19937 gen;
+    std::uniform_int_distribution<int> distX = std::uniform_int_distribution<int>(0, chunkManager->mapWidth - 1);
+    std::uniform_int_distribution<int> distY = std::uniform_int_distribution<int>(0, chunkManager->mapHeight - 1);
     auto botNames = BrainsRegistry::getInstance().listRegisteredBots();
     for (const auto& name : botNames) {
         addSmartBot(
             BrainsRegistry::getInstance().createBot(name),
-            Vec2<float>(150.0f, 150.0f)
-            // Vec2<float>(distX(gen), distY(gen))
+            // Vec2<float>(150.0f, 150.0f)
+            Vec2<float>(distX(gen), distY(gen))
         );
     }
 }

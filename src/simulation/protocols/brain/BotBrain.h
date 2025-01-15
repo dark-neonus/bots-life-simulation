@@ -64,8 +64,15 @@ public:
     bool seeFriend() { return protocolsHolder->updateProtocol.distanceToNearestFriend != -1.0f; }
 
     /*
-     * Check if there are any friends in vision
+     * Check if there are any enemy in vision
      * (Check if protocolsHolder->updateProtocol.distanceToNearestEnemy != -1.0f)
      */
     bool seeEnemy() { return protocolsHolder->updateProtocol.distanceToNearestEnemy != -1.0f; }
+
+
+    /*
+     * Check if there are any food in vision
+     * (Check if protocolsHolder->updateProtocol.distanceToNearestFoood != -1.0f)
+     */
+    bool seeFood() { return protocolsHolder->updateProtocol.distanceToNearestFood != -1.0f; }
 };

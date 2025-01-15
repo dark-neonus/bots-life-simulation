@@ -210,23 +210,23 @@ int guiLoop(std::shared_ptr<Simulation> simulation)
         ///////////////////////////////////////////////////
 
         // if (spawnChance(gen) == 7) {
-        for (int i = 0; i < 20; i++) {
-            simulation->addObject(
-                SimulationObjectType::FoodObject,
-                std::dynamic_pointer_cast<SimulationObject> (
-                    std::make_shared<FoodObject>(
-                        simulation,
-                        Vec2(distX(gen), distY(gen)),
-                        colorInt(100, 0, 0),
-                        450,
-                        550,
-                        0.5f,
-                        1.0f,
-                        false
-                    )
-                )
-            );
-        }
+        // // for (int i = 0; i < 20; i++) {
+        //     simulation->addObject(
+        //         SimulationObjectType::FoodObject,
+        //         std::dynamic_pointer_cast<SimulationObject> (
+        //             std::make_shared<FoodObject>(
+        //                 simulation,
+        //                 Vec2(distX(gen), distY(gen)),
+        //                 colorInt(100, 0, 0),
+        //                 450,
+        //                 550,
+        //                 0.5f,
+        //                 1.0f,
+        //                 false
+        //             )
+        //         )
+        //     );
+        // }
 
         createGui(simulation, io);
 
