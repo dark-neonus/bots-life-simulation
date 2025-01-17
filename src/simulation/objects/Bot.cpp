@@ -50,7 +50,7 @@ void BotObject::update()
         health.decrease(0.5);
     }
     packProtocol();
-    brain->update();
+    brain->update(brain->protocolsHolder->updateProtocol, brain->protocolsHolder->updateProtocolResponce);
     parseProtocolResponce();
     if (health.get() == 0)
     {
@@ -387,7 +387,7 @@ void BotObject::onDestroy()
                                        5.0f,
                                        true));
     }
-    brain->kill();
+    brain->kill(brain->protocolsHolder->killProtocol, brain->protocolsHolder->killProtocolResponce);
 }
 
 void BotObject::packProtocol()

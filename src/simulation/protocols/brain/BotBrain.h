@@ -27,19 +27,19 @@ public:
      * It should read protocolsHolder->InitProtocol and modify protocolsHolder->InitProtocolResponce
      * setting all parameters needed to create a new BotObject.
      */
-    virtual void init() {}
+    virtual void init(InitProtocol& data, InitProtocolResponce& responce) {}
     /*
      * Function that will be called on each frame of the simulation.
      * It should read protocolsHolder->UpdateProtocol and modify protocolsHolder->UpdateProtocolResponce
      * telling the BotObject what to do and howto do it.
      */
-    virtual void update() {}
+    virtual void update(UpdateProtocol& data, UpdateProtocolResponce& responce) {}
     /*
      * Function that will be called on the died of the bot.
      * It should read protocolsHolder->KillProtocol and modify protocolsHolder->KillProtocolResponce
      * doing all thing needed to delete/kill bot (e.g. dealocate allocated memory).
      */
-    virtual void kill() {}
+    virtual void kill(KillProtocol& data, KillProtocolResponce& responce) {}
 
     /*
      * Check if given object can be reached

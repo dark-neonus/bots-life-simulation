@@ -304,7 +304,7 @@ std::shared_ptr<BotObject> Simulation::addSmartBot(std::shared_ptr<BotBrain> bra
 {
     brain->protocolsHolder->initProtocol.botSpawnPosition = pos;
     brain->protocolsHolder->initProtocol.evolutionPoints = evolutionPoints == -1 ? settings->evolutionPointsSettings.amountOfPoints : evolutionPoints;
-    brain->init();
+    brain->init(brain->protocolsHolder->initProtocol, brain->protocolsHolder->initProtocolResponce);
 
     brain->protocolsHolder->initProtocolResponce.healthPoints = std::max(0, brain->protocolsHolder->initProtocolResponce.healthPoints);
     brain->protocolsHolder->initProtocolResponce.foodPoints = std::max(0, brain->protocolsHolder->initProtocolResponce.foodPoints);
