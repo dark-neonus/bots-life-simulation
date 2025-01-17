@@ -97,10 +97,10 @@ public:
         shadow->_radius = getRadius();
     }
 
-    void draw(ImDrawList *draw_list, ImVec2 drawing_delta_pos) override
+    void draw(ImDrawList *draw_list, ImVec2 drawing_delta_pos, float zoom) override
     {
-        draw_list->AddRectFilled(ImVec2(drawing_delta_pos.x + pos.x - getRadius(), drawing_delta_pos.y + pos.y - getRadius()),
-                                 ImVec2(drawing_delta_pos.x + pos.x + getRadius(), drawing_delta_pos.y + pos.y + getRadius()),
+        draw_list->AddRectFilled(ImVec2(drawing_delta_pos.x + (pos.x - getRadius()) * zoom, drawing_delta_pos.y + (pos.y - getRadius()) * zoom),
+                                 ImVec2(drawing_delta_pos.x + (pos.x + getRadius()) * zoom, drawing_delta_pos.y + (pos.y + getRadius()) * zoom),
                                  color);
     }
 

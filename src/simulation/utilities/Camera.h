@@ -17,12 +17,15 @@ private:
     RangeValue<float> _width;
     RangeValue<float> _height;
 
+
     bool movingToDestination = false;
     Vec2<float> destination;
 
     bool isMoving = false;
     float speedMultyplier = 1.0f;
 public:
+    RangeValue<float> zoom = RangeValue<float>(1.0f, 0.1f, 2.0f);
+
     Camera() {};
     Camera(float xLimit, float yLimit, float step_=5)
         : _xLimit(xLimit), _yLimit(yLimit),
@@ -30,10 +33,10 @@ public:
         _width(0.0, 0.0, _xLimit), _height(0.0, 0.0, _yLimit)
     {}
 
-    float x() { return _x.get(); }
-    float y() { return _y.get(); }
-    float width() { return _width.get(); }
-    float height() { return _height.get(); }
+    float x() { return _x.get() * zoom.get() - _width.get() / 2; }
+    float y() { return _y.get() * zoom.get() - _height.get() / 2; }
+    float width() { return _width.get() / zoom.get(); }
+    float height() { return _height.get() / zoom.get(); }
 
     float getXLimit() { return _x.getMax(); }
     float getYLimit() { return _y.getMax(); }
@@ -73,10 +76,20 @@ public:
         isMoving = true;
     }
 
+    /// @brief Function to move camera with the mouse
+    /// @param dx X delta factor
+    /// @param dy Y delta factor
+    void mouseMove(float dx, float dy) {
+        _x.increase(dx / zoom.get());
+        _y.increase(dy / zoom.get());
+    }
+
     /// @brief Draw X and Y controls for camera position on current ImGui window
     void drawCameraControls() {
         ImGui::SliderFloat("CameraPosX", _x.valuePointer(), _x.getMin(), _x.getMax(), "%.1f");
         ImGui::SliderFloat("CameraPosY", _y.valuePointer(), _y.getMin(), _y.getMax(), "%.1f");
+
+        ImGui::SliderFloat("Zoom", zoom.valuePointer(), zoom.getMin(), zoom.getMax(), "%.2f");
     }
 
     bool isPointInVision(Vec2<float> point) {
@@ -114,11 +127,11 @@ public:
 
     /// @brief Returns the top-left corner coordinates of the camera.
     Vec2<float> getTopLeft() {
-        return Vec2<float>(x(), y());
+        return Vec2<float>(x() / zoom.get(), y() / zoom.get());
     }
 
     /// @brief Returns the bottom-right corner coordinates of the camera.
     Vec2<float> getBottomRight() {
-        return Vec2<float>(x() + width(), y() + height());
+        return Vec2<float>(x() / zoom.get() + width(), y() / zoom.get() + height());
     }
 };

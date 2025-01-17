@@ -51,7 +51,6 @@ private:
     std::queue<std::shared_ptr<SimulationObject>> deathNote;
 
     std::queue<std::tuple<std::shared_ptr<BotBrain>, Vec2<float>, int>> bornQueue;
-
 public:
     IDManager idManger;
     // This property must be first
@@ -65,6 +64,7 @@ public:
     Camera camera;
 
     std::shared_ptr<const SimulationSettings> settings;
+
 
     Simulation(std::shared_ptr<const SimulationSettings> settings_);
 

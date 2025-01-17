@@ -95,7 +95,8 @@ void Simulation::render(ImDrawList *draw_list, ImVec2 window_pos, ImVec2 window_
     int endChunkY = std::min(chunkManager->numberOfChunksY - 1, int(cameraEndPos.y / chunkManager->chunkSize + 1));
 
     ImVec2 mouse_pos = ImGui::GetMousePos();
-    ImVec2 mouse_map_pos = ImVec2(mouse_pos.x + camera.x(), mouse_pos.y + camera.y());
+    ImVec2 mouse_map_pos = ImVec2(window_pos.x + (mouse_pos.x - window_pos.x + camera.x()) / camera.zoom.get(),
+                                    window_pos.y + (mouse_pos.y - window_pos.y + camera.y()) / camera.zoom.get());
     // Holder variable for distance between click position and object
     float dist_sq = 0.0f;
     ImVec2 object_center;
@@ -149,24 +150,14 @@ void Simulation::render(ImDrawList *draw_list, ImVec2 window_pos, ImVec2 window_
         }
     }
     // Draw map mesh
-    chunkManager->drawChunksMesh(draw_list, drawing_delta_pos);
+    chunkManager->drawChunksMesh(draw_list, drawing_delta_pos, camera.zoom.get());
 
     // If chunk is selected, draw it before anything else
     if (auto validSelectedChunk = selectedChunk.lock())
     {
-        draw_list->AddRect(toImVec2(Vec2<float>(drawing_delta_pos) + validSelectedChunk->startPos),
-                           toImVec2(Vec2<float>(drawing_delta_pos) + validSelectedChunk->endPos), ImColor(colorInt(255, 255, 0, 50)), 0, 0, 2);
+        draw_list->AddRect(toImVec2(Vec2<float>(drawing_delta_pos) + validSelectedChunk->startPos * camera.zoom.get()),
+                           toImVec2(Vec2<float>(drawing_delta_pos) + validSelectedChunk->endPos * camera.zoom.get()), ImColor(colorInt(255, 255, 0, 50)), 0, 0, 2);
     }
-
-    // Draw all objects by chunks
-    // for (auto chunk : *chunkManager.get()) {
-    //     for (auto& obj : chunk->objects) {
-    //         if (auto validObj = obj.lock()) {
-    //             validObj->draw(draw_list, drawing_delta_pos);
-    //
-    //         }
-    //     }
-    // }
 
     // Draw objects within visible chunks
     for (int chunkY = startChunkY; chunkY <= endChunkY; ++chunkY)
@@ -178,7 +169,7 @@ void Simulation::render(ImDrawList *draw_list, ImVec2 window_pos, ImVec2 window_
             {
                 if (auto validObj = obj.lock())
                 {
-                    validObj->draw(draw_list, drawing_delta_pos);
+                    validObj->draw(draw_list, drawing_delta_pos, camera.zoom.get());
                 }
             }
         }
@@ -191,7 +182,7 @@ void Simulation::render(ImDrawList *draw_list, ImVec2 window_pos, ImVec2 window_
         {
             if (auto validSelectedObject = obj.lock())
             {
-                validSelectedObject->drawHighlightion(draw_list, drawing_delta_pos);
+                validSelectedObject->drawHighlightion(draw_list, drawing_delta_pos, camera.zoom.get());
             }
         }
     }

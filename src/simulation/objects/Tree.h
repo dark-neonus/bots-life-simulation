@@ -92,9 +92,9 @@ public:
         }
     }
 
-    void draw(ImDrawList *draw_list, ImVec2 drawing_delta_pos) override
+    void draw(ImDrawList *draw_list, ImVec2 drawing_delta_pos, float zoom) override
     {
-        draw_list->AddNgonFilled(ImVec2(pos.x + drawing_delta_pos.x, pos.y + drawing_delta_pos.y), getRadius(), color, numberOfFruits);
+        draw_list->AddNgonFilled(ImVec2(pos.x * zoom + drawing_delta_pos.x, pos.y * zoom + drawing_delta_pos.y), getRadius() * zoom, color, numberOfFruits);
     }
 
     int getRadius() override { return 10 + numberOfFruits * 2; }

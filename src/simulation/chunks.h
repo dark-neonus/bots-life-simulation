@@ -166,17 +166,17 @@ public:
         return getChunk(xIndex, yIndex);
     }
 
-    void drawChunksMesh(ImDrawList *draw_list, ImVec2 window_pos) {
+    void drawChunksMesh(ImDrawList *draw_list, ImVec2 window_pos, float zoom) {
         for (int y = 0; y < numberOfChunksY; y++)
         {
             for (int x = 0; x < numberOfChunksX; x++)
             {
-                draw_list->AddRect(toImVec2(Vec2<float>(window_pos) + chunks[y][x]->startPos),
-                                    toImVec2(Vec2<float>(window_pos) + chunks[y][x]->endPos), ImColor(colorInt(255, 255, 0, 10)), 0, 0, 2);
+                draw_list->AddRect(toImVec2(Vec2<float>(window_pos) + chunks[y][x]->startPos * zoom),
+                                    toImVec2(Vec2<float>(window_pos) + chunks[y][x]->endPos * zoom), ImColor(colorInt(255, 255, 0, 10)), 0, 0, 2);
             }
         }
         // Draw map limits
-        draw_list->AddRect(window_pos, ImVec2(window_pos.x + mapWidth, window_pos.y + mapHeight), ImColor(colorInt(255, 0, 255, 30)), 0, 0, 5);
+        draw_list->AddRect(window_pos, ImVec2(window_pos.x + mapWidth * zoom, window_pos.y + mapHeight * zoom), ImColor(colorInt(255, 0, 255, 30)), 0, 0, 5);
     }
 
     // Updated ChunkIterator

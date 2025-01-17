@@ -151,14 +151,14 @@ public:
 
     void update() override;
 
-    void draw(ImDrawList *draw_list, ImVec2 drawing_delta_pos) override
+    void draw(ImDrawList *draw_list, ImVec2 drawing_delta_pos, float zoom) override
     {
-        draw_list->AddCircleFilled(ImVec2(drawing_delta_pos.x + pos.x, drawing_delta_pos.y + pos.y), getRadius(), color, 24);
+        draw_list->AddCircleFilled(ImVec2(drawing_delta_pos.x + pos.x * zoom, drawing_delta_pos.y + pos.y * zoom), getRadius() * zoom, color, 24);
         if (debug_drawing)
         {
-            float radius_ = getRadius();
-            float center_x = drawing_delta_pos.x + pos.x;
-            float center_y = drawing_delta_pos.y + pos.y;
+            float radius_ = getRadius() * zoom;
+            float center_x = drawing_delta_pos.x + pos.x * zoom;
+            float center_y = drawing_delta_pos.y + pos.y * zoom;
             constexpr int bar_height = 10;
             constexpr float bar_size_reduction = 0.3f;
             // Draw see distance circle

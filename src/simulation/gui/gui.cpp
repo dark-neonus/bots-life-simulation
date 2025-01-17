@@ -152,6 +152,21 @@ void createGui(std::shared_ptr<Simulation> simulation, ImGuiIO& io) {
         simulation->drawLogger("Logger");
         ImGui::End();
     }
+
+    // Mouse wheel event
+    float mouseWheel = ImGui::GetIO().MouseWheel;
+    if (mouseWheel > 0.0f) {
+        simulation->camera.zoom.increase(0.05f); // Scroll up
+    } else if (mouseWheel < 0.0f) {
+        simulation->camera.zoom.decrease(0.05f); // Scroll down
+    }
+
+    // Central mouse key event
+    if (ImGui::IsMouseDown(ImGuiMouseButton_Middle))
+    {
+        // Adjust the camera position based on mouse delta
+        simulation->camera.mouseMove(-io.MouseDelta.x, -io.MouseDelta.y);
+    }
 }
 
 void createObjectListGui(std::shared_ptr<Simulation> simulation) {

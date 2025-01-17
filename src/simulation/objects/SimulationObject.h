@@ -95,9 +95,9 @@ public:
     /// @brief Draw object to ImGui window
     /// @param draw_list Object to draw on provided by ImGui
     /// @param window_pos Position of window to draw on. Must add it to objects position
-    virtual void draw(ImDrawList *draw_list, ImVec2 drawing_delta_pos)
+    virtual void draw(ImDrawList *draw_list, ImVec2 drawing_delta_pos, float zoom)
     {
-        draw_list->AddCircle(ImVec2(drawing_delta_pos.x + pos.x, drawing_delta_pos.y + pos.y), getRadius(), color, 24);
+        draw_list->AddCircle(ImVec2(drawing_delta_pos.x + pos.x * zoom, drawing_delta_pos.y + pos.y * zoom), getRadius() * zoom, color, 24);
     }
     
 
@@ -122,7 +122,7 @@ public:
     }
 
     const ImVec4 selectionColor = colorInt(255, 255, 255, 45);
-    virtual void drawHighlightion(ImDrawList *draw_list, ImVec2 window_pos);
+    virtual void drawHighlightion(ImDrawList *draw_list, ImVec2 window_pos, float zoom);
 
     virtual ~SimulationObject() = default;
 };
