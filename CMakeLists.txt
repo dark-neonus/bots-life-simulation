@@ -36,6 +36,7 @@ include_directories(
     ${BACKENDS_DIR}
     ${SIMULATION_DIR}
     ${GUI_DIR}  # Include GUI directory
+    ${SRC_DIR}
 )
 
 # Set the compiler flags for Debug and Release
