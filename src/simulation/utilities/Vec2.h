@@ -56,6 +56,12 @@ public:
         return std::sqrt(dx * dx + dy * dy);
     }
 
+    Vec2<T>& operator+=(const Vec2<T>& other) {
+        x += other.x;
+        y += other.y;
+        return *this;
+    }
+
     /// @brief Calculate the distance*distance between this point and another point(work faster than distanceTo())
     /// @param other The other point to calculate the distance to.
     /// @return The distance between the two points.

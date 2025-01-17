@@ -20,6 +20,14 @@ int main()
     settings->simulationSizeSettings.numberOfChunksX = 20;
     settings->simulationSizeSettings.numberOfChunksY = 20;
 
+    settings->mapGenerationSettings.spawnType = SpawnType::Circle;
+    settings->mapGenerationSettings.numberOfBotsPerPopulation = 70;
+    settings->mapGenerationSettings.spawnRadius = 50.0f;
+    settings->mapGenerationSettings.numberOfTreePerChunk = 3.5f;
+    settings->mapGenerationSettings.randomSpawnFood = true;
+    settings->mapGenerationSettings.foodPerChunk = 2.5f;
+    settings->mapGenerationSettings.foodSpawnChance = 0.1f;
+
     std::shared_ptr<Simulation> simulation = std::make_shared<Simulation>(
         std::const_pointer_cast<const SimulationSettings>(settings)
         );

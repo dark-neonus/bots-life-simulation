@@ -382,16 +382,85 @@ std::shared_ptr<BotObject> Simulation::addSmartBot(std::shared_ptr<BotBrain> bra
 }
 
 void Simulation::initBotClasses() {
+    if (!settings) {
+        log(Logger::ERROR, "Simulation settings are not initialized.");
+        return;
+    }
+
+    const auto& mapSettings = settings->mapGenerationSettings;
     std::random_device rd;
-    std::mt19937 gen;
-    std::uniform_int_distribution<int> distX = std::uniform_int_distribution<int>(0, chunkManager->mapWidth - 1);
-    std::uniform_int_distribution<int> distY = std::uniform_int_distribution<int>(0, chunkManager->mapHeight - 1);
-    auto botNames = BrainsRegistry::getInstance().listRegisteredBots();
-    for (const auto& name : botNames) {
-        addSmartBot(
-            BrainsRegistry::getInstance().createBot(name),
-            // Vec2<float>(150.0f, 150.0f)
-            Vec2<float>(distX(gen), distY(gen))
+    std::mt19937 gen(rd());
+
+    // Calculate the map center
+    Vec2<float> mapCenter(
+        static_cast<float>(chunkManager->mapWidth) / 2.0f,
+        static_cast<float>(chunkManager->mapHeight) / 2.0f
+    );
+
+    // Set spawn radius for circle type to 75% of the smallest map dimension
+    float circleRadius = 0.30f * std::min(chunkManager->mapWidth, chunkManager->mapHeight);
+
+    // Distributions for random coordinates
+    std::uniform_int_distribution<int> distX(0, chunkManager->mapWidth - 1);
+    std::uniform_int_distribution<int> distY(0, chunkManager->mapHeight - 1);
+
+    std::uniform_real_distribution<float> angleDist(0.0f, 2.0f * M_PI);
+    std::uniform_real_distribution<float> radiusDist(0.0f, mapSettings.spawnRadius);  // Radius for random spawn
+
+    // Lambda to clamp positions to stay within map bounds
+    auto clampPosition = [&](const Vec2<float>& pos) {
+        return Vec2<float>(
+            std::clamp(pos.x, 0.0f, static_cast<float>(chunkManager->mapWidth - 1)),
+            std::clamp(pos.y, 0.0f, static_cast<float>(chunkManager->mapHeight - 1))
         );
+        };
+
+    auto botNames = BrainsRegistry::getInstance().listRegisteredBots();
+
+    for (const auto& name : botNames) {
+        // Only generate random values if spawn type is Random
+        for (unsigned int i = 0; i < mapSettings.numberOfBotsPerPopulation; ++i) {
+            Vec2<float> spawnPos;
+
+            // Start with the correct spawn type logic
+            switch (mapSettings.spawnType) {
+            case SpawnType::Random: {
+                spawnPos = Vec2<float>(distX(gen), distY(gen));
+                break;
+            }
+
+            case SpawnType::Circle: {
+                float angle = angleDist(gen);
+                spawnPos = Vec2<float>(mapCenter.x + circleRadius * std::cos(angle),
+                    mapCenter.y + circleRadius * std::sin(angle));
+                break;
+            }
+
+            case SpawnType::OnePlace:
+                // Spawn all bots in one central location (e.g., map center)
+                spawnPos = mapCenter;
+                break;
+
+            default:
+                log(Logger::WARNING, "Unknown spawn type. Defaulting to random.");
+                spawnPos = Vec2<float>(distX(gen), distY(gen));
+                break;
+            }
+
+            // Add additional random offset using spawnRadius
+            float angle = angleDist(gen);
+            float radius = radiusDist(gen);
+            spawnPos += {radius * std::cos(angle), radius * std::sin(angle)};
+
+            // Clamp the final spawn position to ensure it's within the map bounds
+            spawnPos = clampPosition(spawnPos);
+
+            // Create and add the bot to the simulation
+            addSmartBot(
+                BrainsRegistry::getInstance().createBot(name),
+                spawnPos
+            );
+        }
     }
 }
+
