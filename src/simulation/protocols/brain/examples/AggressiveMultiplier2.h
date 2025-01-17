@@ -36,9 +36,9 @@ public:
 
     void init(InitProtocol& data, InitProtocolResponce& responce) override 
     { // User defined brain class must have override init function that takes 0 arguments
-        responce.r = 210;
-        responce.g = 130;
-        responce.b = 30;
+        responce.r = 180;
+        responce.g = 30;
+        responce.b = 210;
 
         responce.healthPoints = int(0.05 * data.evolutionPoints);
         responce.foodPoints = int(0.25 * data.evolutionPoints);
@@ -51,11 +51,6 @@ public:
         b_id++;
         gen = std::mt19937(static_cast<std::mt19937::result_type>(rd() + b_id));
         printStats();
-        // std::cout << "random_seq: ";
-        // for (int i = 0 ; i< 10; i++) {
-        // std::cout << " " << randomDirChance(gen);
-        // }
-        // std::cout << "\n";
     }
 
     int focusTime = 0;
@@ -87,7 +82,7 @@ public:
                     data.body->health() == data.body->maxHealth()) {
                     responce.actionSpawn(
                         std::dynamic_pointer_cast<BotBrain>(
-                            std::make_shared<AggressiveMultiplierBotBrain>()
+                            std::make_shared<AggressiveMultiplierBotBrain2>()
                         ),
                         protocolsHolder->initProtocol.evolutionPoints + 5
                     );

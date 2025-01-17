@@ -51,11 +51,6 @@ public:
         b_id++;
         gen = std::mt19937(static_cast<std::mt19937::result_type>(rd() + b_id));
         printStats();
-        // std::cout << "random_seq: ";
-        // for (int i = 0 ; i< 10; i++) {
-        // std::cout << " " << randomDirChance(gen);
-        // }
-        // std::cout << "\n";
     }
 
     int focusTime = 0;
