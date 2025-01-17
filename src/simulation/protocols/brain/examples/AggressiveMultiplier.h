@@ -34,28 +34,23 @@ public:
     {
     }
 
-    void init() override 
+    void init(InitProtocol& data, InitProtocolResponce& responce) override 
     { // User defined brain class must have override init function that takes 0 arguments
-        protocolsHolder->initProtocolResponce.r = 210;
-        protocolsHolder->initProtocolResponce.g = 130;
-        protocolsHolder->initProtocolResponce.b = 30;
+        responce.r = 210;
+        responce.g = 130;
+        responce.b = 30;
 
-        protocolsHolder->initProtocolResponce.healthPoints = int(0.05 * protocolsHolder->initProtocol.evolutionPoints);
-        protocolsHolder->initProtocolResponce.foodPoints = int(0.25 * protocolsHolder->initProtocol.evolutionPoints);
-        protocolsHolder->initProtocolResponce.visionPoints = int(0.37 * protocolsHolder->initProtocol.evolutionPoints);
-        protocolsHolder->initProtocolResponce.speedPoints = int(0.25 * protocolsHolder->initProtocol.evolutionPoints);
-        protocolsHolder->initProtocolResponce.attackPoints = int(0.07 * protocolsHolder->initProtocol.evolutionPoints);
+        responce.healthPoints = int(0.05 * data.evolutionPoints);
+        responce.foodPoints = int(0.25 * data.evolutionPoints);
+        responce.visionPoints = int(0.37 * data.evolutionPoints);
+        responce.speedPoints = int(0.25 * data.evolutionPoints);
+        responce.attackPoints = int(0.07 * data.evolutionPoints);
 
         angle = circleAngle(gen);
         population++;
         b_id++;
         gen = std::mt19937(static_cast<std::mt19937::result_type>(rd() + b_id));
         printStats();
-        // std::cout << "random_seq: ";
-        // for (int i = 0 ; i< 10; i++) {
-        // std::cout << " " << randomDirChance(gen);
-        // }
-        // std::cout << "\n";
     }
 
     int focusTime = 0;
@@ -63,7 +58,7 @@ public:
 
     std::weak_ptr<const ShadowSimulationObject> focusedFood;
 
-    void update() override
+    void update(UpdateProtocol& data, UpdateProtocolResponce& responce) override
     { // User defined brain class must have override update function that takes 0 arguments
         // std::cout << "process_bot_: " << protocolsHolder->updateProtocol.body->id() << "\n";
         // if (bornAmount >= 2 && population > 120 || bornAmount >= 1 && population > 500) {
@@ -72,20 +67,20 @@ public:
         // }
         if (seeEnemy() &&
             // protocolsHolder->updateProtocol.nearestEnemy->speed() + 2 < protocolsHolder->updateProtocol.body->speed() &&
-            protocolsHolder->updateProtocol.body->food() >= 0.6f * protocolsHolder->updateProtocol.body->maxFood()) {
-            if (canReach(protocolsHolder->updateProtocol.nearestEnemy)) {
-                protocolsHolder->updateProtocolResponce.actionAttackByID(false, protocolsHolder->updateProtocol.nearestEnemy->id());
+            data.body->food() >= 0.6f * data.body->maxFood()) {
+            if (canReach(data.nearestEnemy)) {
+                responce.actionAttackByID(false, data.nearestEnemy->id());
             }
             else {
-                protocolsHolder->updateProtocolResponce.actionGoTo(protocolsHolder->updateProtocol.nearestEnemy->pos());
+                responce.actionGoTo(data.nearestEnemy->pos());
             }
             return;
         }
         if (auto validFocusedFood = focusedFood.lock()) {
             if (canReach(validFocusedFood)) {
-                if (protocolsHolder->updateProtocol.body->food() >= 0.9f * protocolsHolder->updateProtocol.body->maxFood() &&
-                    protocolsHolder->updateProtocol.body->health() == protocolsHolder->updateProtocol.body->maxHealth()) {
-                    protocolsHolder->updateProtocolResponce.actionSpawn(
+                if (data.body->food() >= 0.9f * data.body->maxFood() &&
+                    data.body->health() == data.body->maxHealth()) {
+                    responce.actionSpawn(
                         std::dynamic_pointer_cast<BotBrain>(
                             std::make_shared<AggressiveMultiplierBotBrain>()
                         ),
@@ -96,16 +91,16 @@ public:
                 else {
                     // std::cout << "try to eat: " << validFocusedFood->id() << "\n";
                     // std::cout << "myPos: " << protocolsHolder->updateProtocol.body->pos().text() << "targetPos: " << validFocusedFood->pos() << "\n";
-                    protocolsHolder->updateProtocolResponce.actionEatByID(validFocusedFood->id());
+                    responce.actionEatByID(validFocusedFood->id());
                 }
             }
             else {
-                protocolsHolder->updateProtocolResponce.actionGoTo(validFocusedFood->pos());
+                responce.actionGoTo(validFocusedFood->pos());
             }
         }
         else {
             int indexOfObject = randomDirChance(gen);
-            for (auto& obj : protocolsHolder->updateProtocol.visibleObjects) {
+            for (auto& obj : data.visibleObjects) {
                 if (obj->type() == ShadowFoodObj) {
                     if (indexOfObject <= 0) {
                         focusedFood = obj;
@@ -122,12 +117,12 @@ public:
         
             angle += deltaAngle(gen);
             angle = std::fmod(angle + M_PI, 2 * M_PI) - M_PI;
-            protocolsHolder->updateProtocolResponce.actionMove(Vec2<float>(std::cos(angle), std::sin(angle)), 1.0f);
+            responce.actionMove(Vec2<float>(std::cos(angle), std::sin(angle)), 1.0f);
             
         }
     }
 
-    void kill() override
+    void kill(KillProtocol& data, KillProtocolResponce& responce) override
     { // User defined brain class must have override kill function that takes 0 arguments
         population--;
         death++;
@@ -138,5 +133,3 @@ public:
 int AggressiveMultiplierBotBrain::population = 0;
 int AggressiveMultiplierBotBrain::death = 0;
 unsigned long AggressiveMultiplierBotBrain::b_id = 0;
-
-REGISTER_BOT_CLASS(AggressiveMultiplierBotBrain);
