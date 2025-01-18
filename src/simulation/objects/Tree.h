@@ -34,7 +34,7 @@ public:
         foodGrowthRate(foodGrowthRate_),
         foodDecayRate(foodDecayRate_),
         foodIsMature(foodIsMature_),
-        foodSpawnCooldown(foodSpawnCooldownMax_),
+        foodSpawnCooldown(0.2f * foodSpawnCooldownMax_),
         foodSpawnCooldownMax(foodSpawnCooldownMax_),
         numberOfFruits(numberOfFruits_),
         shadow(std::make_shared<ShadowTreeObject>(id.get(), pos, getRadius(), numberOfFruits))
