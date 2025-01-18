@@ -5,10 +5,9 @@
 #include <memory>
 
 #include "protocols/brain/BotBrain.h"
-#include "protocols/brain/BrainsRegistry.h"
 
 
-class AggressiveMultiplierBotBrain : public BotBrain
+class AggressiveMultiplierBotBrain2 : public BotBrain
 {
 private:
     static int population;
@@ -29,16 +28,16 @@ public:
     float angle = 0.0f;
 
     /// @brief User defined brain class must have constructor that takes 0 arguments and use ": BotBrain(populationName)"
-    AggressiveMultiplierBotBrain() 
-    : BotBrain("AgressiveMultiplierLegion")
+    AggressiveMultiplierBotBrain2() 
+    : BotBrain("AgressiveMultiplierLegion2")
     {
     }
 
     void init(InitProtocol& data, InitProtocolResponce& responce) override 
     { // User defined brain class must have override init function that takes 0 arguments
-        responce.r = 210;
-        responce.g = 130;
-        responce.b = 30;
+        responce.r = 180;
+        responce.g = 30;
+        responce.b = 210;
 
         responce.healthPoints = int(0.05 * data.evolutionPoints);
         responce.foodPoints = int(0.25 * data.evolutionPoints);
@@ -82,7 +81,7 @@ public:
                     data.body->health() == data.body->maxHealth()) {
                     responce.actionSpawn(
                         std::dynamic_pointer_cast<BotBrain>(
-                            std::make_shared<AggressiveMultiplierBotBrain>()
+                            std::make_shared<AggressiveMultiplierBotBrain2>()
                         ),
                         protocolsHolder->initProtocol.evolutionPoints + 5
                     );
@@ -127,9 +126,10 @@ public:
         population--;
         death++;
         printStats();
+        responce.success = true;
     }
 };
 
-int AggressiveMultiplierBotBrain::population = 0;
-int AggressiveMultiplierBotBrain::death = 0;
-unsigned long AggressiveMultiplierBotBrain::b_id = 0;
+int AggressiveMultiplierBotBrain2::population = 0;
+int AggressiveMultiplierBotBrain2::death = 0;
+unsigned long AggressiveMultiplierBotBrain2::b_id = 0;

@@ -18,7 +18,7 @@ int main()
     settings->mapGenerationSettings.spawnType = SpawnType::Circle;
     settings->mapGenerationSettings.numberOfBotsPerPopulation = 70;
     settings->mapGenerationSettings.spawnRadius = 50.0f;
-    // settings->mapGenerationSettings.numberOfTreePerChunk = 3.5f;
+    settings->mapGenerationSettings.treeRarety = 0;
     settings->mapGenerationSettings.randomSpawnFood = true;
     settings->mapGenerationSettings.foodPerChunk = 3.0f;
     settings->mapGenerationSettings.foodSpawnChance = 0.005f;
