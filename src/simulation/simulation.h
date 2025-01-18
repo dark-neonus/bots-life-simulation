@@ -150,5 +150,7 @@ public:
 
     void initBotClasses();
 
+    void generateTree();
+
     void randomGenerationFood();
 };

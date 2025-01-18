@@ -18,7 +18,7 @@ int main()
     settings->mapGenerationSettings.spawnType = SpawnType::Circle;
     settings->mapGenerationSettings.numberOfBotsPerPopulation = 70;
     settings->mapGenerationSettings.spawnRadius = 50.0f;
-    settings->mapGenerationSettings.numberOfTreePerChunk = 3.5f;
+    // settings->mapGenerationSettings.numberOfTreePerChunk = 3.5f;
     settings->mapGenerationSettings.randomSpawnFood = true;
     settings->mapGenerationSettings.foodPerChunk = 3.0f;
     settings->mapGenerationSettings.foodSpawnChance = 0.005f;
@@ -28,6 +28,7 @@ int main()
     );
 
     simulation->initBotClasses();
+    simulation->generateTree();
 
     std::random_device rd;
     std::mt19937 gen;
@@ -37,22 +38,22 @@ int main()
     std::uniform_int_distribution<int> maxCalories = std::uniform_int_distribution<int>(50, 200);
     std::uniform_int_distribution<int> respawnTime = std::uniform_int_distribution<int>(250, 600);
 
-    for (int i = 0; i < simulation->chunkManager->numberOfChunksX * simulation->chunkManager->numberOfChunksY * 2; i++) {
-        simulation->addObject(SimulationObjectType::TreeObject,
-            std::dynamic_pointer_cast<SimulationObject> (
-                std::make_shared<TreeObject>(
-                    simulation,
-                    Vec2<float>(distX(gen), distY(gen)),
-                    fruitAmountRandom(gen),
-                    maxCalories(gen),
-                    0.5f,
-                    1.5f,
-                    respawnTime(gen),
-                    false
-                )
-            )
-        );
-    }
+    // for (int i = 0; i < simulation->chunkManager->numberOfChunksX * simulation->chunkManager->numberOfChunksY * 2; i++) {
+    //     simulation->addObject(SimulationObjectType::TreeObject,
+    //         std::dynamic_pointer_cast<SimulationObject> (
+    //             std::make_shared<TreeObject>(
+    //                 simulation,
+    //                 Vec2<float>(distX(gen), distY(gen)),
+    //                 fruitAmountRandom(gen),
+    //                 maxCalories(gen),
+    //                 0.5f,
+    //                 1.5f,
+    //                 respawnTime(gen),
+    //                 false
+    //             )
+    //         )
+    //     );
+    // }
 
     guiLoop(simulation);
 

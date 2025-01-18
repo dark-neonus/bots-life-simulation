@@ -15,6 +15,8 @@
 #include "settings/SimulationSettings.h"
 #include "protocols/brain/BrainsRegistry.h"
 
+#include "utilities/PerlinNoise2D.h"
+
 
 Simulation::Simulation(std::shared_ptr<const SimulationSettings> settings_)
     : unit(settings_->simulationSizeSettings.unit),
@@ -498,3 +500,39 @@ void Simulation::initBotClasses() {
     }
 }
 
+void Simulation::generateTree() {
+    PerlinNoise2D perlinNoise;
+
+    float noiseValue = 0.0f;
+    float upThresholdValue = 0.0f;
+
+    std::random_device rd;
+    std::mt19937 gen;
+    std::uniform_int_distribution<int> spawnChance = std::uniform_int_distribution<int>(0, settings->mapGenerationSettings.treeRarety);
+
+    for (int x = 1; x < chunkManager->numberOfChunksX * settings->simulationSizeSettings.unitsPerChunk - 1; x++) {
+        for (int y = 1; y < chunkManager->numberOfChunksY * settings->simulationSizeSettings.unitsPerChunk - 1; y++) {
+            noiseValue = std::clamp<float>(
+                perlinNoise.getValue(x * settings->mapGenerationSettings.positiveScale, y * settings->mapGenerationSettings.positiveScale)
+                - perlinNoise.getValue(x * settings->mapGenerationSettings.negativeScale, y * settings->mapGenerationSettings.negativeScale),
+                0.0f, 1.0f);
+            if (noiseValue > settings->mapGenerationSettings.perlinThreshold && spawnChance(gen) == 0) {
+                upThresholdValue = noiseValue - settings->mapGenerationSettings.perlinThreshold;
+                addObject(SimulationObjectType::TreeObject,
+                    std::dynamic_pointer_cast<SimulationObject> (
+                        std::make_shared<TreeObject>(
+                            shared_from_this(),
+                            Vec2<float>(x, y) * settings->simulationSizeSettings.unit,
+                            3 + int(3 * upThresholdValue),
+                            100.0f + int(200 * upThresholdValue),
+                            0.5f,
+                            1.5f,
+                            900 - int(450 * upThresholdValue),
+                            false
+                            )
+                        )
+                    );
+            }
+        }
+    }
+}
