@@ -20,8 +20,8 @@ int main()
     settings->mapGenerationSettings.spawnRadius = 50.0f;
     settings->mapGenerationSettings.numberOfTreePerChunk = 3.5f;
     settings->mapGenerationSettings.randomSpawnFood = true;
-    settings->mapGenerationSettings.foodPerChunk = 2.5f;
-    settings->mapGenerationSettings.foodSpawnChance = 0.1f;
+    settings->mapGenerationSettings.foodPerChunk = 3.0f;
+    settings->mapGenerationSettings.foodSpawnChance = 0.005f;
 
     std::shared_ptr<Simulation> simulation = std::make_shared<Simulation>(
         std::const_pointer_cast<const SimulationSettings>(settings)

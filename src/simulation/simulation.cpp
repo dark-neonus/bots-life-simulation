@@ -36,6 +36,10 @@ void Simulation::update(bool isSimulationRunning)
         return;
     }
 
+    if (settings->mapGenerationSettings.randomSpawnFood) {
+        randomGenerationFood();
+    }
+
     std::vector<std::shared_ptr<SimulationObject>> objects_to_update = objects;
 
     for (auto &obj : objects_to_update)
@@ -370,6 +374,45 @@ std::shared_ptr<BotObject> Simulation::addSmartBot(std::shared_ptr<BotBrain> bra
 
     rawAddToObjectList(bot);
     return bot;
+}
+
+void Simulation::randomGenerationFood() {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<int> foodCountDist(1, static_cast<int>(settings->mapGenerationSettings.foodPerChunk));
+
+    for (const auto& chunkPtr : *chunkManager) {
+        // Determine whether to spawn food in this chunk
+        float chance = static_cast<float>(rand()) / RAND_MAX; // Random value [0.0, 1.0]
+
+        if (chance > settings->mapGenerationSettings.foodSpawnChance) {
+            continue;
+        }
+
+        int foodCount = foodCountDist(gen);
+
+        for (int i = 0; i < foodCount; ++i) {
+            float x = chunkPtr->startPos.x + static_cast<float>(rand()) / RAND_MAX * chunkPtr->chunkSize;
+            float y = chunkPtr->startPos.y + static_cast<float>(rand()) / RAND_MAX * chunkPtr->chunkSize;
+            Vec2<float> foodPosition(x, y);
+
+            addObject(
+                SimulationObjectType::FoodObject,
+                std::dynamic_pointer_cast<SimulationObject>(
+                    std::make_shared<FoodObject>(
+                        shared_from_this(),
+                        foodPosition,
+                        colorInt(100, 0, 0),
+                        50,                
+                        350,                
+                        0.5f,                
+                        1.0f,                
+                        false                
+                    )
+                )
+            );
+        }
+    }
 }
 
 void Simulation::initBotClasses() {

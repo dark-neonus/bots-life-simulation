@@ -66,6 +66,26 @@ public:
 
     /// @brief Spawns a set of food objects around the Tree in a regular polygon pattern.
     void spawnFood() {
+        float mapWidth;
+        float mapHeight;
+
+        if (auto validSimulation = simulation.lock()) {
+            mapWidth = validSimulation->chunkManager->mapWidth - 1;
+            mapHeight = validSimulation->chunkManager->mapHeight - 1;
+        }
+        else {
+            return;
+        }
+
+        auto clampPosition = [&](const Vec2<float>& pos) {
+
+
+            return Vec2<float>(
+                std::clamp(pos.x, 0.0f, static_cast<float>(mapWidth)),
+                std::clamp(pos.y, 0.0f, static_cast<float>(mapHeight))
+            );
+            };
+
         for (int i = 0; i < numberOfFruits; ++i) {
 
             float angle = 2.0f * M_PI * i / numberOfFruits;

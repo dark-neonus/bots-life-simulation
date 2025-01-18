@@ -149,4 +149,6 @@ public:
     }
 
     void initBotClasses();
+
+    void randomGenerationFood();
 };

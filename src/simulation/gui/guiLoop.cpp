@@ -136,11 +136,11 @@ int guiLoop(std::shared_ptr<Simulation> simulation)
     // bool show_another_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-    std::random_device rd;
-    std::mt19937 gen;
-    std::uniform_int_distribution<int> spawnChance = std::uniform_int_distribution<int>(0, 10);
-    std::uniform_int_distribution<int> distX = std::uniform_int_distribution<int>(0, simulation->chunkManager->mapWidth - 1);
-    std::uniform_int_distribution<int> distY = std::uniform_int_distribution<int>(0, simulation->chunkManager->mapHeight - 1);
+    // std::random_device rd;
+    // std::mt19937 gen;
+    // std::uniform_int_distribution<int> spawnChance = std::uniform_int_distribution<int>(0, 10);
+    // std::uniform_int_distribution<int> distX = std::uniform_int_distribution<int>(0, simulation->chunkManager->mapWidth - 1);
+    // std::uniform_int_distribution<int> distY = std::uniform_int_distribution<int>(0, simulation->chunkManager->mapHeight - 1);
     
 
     // Init of simulation here
