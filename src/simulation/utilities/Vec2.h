@@ -130,6 +130,17 @@ public:
 
     // Arithmetic operations between vectors
 
+    Vec2& operator/=(float scalar) {
+        if (scalar != 0) {
+            x /= scalar;
+            y /= scalar;
+        }
+        else {
+            throw std::runtime_error("Division by zero in Vec2.");
+        }
+        return *this;
+    }
+
     Vec2<T> operator+(const Vec2<T> &other) const
     {
         return Vec2<T>(x + other.x, y + other.y);

@@ -20,6 +20,7 @@ private:
 
     std::string _populationName;
 
+    bool _underAttack;
 public:
     ShadowBotObject() {}
     ShadowBotObject(unsigned long id_, Vec2<float> pos_,
@@ -34,7 +35,8 @@ public:
           _speed(speed_),
           _damage(damage_),
           _maxHealth(maxHealth_),
-          _maxFood(maxFood_)
+          _maxFood(maxFood_),
+          _underAttack(false)
     {
     }
 
@@ -48,6 +50,7 @@ public:
 
     float maxHealth() const { return _maxHealth; }
     float maxFood() const { return _maxFood; }
+    bool isUnderAttack() const { return _underAttack; }
 
     std::string populationName() const { return _populationName; }
 };

@@ -3,6 +3,7 @@
 // Include your brains here
 #include "brains/examples/AggressiveMultiplier.h"
 #include "brains/examples/AggressiveMultiplier2.h"
+#include "brains/examples/Dota2Player.h"
 
 // Register your brains here
 REGISTER_BOT_CLASS(AggressiveMultiplierBotBrain);

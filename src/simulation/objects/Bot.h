@@ -43,6 +43,8 @@ private:
     std::shared_ptr<BotBrain> brain;
 
 public:
+    bool underAttack = false;
+
     BotObject(std::shared_ptr<Simulation> simulation,
               Vec2<int> position,
               float health_,
@@ -181,6 +183,7 @@ public:
         }
     }
 
+    bool isUnderAttack() const;
     void displayInfo();
 
     void onDestroy() override;

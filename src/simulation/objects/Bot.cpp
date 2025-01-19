@@ -61,6 +61,8 @@ void BotObject::update()
         health.increase(0.1);
         food.decrease(0.2);
     }
+
+    underAttack = false;
 }
 
 // enum BotAction
@@ -252,6 +254,7 @@ void BotObject::rawAttack(std::shared_ptr<BotObject> targetBot)
 {
     targetBot->health.decrease(damage);
     food.decrease(0.4);
+    targetBot->underAttack = true;
 }
 
 void BotObject::actionEat(unsigned long targetID)
@@ -399,6 +402,8 @@ void BotObject::packProtocol()
     shadow->_speed = speed;
     shadow->_damage = damage;
     shadow->_pos = pos;
+    shadow->_underAttack = underAttack;
+
     if (!protocolsHolder->updateProtocol.body) {
         protocolsHolder->updateProtocol.body = std::const_pointer_cast<const ShadowBotObject>(shadow);
     }
@@ -490,6 +495,7 @@ void BotObject::packProtocol()
                             protocolsHolder->updateProtocol.visibleEnemies.insert(botObj);
                         }
                         protocolsHolder->updateProtocol.visibleObjects.insert(botObj);
+                        protocolsHolder->updateProtocol.visibleBots.insert(botObj);
                         break;
                     default:
                         throw std::runtime_error("Invalid simulation object type!");
@@ -530,6 +536,10 @@ void BotObject::setBrainObject(std::shared_ptr<BotBrain> brain_)
     brain = brain_;
     protocolsHolder = brain->protocolsHolder;
     shadow->_populationName = brain->populationName;
+}
+
+bool BotObject::isUnderAttack() const {
+    return underAttack;
 }
 
 void BotObject::displayInfo()
