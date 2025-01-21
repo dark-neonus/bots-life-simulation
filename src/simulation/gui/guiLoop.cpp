@@ -40,10 +40,19 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"  // For loading PNG images
 
+#include <filesystem>
+
 // Function to load image and return GLFWimage
 GLFWimage LoadIcon(const char* filepath) {
     GLFWimage icon = { 0, 0, nullptr };
     int width, height, channels;
+
+    try {
+        std::filesystem::path currentPath = std::filesystem::current_path();
+        std::cout << "Current working directory: " << currentPath << std::endl;
+    } catch (const std::filesystem::filesystem_error& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+    }
 
     // Load the image using stb_image
     unsigned char* data = stbi_load(filepath, &width, &height, &channels, 0);
@@ -103,6 +112,10 @@ int guiLoop(std::shared_ptr<Simulation> simulation)
     GLFWwindow* window = glfwCreateWindow(1280, 720, "Bots Life Simulation", nullptr, nullptr);
 
     GLFWimage icon = LoadIcon("../assets/icon.png");
+
+    if (!icon.pixels) {
+        icon = LoadIcon("./assets/icon.png");
+    }
 
     if (icon.pixels) {
         glfwSetWindowIcon(window, 1, &icon);
