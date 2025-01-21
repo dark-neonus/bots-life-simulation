@@ -38,7 +38,7 @@
 #endif
 
 #define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>  // For loading PNG images
+#include "stb_image.h"  // For loading PNG images
 
 // Function to load image and return GLFWimage
 GLFWimage LoadIcon(const char* filepath) {

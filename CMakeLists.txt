@@ -15,6 +15,7 @@ set(PROJECT_ROOT ${CMAKE_SOURCE_DIR})
 set(SRC_DIR ${PROJECT_ROOT}/src)
 set(LIBS_DIR ${PROJECT_ROOT}/libs)
 set(IMGUI_DIR ${LIBS_DIR}/imgui)
+set(STB_DIR ${LIBS_DIR}/stb)
 set(BACKENDS_DIR ${IMGUI_DIR}/backends)
 set(SIMULATION_DIR ${SRC_DIR}/simulation)
 set(GUI_DIR ${SIMULATION_DIR}/gui)  # Added correct path for gui.cpp
@@ -33,6 +34,7 @@ endif()
 # Include directories
 include_directories(
     ${IMGUI_DIR}
+    ${STB_DIR}
     ${BACKENDS_DIR}
     ${SIMULATION_DIR}
     ${GUI_DIR}  # Include GUI directory
