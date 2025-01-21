@@ -1,5 +1,7 @@
 # Bots Life Simulation
 
+![Simulation screenshot](assets/simulation_example.png "Simulation screenshot")
+
 ## Overview
 **Bots Life Simulation** is a dynamic environment where you can create and customize your own bot behaviors, design unique simulations, and observe how bots interact with their surroundings and each other. The project is highly modular and allows extensive customization, making it ideal for both experimentation and entertainment.
 
