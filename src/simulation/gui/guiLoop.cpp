@@ -37,6 +37,28 @@
 #include "../libs/emscripten/emscripten_mainloop_stub.h"
 #endif
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>  // For loading PNG images
+
+// Function to load image and return GLFWimage
+GLFWimage LoadIcon(const char* filepath) {
+    GLFWimage icon = { 0, 0, nullptr };
+    int width, height, channels;
+
+    // Load the image using stb_image
+    unsigned char* data = stbi_load(filepath, &width, &height, &channels, 0);
+    if (data) {
+        icon.width = width;
+        icon.height = height;
+        icon.pixels = data;
+    }
+    else {
+        std::cerr << "Failed to load icon image!" << std::endl;
+    }
+
+    return icon;
+}
+
 static void glfw_error_callback(int error, const char* description)
 {
     fprintf(stderr, "GLFW Error %d: %s\n", error, description);
@@ -78,7 +100,15 @@ int guiLoop(std::shared_ptr<Simulation> simulation)
 #endif
 
     // Create window with graphics context
-    GLFWwindow* window = glfwCreateWindow(1280, 720, "Dear ImGui GLFW+OpenGL3 example", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(1280, 720, "Bots Life Simulation", nullptr, nullptr);
+
+    GLFWimage icon = LoadIcon("../assets/icon.png");
+
+    if (icon.pixels) {
+        glfwSetWindowIcon(window, 1, &icon);
+        stbi_image_free(icon.pixels);  // Free image data after setting the icon
+    }
+
     if (window == nullptr)
         return 1;
     glfwMakeContextCurrent(window);
@@ -136,49 +166,6 @@ int guiLoop(std::shared_ptr<Simulation> simulation)
     // bool show_another_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-    // std::random_device rd;
-    // std::mt19937 gen;
-    // std::uniform_int_distribution<int> spawnChance = std::uniform_int_distribution<int>(0, 10);
-    // std::uniform_int_distribution<int> distX = std::uniform_int_distribution<int>(0, simulation->chunkManager->mapWidth - 1);
-    // std::uniform_int_distribution<int> distY = std::uniform_int_distribution<int>(0, simulation->chunkManager->mapHeight - 1);
-    
-
-    // Init of simulation here
-    // Create a shared pointer to the simulation
-    // std::shared_ptr<Simulation> simulation = std::make_shared<Simulation>(6, 6, 35);
-
-    // Add SimulationObjects
-    // Add BaseObjects
-    // simulation->addObject(SimulationObjectType::BaseObject, std::make_shared<SimulationObject>(simulation, Vec2(0, 0), 3, colorInt(255, 0, 0)));
-    // simulation->addObject(SimulationObjectType::BaseObject, std::make_shared<SimulationObject>(simulation, Vec2(100, 100), 5, colorInt(255, 255, 0)));
-    // simulation->addObject(SimulationObjectType::BaseObject, std::make_shared<SimulationObject>(simulation, Vec2(100, 150), 5, colorInt(255, 255, 0)));
-    // simulation->addObject(SimulationObjectType::BaseObject, std::make_shared<SimulationObject>(simulation, Vec2(150, 100), 5, colorInt(255, 255, 0)));
-    // simulation->addObject(SimulationObjectType::BaseObject, std::make_shared<SimulationObject>(simulation, Vec2(50, 110), 10, colorInt(0, 0, 255, 120)));
-    // simulation->addObject(SimulationObjectType::BaseObject, std::make_shared<SimulationObject>(simulation, Vec2(60, 70), 30, colorInt(0, 125, 0)));
-
-    // // Add FoodObjects
-    // simulation->addObject(SimulationObjectType::FoodObject, std::make_shared<FoodObject>(simulation, Vec2(200, 200), colorInt(100, 0, 0), simulation->unit * 10, simulation->unit * 5, 1.0f, 2.0f, true));
-    // simulation->addObject(SimulationObjectType::FoodObject, std::make_shared<FoodObject>(simulation, Vec2(250, 200), colorInt(100, 0, 0), simulation->unit * 20, simulation->unit * 10, 1.0f, 2.0f, true));
-    // simulation->addObject(SimulationObjectType::FoodObject, std::make_shared<FoodObject>(simulation, Vec2(300, 200), colorInt(100, 0, 0), simulation->unit * 30, simulation->unit * 15, 1.0f, 2.0f, true));
-    // simulation->addObject(SimulationObjectType::FoodObject, std::make_shared<FoodObject>(simulation, Vec2(350, 200), colorInt(100, 0, 0), simulation->unit * 40, simulation->unit * 20, 1.0f, 2.0f, true));
-
-    // // Add TreeObjects
-    // simulation->addObject(SimulationObjectType::TreeObject, std::make_shared<TreeObject>(simulation, Vec2(200, 150), 3, 700.0f, 1.0f, 0.5f, 500.0f, true));
-    // simulation->addObject(SimulationObjectType::TreeObject, std::make_shared<TreeObject>(simulation, Vec2(250, 150), 5, 300.0f, 1.2f, 2.5f, 400.0f, false));
-    // simulation->addObject(SimulationObjectType::TreeObject, std::make_shared<TreeObject>(simulation, Vec2(350, 150), 10, 200.0f, 1.0f, 1.5f, 700.0f, false));
-
-    // // Add BotObjects
-    // simulation->addObject(SimulationObjectType::BotObject, std::make_shared<BotObject>(simulation, Vec2(300, 300), 100, 80, 30, 5.0f, 8));
-    // simulation->addObject(SimulationObjectType::BotObject, std::make_shared<BotObject>(simulation, Vec2(400, 300), 200, 40, 20, 2.0f, 20));
-
-
-    // Spawn 400 bots for crash test
-
-    // for (int y = 0; y < 20; y++) {
-    //     for (int x = 0; x < 20; x++) {
-    //         simulation->addObject(SimulationObjectType::BotObject, std::make_shared<BotObject>(simulation, Vec2(200 + x*40, 200 + y*40), 200, 80, 100, 2.0f, 20));
-    //     }
-    // 
     // Main loop
 #ifdef __EMSCRIPTEN__
     // For an Emscripten build we are disabling file-system access, so let's not attempt to do a fopen() of the imgui.ini file.
@@ -204,29 +191,6 @@ int guiLoop(std::shared_ptr<Simulation> simulation)
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-
-        ///////////////////////////////////////////////////
-        ///////////////////////////////////////////////////
-        ///////////////////////////////////////////////////
-
-        // if (spawnChance(gen) == 7) {
-        // // for (int i = 0; i < 20; i++) {
-        //     simulation->addObject(
-        //         SimulationObjectType::FoodObject,
-        //         std::dynamic_pointer_cast<SimulationObject> (
-        //             std::make_shared<FoodObject>(
-        //                 simulation,
-        //                 Vec2(distX(gen), distY(gen)),
-        //                 colorInt(100, 0, 0),
-        //                 450,
-        //                 550,
-        //                 0.5f,
-        //                 1.0f,
-        //                 false
-        //             )
-        //         )
-        //     );
-        // }
 
         createGui(simulation, io);
 
